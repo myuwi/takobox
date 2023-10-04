@@ -1,0 +1,15 @@
+[package]
+name = "takobox"
+version = "0.1.0"
+authors = ["Myuwi <myuwi@proton.me>"]
+license = "ISC"
+edition = "2021"
+
+[dependencies]
+askama = { version = "0.12.1", features = ["with-axum"] }
+askama_axum = "0.3.0"
+axum = "0.6.19"
+serde = { version = "1.0.177", features = ["derive"] }
+serde_json = "1.0.104"
+tokio = { version = "1", features = ["full"] }
+tower-http = { version = "0.4.4", features = ["cors", "fs"] }
