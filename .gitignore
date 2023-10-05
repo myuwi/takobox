@@ -1,3 +1,8 @@
+/node_modules
 /target
+
+/public/main.css
+
 /uploads
 .env
+

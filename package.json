@@ -1,0 +1,12 @@
+{
+  "name": "takobox",
+  "license": "ISC",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "build:css": "pnpm tailwindcss -i ./src/main.css -o ./public/main.css --minify",
+    "watch:css": "pnpm tailwindcss -i ./src/main.css -o ./public/main.css --minify --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.3.3"
+  }
+}

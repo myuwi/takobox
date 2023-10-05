@@ -3,6 +3,7 @@ use axum::{
     response::IntoResponse,
     routing::{get, Router},
 };
+use tower_http::services::ServeDir;
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -13,5 +14,7 @@ async fn index() -> impl IntoResponse {
 }
 
 pub fn routes() -> Router {
-    Router::new().route("/", get(index))
+    Router::new()
+        .route("/", get(index))
+        .fallback_service(ServeDir::new("public"))
 }
