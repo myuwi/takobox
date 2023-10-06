@@ -4,6 +4,7 @@ use std::net::SocketAddr;
 use tokio::signal::unix::{signal, SignalKind};
 use tower_cookies::CookieManagerLayer;
 
+mod model;
 mod state;
 mod web;
 
@@ -25,7 +26,7 @@ async fn main() {
     let app_state = AppState { pool };
 
     let app = Router::new()
-        .merge(web::routes())
+        .merge(web::routes(&app_state))
         .layer(CookieManagerLayer::new())
         .with_state(app_state);
 

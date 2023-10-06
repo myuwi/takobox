@@ -1,15 +1,10 @@
 use askama::Template;
 use axum::{extract::State, response::IntoResponse, Form};
-use serde::Deserialize;
 use sqlx::SqlitePool;
 use tower_cookies::{Cookie, Cookies};
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize)]
-pub struct RegisterPayload {
-    pub username: String,
-    pub password: String,
-}
+use crate::{model::user::UserAuth, web::AUTH_TOKEN};
 
 #[derive(Template)]
 #[template(path = "register.html")]
@@ -22,7 +17,7 @@ pub async fn get() -> impl IntoResponse {
 pub async fn post(
     State(pool): State<SqlitePool>,
     cookies: Cookies,
-    Form(form_data): Form<RegisterPayload>,
+    Form(form_data): Form<UserAuth>,
 ) -> impl IntoResponse {
     // TODO: Validate form data
     let res = sqlx::query("INSERT INTO users (id, username, password) VALUES ($1, $2, $3)")
@@ -41,7 +36,7 @@ pub async fn post(
     }
 
     cookies.add(Cookie::new(
-        "AUTH-TOKEN",
+        AUTH_TOKEN,
         format!("{}.fake.token", &form_data.username),
     ));
 
