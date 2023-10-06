@@ -2,6 +2,7 @@ use axum::Router;
 use sqlx::sqlite::SqlitePoolOptions;
 use std::net::SocketAddr;
 use tokio::signal::unix::{signal, SignalKind};
+use tower_cookies::CookieManagerLayer;
 
 mod state;
 mod web;
@@ -25,6 +26,7 @@ async fn main() {
 
     let app = Router::new()
         .merge(web::routes())
+        .layer(CookieManagerLayer::new())
         .with_state(app_state);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
