@@ -19,6 +19,14 @@ pub async fn post(
     cookies: Cookies,
     Form(form_data): Form<UserAuth>,
 ) -> impl IntoResponse {
+    // TODO: Out of Band updates
+    if !(4..=32).contains(&form_data.username.len()) {
+        return "Username must be between 4 and 32 characters".into_response();
+    }
+    if !(6..=64).contains(&form_data.password.len()) {
+        return "Password must be between 6 and 64 characters".into_response();
+    }
+
     // TODO: Validate form data
     let res = sqlx::query("INSERT INTO users (id, username, password) VALUES ($1, $2, $3)")
         .bind(Uuid::new_v4())
@@ -28,11 +36,20 @@ pub async fn post(
         .execute(&pool)
         .await;
 
-    dbg!(&res);
-
-    if res.is_err() {
+    if let Err(err) = res {
         // TODO: Better error messages
-        return "Unable to create account".into_response();
+        let msg = match err
+            .as_database_error()
+            .map(|e| e.code().unwrap_or_default())
+            .unwrap_or_default()
+            .to_string()
+            .as_str()
+        {
+            "2067" => "Username is already taken",
+            _ => "Unable to create account",
+        };
+
+        return msg.into_response();
     }
 
     cookies.add(Cookie::new(
