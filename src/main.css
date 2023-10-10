@@ -3,11 +3,15 @@
 @tailwind utilities;
 
 @layer components {
+  .btn {
+    @apply flex-shrink-0 py-2 px-4 h-10 text-base rounded-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
   .btn-primary {
-    @apply py-2 px-4 h-10 bg-orange-300 rounded border border-orange-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-orange-300 border border-orange-300 text-slate-700;
   }
 
   .form-input {
-    @apply py-2 px-4 h-10 text-sm bg-gray-100 rounded border border-gray-200;
+    @apply py-2 px-4 h-10 bg-gray-100 rounded-md border border-gray-200;
   }
 }

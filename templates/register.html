@@ -11,7 +11,7 @@
         hx-disabled-elt="input[type='submit']"
       >
         <h1 class="text-3xl">Register</h1>
-        <span class="flex items-center py-2 px-4 h-10 text-white bg-red-400 rounded empty:hidden" id="error"></span>
+        <span class="flex items-center py-2 px-4 h-10 text-white bg-red-400 rounded-md empty:hidden" id="error"></span>
         <div class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
             <label for="username">Username</label>
@@ -22,7 +22,8 @@
             <input class="form-input" type="password" id="password" name="password" required>
           </div>
         </div>
-        <input class="btn-primary" type="submit" value="Log in">
+        <input class="btn btn-primary" type="submit" value="Create Account">
+        <a href="/" class="self-center hover:underline">Back home</a>
       </form>
     </main>
 {%- endblock %}
