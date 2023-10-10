@@ -8,6 +8,7 @@ use tower_http::services::ServeDir;
 use crate::AppState;
 
 mod error;
+mod logout;
 mod middleware;
 mod register;
 
@@ -24,6 +25,7 @@ async fn index() -> impl IntoResponse {
 pub fn routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/", get(index))
+        .route("/logout", get(logout::get))
         .route("/register", get(register::get))
         .route("/register", post(register::post))
         .layer(axum::middleware::from_fn_with_state(
