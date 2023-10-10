@@ -3,5 +3,19 @@
 {% block title %}Takobox{% endblock %}
 
 {% block body %}
-    <h1>Hello, takobox!</h1>
+    {%~ include "nav.html" %}
+    <main class="flex flex-col gap-6 items-center py-48 px-4 mx-auto max-w-5xl">
+      <h1 class="text-5xl font-semibold">Takobox<span class="text-orange-300">.moe</span></h1>
+      <h2 class="flex flex-col text-lg text-center">
+        <span>A simple, self-hostable file upload service</span>
+      </h2>
+      <div class="flex flex-row gap-4">
+        {%- match user %}
+        {%- when Some with (user) %}
+        <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
+        {%- when None %}
+        <a href="/login" class="btn btn-primary">Log In</a>
+        {%- endmatch %}
+      </div>
+    </main>
 {%- endblock %}

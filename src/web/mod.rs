@@ -5,7 +5,7 @@ use axum::{
 };
 use tower_http::services::ServeDir;
 
-use crate::AppState;
+use crate::{model::user::User, AppState};
 
 mod error;
 mod logout;
@@ -16,10 +16,12 @@ pub const AUTH_TOKEN: &str = "AUTH-TOKEN";
 
 #[derive(Template)]
 #[template(path = "index.html")]
-pub struct Index;
+pub struct Index {
+    user: Option<User>,
+}
 
-async fn index() -> impl IntoResponse {
-    Index {}
+async fn index(user: Option<User>) -> impl IntoResponse {
+    Index { user }
 }
 
 pub fn routes(state: &AppState) -> Router<AppState> {

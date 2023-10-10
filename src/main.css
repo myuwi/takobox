@@ -11,6 +11,10 @@
     @apply bg-orange-300 border border-orange-300 text-slate-700;
   }
 
+  .btn-secondary {
+    @apply border border-gray-200 hover:bg-gray-100 text-slate-700;
+  }
+
   .form-input {
     @apply py-2 px-4 h-10 bg-gray-100 rounded-md border border-gray-200;
   }
