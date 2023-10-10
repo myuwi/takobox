@@ -1,5 +1,6 @@
 use axum::Router;
-use sqlx::sqlite::SqlitePoolOptions;
+use dotenvy::dotenv;
+use sqlx::{migrate::MigrateDatabase, sqlite::SqlitePoolOptions, Sqlite};
 use std::net::SocketAddr;
 use tokio::signal::unix::{signal, SignalKind};
 use tower_cookies::CookieManagerLayer;
@@ -12,9 +13,18 @@ use crate::state::AppState;
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok();
+
+    let db_path =
+        std::env::var("TAKOBOX_DB_PATH").expect("Environment variable TAKOBOX_DB_PATH is not set");
+
+    if !Sqlite::database_exists(&db_path).await.unwrap_or(false) {
+        Sqlite::create_database(&db_path).await.unwrap();
+    }
+
     let pool = SqlitePoolOptions::new()
         .max_connections(5)
-        .connect("sqlite::memory:")
+        .connect(&db_path)
         .await
         .expect("could not connect to database");
 

@@ -1705,6 +1705,7 @@ dependencies = [
  "askama",
  "askama_axum",
  "axum",
+ "dotenvy",
  "serde",
  "serde_json",
  "sqlx",
