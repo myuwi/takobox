@@ -1,5 +1,7 @@
-use figment::{providers::Env, Error, Figment};
+use figment::{providers::Env, Figment};
 use serde::{Deserialize, Serialize};
+
+use crate::error::{Error, Result};
 
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(default)]
@@ -16,7 +18,10 @@ impl Default for Config {
 }
 
 impl Config {
-    pub fn new() -> Result<Self, Error> {
-        Figment::new().merge(Env::prefixed("TAKOBOX_")).extract()
+    pub fn new() -> Result<Self> {
+        Figment::new()
+            .merge(Env::prefixed("TAKOBOX_"))
+            .extract()
+            .map_err(Error::Config)
     }
 }
