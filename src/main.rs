@@ -5,26 +5,28 @@ use std::net::SocketAddr;
 use tokio::signal::unix::{signal, SignalKind};
 use tower_cookies::CookieManagerLayer;
 
+mod config;
 mod model;
 mod state;
 mod web;
 
+use crate::config::Config;
 use crate::state::AppState;
 
 #[tokio::main]
 async fn main() {
     dotenv().ok();
 
-    let db_path =
-        std::env::var("TAKOBOX_DB_PATH").expect("Environment variable TAKOBOX_DB_PATH is not set");
+    let config = Config::new().expect("Unable to construct Config");
+    let db_path = &config.db_path;
 
-    if !Sqlite::database_exists(&db_path).await.unwrap_or(false) {
-        Sqlite::create_database(&db_path).await.unwrap();
+    if !Sqlite::database_exists(db_path).await.unwrap_or(false) {
+        Sqlite::create_database(db_path).await.unwrap();
     }
 
     let pool = SqlitePoolOptions::new()
         .max_connections(5)
-        .connect(&db_path)
+        .connect(db_path)
         .await
         .expect("could not connect to database");
 
@@ -33,7 +35,7 @@ async fn main() {
         .await
         .expect("could not migrate database");
 
-    let app_state = AppState { pool };
+    let app_state = AppState { config, pool };
 
     let app = Router::new()
         .merge(web::routes(&app_state))
