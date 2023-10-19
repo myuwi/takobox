@@ -5,17 +5,16 @@
 {% block body %}
     {%~ include "nav.html" %}
     <main class="flex flex-col gap-6 items-center py-48 px-4 mx-auto max-w-5xl">
-      <h1 class="text-5xl font-semibold">Takobox<span class="text-orange-300">.moe</span></h1>
+      <h1 class="text-5xl font-semibold">Tako<span class="text-orange-300">box</span></h1>
       <h2 class="flex flex-col text-lg text-center">
         <span>A simple, self-hostable file upload service</span>
       </h2>
       <div class="flex flex-row gap-4">
-        {%- match user %}
-        {%- when Some with (user) %}
+        {%- if user.is_some() %}
         <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
-        {%- when None %}
+        {%- else %}
         <a href="/login" class="btn btn-primary">Log In</a>
-        {%- endmatch %}
+        {%- endif %}
       </div>
     </main>
 {%- endblock %}
