@@ -4,24 +4,15 @@
 
 {% block body %}
     <main class="flex justify-center items-center h-full">
-      <form
-        class="flex flex-col gap-6 p-4 w-full max-w-sm"
-        hx-post="/register"
-        hx-target="#error"
-        hx-disabled-elt="input[type='submit']"
+      <form {# -#}
+        class="flex flex-col gap-6 p-4 w-full max-w-sm" {# -#}
+        hx-post="/register" {# -#}
+        hx-target="#fields" {# -#}
+        hx-ext="alpine-morph" {# -#}
+        hx-swap="morph" {# -#}
       >
         <h1 class="text-3xl">Register</h1>
-        <span class="flex items-center py-2 px-4 h-10 text-white bg-red-400 rounded-md empty:hidden" id="error"></span>
-        <div class="flex flex-col gap-4">
-          <div class="flex flex-col gap-2">
-            <label for="username">Username</label>
-            <input class="form-input" type="text" id="username" name="username" required">
-          </div>
-          <div class="flex flex-col gap-2">
-            <label for="password">Password</label>
-            <input class="form-input" type="password" id="password" name="password" required>
-          </div>
-        </div>
+        {%~ include "auth-fields.html" %}
         <input class="btn btn-primary" type="submit" value="Create Account">
         <a href="/" class="self-center hover:underline">Back home</a>
       </form>
