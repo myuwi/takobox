@@ -10,7 +10,7 @@ use tower_cookies::{Cookie, Cookies};
 
 use crate::model::user::User;
 use crate::web::{
-    error::{Error, Result},
+    error::{AuthError, Error, Result},
     AUTH_TOKEN,
 };
 
@@ -63,6 +63,8 @@ pub async fn require_auth<B>(
     Ok(next.run(req).await)
 }
 
+type UserExtResult = core::result::Result<User, AuthError>;
+
 #[async_trait]
 impl<S: Send + Sync> FromRequestParts<S> for User {
     type Rejection = Error;
@@ -78,15 +80,4 @@ impl<S: Send + Sync> FromRequestParts<S> for User {
             .clone()
             .map_err(Error::Auth)
     }
-}
-
-type UserExtResult = core::result::Result<User, AuthError>;
-
-#[derive(Clone, Debug)]
-pub enum AuthError {
-    NoAuthCookie,
-    DatabaseError,
-    InvalidToken,
-    UserNotFound,
-    UserExtNotFound,
 }

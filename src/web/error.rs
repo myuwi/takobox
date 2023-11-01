@@ -3,13 +3,20 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use super::middleware::auth::AuthError;
-
 pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Clone, Debug)]
 pub enum Error {
     Auth(AuthError),
+}
+
+#[derive(Clone, Debug)]
+pub enum AuthError {
+    NoAuthCookie,
+    DatabaseError,
+    InvalidToken,
+    UserNotFound,
+    UserExtNotFound,
 }
 
 impl IntoResponse for Error {
