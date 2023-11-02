@@ -3,8 +3,7 @@
   "license": "ISC",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "build:css": "pnpm tailwindcss -i ./src/main.css -o ./public/main.css --minify",
-    "watch:css": "pnpm tailwindcss -i ./src/main.css -o ./public/main.css --minify --watch",
+    "css": "pnpm tailwindcss -i ./css/main.css -o ./public/main.css --minify",
     "format:css": "rustywind --write . && rustywind --write . --custom-regex \"@apply ([_a-zA\\.-Z0-9\\-:\\[\\] ]+);\""
   },
   "devDependencies": {
