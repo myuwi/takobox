@@ -1,47 +1,21 @@
 use askama::Template;
 use axum::{extract::State, response::IntoResponse, Form};
 use sqlx::SqlitePool;
-use tower_cookies::{Cookie, Cookies};
+use tower_cookies::{cookie::SameSite, Cookie, Cookies};
 use uuid::Uuid;
 
-use crate::{model::user::UserAuth, web::AUTH_TOKEN};
-
-#[derive(Default)]
-struct Errors {
-    username: Option<String>,
-    password: Option<String>,
-}
-
-#[derive(Template, Default)]
-#[template(path = "auth-fields.html")]
-pub struct AuthFields {
-    errors: Errors,
-}
-
-impl AuthFields {
-    fn with_username_error(msg: impl Into<String>) -> Self {
-        Self {
-            errors: Errors {
-                username: Some(msg.into()),
-                ..Default::default()
-            },
-        }
-    }
-
-    fn with_password_error(msg: impl Into<String>) -> Self {
-        Self {
-            errors: Errors {
-                password: Some(msg.into()),
-                ..Default::default()
-            },
-        }
-    }
-}
+use crate::{
+    model::user::UserAuth,
+    web::{
+        partials::{AuthErrors, AuthFields},
+        AUTH_TOKEN,
+    },
+};
 
 #[derive(Template, Default)]
 #[template(path = "register.html")]
-struct Register {
-    errors: Errors,
+pub struct Register {
+    pub errors: AuthErrors,
 }
 
 pub async fn get() -> impl IntoResponse {
@@ -90,6 +64,7 @@ pub async fn post(
 
     // TODO: Generate a real token
     let auth_cookie = Cookie::build(AUTH_TOKEN, format!("{}.fake.token", &form_data.username))
+        .same_site(SameSite::Strict)
         .http_only(true)
         .finish();
     cookies.add(auth_cookie);

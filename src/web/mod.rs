@@ -1,6 +1,7 @@
 mod error;
 mod middleware;
 mod routes;
+mod partials;
 
 pub use routes::routes;
 
