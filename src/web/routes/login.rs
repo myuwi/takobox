@@ -6,6 +6,7 @@ use tower_cookies::{cookie::SameSite, Cookie, Cookies};
 use crate::{
     model::user::{User, UserAuth},
     web::{
+        auth::verify_password,
         partials::{AuthErrors, AuthFields},
         AUTH_TOKEN,
     },
@@ -37,9 +38,8 @@ pub async fn post(
         ));
     };
 
-    if form_data.password != user.password {
-        return Err(AuthFields::with_password_error("Incorrect password"));
-    }
+    verify_password(&form_data.password, &user.password)
+        .map_err(|_| AuthFields::with_password_error("Incorrect password"))?;
 
     // TODO: Generate a real token
     let auth_cookie = Cookie::build(AUTH_TOKEN, format!("{}.fake.token", &user.username))

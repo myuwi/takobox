@@ -1,7 +1,8 @@
+mod auth;
 mod error;
 mod middleware;
-mod routes;
 mod partials;
+mod routes;
 
 pub use routes::routes;
 

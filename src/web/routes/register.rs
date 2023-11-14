@@ -7,6 +7,7 @@ use uuid::Uuid;
 use crate::{
     model::user::UserAuth,
     web::{
+        auth::hash_password,
         partials::{AuthErrors, AuthFields},
         AUTH_TOKEN,
     },
@@ -40,11 +41,13 @@ pub async fn post(
         ));
     }
 
+    let password_hash = hash_password(&form_data.password)
+        .map_err(|_| AuthFields::with_password_error("Invalid password"))?;
+
     let res = sqlx::query("INSERT INTO users (id, username, password) VALUES ($1, $2, $3)")
         .bind(Uuid::new_v4())
         .bind(&form_data.username)
-        // TODO: Don't insert as plain text
-        .bind(&form_data.password)
+        .bind(&password_hash)
         .execute(&pool)
         .await;
 
