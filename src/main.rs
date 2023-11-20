@@ -29,7 +29,8 @@ async fn shutdown_signal() {
 }
 
 async fn run() -> Result<()> {
-    let config = Config::new()?;
+    let config = Config::load()?;
+    config.validate()?;
 
     let pool = db::init_pool(&config.db_path).await?;
 
