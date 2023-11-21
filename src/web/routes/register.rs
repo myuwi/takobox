@@ -53,14 +53,10 @@ pub async fn post(
 
     res.map_err(|err| {
         // TODO: Better error messages
-        match err
-            .as_database_error()
-            .map(|e| e.code().unwrap_or_default())
-            .unwrap_or_default()
-            .to_string()
-            .as_str()
-        {
-            "2067" => AuthFields::with_username_error("Username is already taken"),
+        match err.as_database_error().map(|e| e.kind()) {
+            Some(sqlx::error::ErrorKind::UniqueViolation) => {
+                AuthFields::with_username_error("Username is already taken")
+            }
             _ => AuthFields::with_username_error("Unable to create account"),
         }
     })?;
