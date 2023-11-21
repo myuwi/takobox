@@ -6,4 +6,4 @@ mod routes;
 
 pub use routes::routes;
 
-pub const AUTH_TOKEN: &str = "AUTH-TOKEN";
+pub const AUTH_TOKEN: &str = "auth_token";

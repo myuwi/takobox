@@ -8,14 +8,20 @@ use axum::{
 use sqlx::SqlitePool;
 use tower_cookies::{Cookie, Cookies};
 
-use crate::model::user::User;
-use crate::web::{
-    error::{AuthError, Error, Result},
-    AUTH_TOKEN,
+use crate::{
+    config::Config,
+    model::{auth::Claims, user::User},
+    state::AppState,
+    web::{
+        auth::decode_jwt,
+        error::{AuthError, Error, Result},
+        AUTH_TOKEN,
+    },
 };
 
 async fn resolve_user(
     pool: &SqlitePool,
+    config: &Config,
     cookies: &Cookies,
 ) -> core::result::Result<User, AuthError> {
     let token = cookies
@@ -23,11 +29,14 @@ async fn resolve_user(
         .map(|c| c.value().to_string())
         .ok_or(AuthError::NoAuthCookie)?;
 
-    // TODO: Proper token parsing
-    let (username, _) = token.split_once('.').ok_or(AuthError::InvalidToken)?;
+    let Claims { sub: id, .. } =
+        decode_jwt(&token, &config.session_secret).map_err(|err| match err.kind() {
+            jsonwebtoken::errors::ErrorKind::ExpiredSignature => AuthError::ExpiredToken,
+            _ => AuthError::InvalidToken,
+        })?;
 
-    sqlx::query_as::<_, User>("SELECT * from users where username = $1")
-        .bind(username)
+    sqlx::query_as::<_, User>("SELECT * from users where id = $1")
+        .bind(id)
         .fetch_one(pool)
         .await
         .map_err(|err| match err {
@@ -37,12 +46,12 @@ async fn resolve_user(
 }
 
 pub async fn auth<B>(
-    State(pool): State<SqlitePool>,
+    State(AppState { config, pool }): State<AppState>,
     cookies: Cookies,
     mut req: Request<B>,
     next: Next<B>,
 ) -> Result<Response> {
-    let result_user = resolve_user(&pool, &cookies).await;
+    let result_user = resolve_user(&pool, &config, &cookies).await;
 
     if !matches!(result_user, Ok(_) | Err(AuthError::NoAuthCookie)) {
         cookies.remove(Cookie::named(AUTH_TOKEN))

@@ -1,15 +1,14 @@
 use askama::Template;
 use axum::{extract::State, response::IntoResponse, Form};
-use sqlx::SqlitePool;
-use tower_cookies::{cookie::SameSite, Cookie, Cookies};
+use tower_cookies::Cookies;
 use uuid::Uuid;
 
 use crate::{
     model::user::UserAuth,
+    state::AppState,
     web::{
-        auth::hash_password,
+        auth::{create_auth_cookie, create_jwt, hash_password},
         partials::{AuthErrors, AuthFields},
-        AUTH_TOKEN,
     },
 };
 
@@ -24,7 +23,7 @@ pub async fn get() -> impl IntoResponse {
 }
 
 pub async fn post(
-    State(pool): State<SqlitePool>,
+    State(AppState { config, pool }): State<AppState>,
     cookies: Cookies,
     Form(form_data): Form<UserAuth>,
 ) -> Result<impl IntoResponse, AuthFields> {
@@ -44,8 +43,10 @@ pub async fn post(
     let password_hash = hash_password(&form_data.password)
         .map_err(|_| AuthFields::with_password_error("Invalid password"))?;
 
+    let uuid = Uuid::new_v4();
+
     let res = sqlx::query("INSERT INTO users (id, username, password) VALUES ($1, $2, $3)")
-        .bind(Uuid::new_v4())
+        .bind(uuid)
         .bind(&form_data.username)
         .bind(&password_hash)
         .execute(&pool)
@@ -61,11 +62,10 @@ pub async fn post(
         }
     })?;
 
-    // TODO: Generate a real token
-    let auth_cookie = Cookie::build(AUTH_TOKEN, format!("{}.fake.token", &form_data.username))
-        .same_site(SameSite::Strict)
-        .http_only(true)
-        .finish();
+    let token = create_jwt(&uuid, &config.session_secret)
+        .map_err(|_| AuthFields::with_username_error("Unable to start session"))?;
+
+    let auth_cookie = create_auth_cookie(token);
     cookies.add(auth_cookie);
 
     Ok([("HX-Redirect", "/")])

@@ -14,6 +14,7 @@ pub enum Error {
 pub enum AuthError {
     NoAuthCookie,
     DatabaseError,
+    ExpiredToken,
     InvalidToken,
     UserNotFound,
     UserExtNotFound,
