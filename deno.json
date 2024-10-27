@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "dev": "deno task dev:backend",
+    "dev:backend": "cd apps/backend && cargo watch -x run"
+  }
+}
