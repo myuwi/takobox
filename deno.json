@@ -1,6 +1,7 @@
 {
   "tasks": {
-    "dev": "deno task dev:backend",
-    "dev:backend": "cd apps/backend && cargo watch -x run"
+    "dev": "deno task dev:web & deno task dev:backend",
+    "dev:web": "deno task --cwd apps/web start",
+    "dev:backend": "cargo watch --workdir apps/backend -x run"
   }
 }
