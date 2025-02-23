@@ -15,10 +15,11 @@ pub fn main() {
   |> dot_env.set_debug(False)
   |> dot_env.load()
 
-  let assert Ok(secret_key_base) = env.get_string("SECRET_KEY_BASE")
+  let assert Ok(secret) = env.get_string("SECRET")
 
   let assert Ok(_) =
-    wisp_mist.handler(router.handle_request, secret_key_base)
+    router.handle_request
+    |> wisp_mist.handler(secret)
     |> mist.new()
     |> mist.port(8000)
     |> mist.start_http()
