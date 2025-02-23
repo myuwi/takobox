@@ -1,0 +1,5 @@
+watch:
+    watchexec -r -c -w . -i build gleam run
+
+test:
+  gleam test
