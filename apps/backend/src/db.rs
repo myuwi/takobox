@@ -1,8 +1,10 @@
-use sqlx::{migrate::MigrateDatabase, sqlite::SqlitePoolOptions, Sqlite, SqlitePool};
+use sqlx::{
+    migrate::{MigrateDatabase, MigrateError},
+    sqlite::SqlitePoolOptions,
+    Sqlite, SqlitePool,
+};
 
-use crate::error::Result;
-
-pub async fn init_pool(db_path: &str) -> Result<SqlitePool> {
+pub async fn init_pool(db_path: &str) -> Result<SqlitePool, MigrateError> {
     if !Sqlite::database_exists(db_path).await? {
         Sqlite::create_database(db_path).await?
     }

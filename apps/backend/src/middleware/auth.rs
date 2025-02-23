@@ -1,36 +1,34 @@
 use axum::{
     async_trait,
+    body::Body,
     extract::{FromRequestParts, State},
-    http::{request::Parts, Request},
+    http::{header, request::Parts, HeaderMap, Request},
     middleware::Next,
     response::Response,
 };
 use sqlx::SqlitePool;
-use tower_cookies::{Cookie, Cookies};
 
 use crate::{
+    auth::jwt::{decode_jwt, Claims},
     config::Config,
-    model::{auth::Claims, user::User},
+    error::{AuthError, Error, Result},
+    model::user::User,
     state::AppState,
-    web::{
-        auth::decode_jwt,
-        error::{AuthError, Error, Result},
-        AUTH_TOKEN,
-    },
 };
 
 async fn resolve_user(
     pool: &SqlitePool,
     config: &Config,
-    cookies: &Cookies,
+    headers: &HeaderMap,
 ) -> core::result::Result<User, AuthError> {
-    let token = cookies
-        .get(AUTH_TOKEN)
-        .map(|c| c.value().to_string())
-        .ok_or(AuthError::NoAuthCookie)?;
+    let token = headers
+        .get(header::AUTHORIZATION)
+        .and_then(|h| h.to_str().ok())
+        .and_then(|h| h.strip_prefix("Bearer "))
+        .ok_or(AuthError::InvalidToken)?;
 
     let Claims { sub: id, .. } =
-        decode_jwt(&token, &config.session_secret).map_err(|err| match err.kind() {
+        decode_jwt(token, &config.session_secret).map_err(|err| match err.kind() {
             jsonwebtoken::errors::ErrorKind::ExpiredSignature => AuthError::ExpiredToken,
             _ => AuthError::InvalidToken,
         })?;
@@ -45,28 +43,18 @@ async fn resolve_user(
         })
 }
 
-pub async fn auth<B>(
+pub async fn auth(
     State(AppState { config, pool }): State<AppState>,
-    cookies: Cookies,
-    mut req: Request<B>,
-    next: Next<B>,
+    mut req: Request<Body>,
+    next: Next,
 ) -> Result<Response> {
-    let result_user = resolve_user(&pool, &config, &cookies).await;
-
-    if !matches!(result_user, Ok(_) | Err(AuthError::NoAuthCookie)) {
-        cookies.remove(Cookie::named(AUTH_TOKEN))
-    }
-
+    let result_user = resolve_user(&pool, &config, req.headers()).await;
     req.extensions_mut().insert(result_user);
 
     Ok(next.run(req).await)
 }
 
-pub async fn require_auth<B>(
-    user: Result<User>,
-    req: Request<B>,
-    next: Next<B>,
-) -> Result<Response> {
+pub async fn require_auth(user: Result<User>, req: Request<Body>, next: Next) -> Result<Response> {
     user?;
 
     Ok(next.run(req).await)

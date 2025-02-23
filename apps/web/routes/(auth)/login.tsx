@@ -1,4 +1,29 @@
 import { Head } from "$fresh/runtime.ts";
+import type { Handlers } from "$fresh/server.ts";
+
+export const handler: Handlers = {
+  async POST(req, ctx) {
+    const form = await req.formData();
+    const body = Object.fromEntries(form);
+
+    const res = await fetch("http://localhost:3000/api/auth/login", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    console.log(await res.text());
+
+    if (!res.ok) {
+      return ctx.render({
+        errors: "Something went wrong",
+      });
+    }
+
+    // TODO: set cookie and redirect
+    return ctx.render();
+  },
+};
 
 export default function Login() {
   return (
@@ -6,7 +31,7 @@ export default function Login() {
       <Head>
         <title>Log in to Takobox</title>
       </Head>
-      <form class="flex flex-col gap-6 w-full max-w-xs">
+      <form class="flex flex-col gap-6 w-full max-w-xs" method="post">
         <h1 class="text-2xl">Log in</h1>
         <div class="flex flex-col gap-4">
           <label class="flex flex-col gap-2">

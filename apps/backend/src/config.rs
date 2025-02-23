@@ -1,7 +1,5 @@
 use figment::{providers::Env, Figment};
-use serde::{Deserialize, Serialize};
-
-use crate::error::{Error, Result};
+use serde::{de::Error, Deserialize, Serialize};
 
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(default)]
@@ -20,16 +18,15 @@ impl Default for Config {
 }
 
 impl Config {
-    pub fn load() -> Result<Self> {
-        Figment::new()
-            .merge(Env::prefixed("TAKOBOX_"))
-            .extract()
-            .map_err(Error::Figment)
+    pub fn load() -> figment::Result<Self> {
+        Figment::new().merge(Env::prefixed("TAKOBOX_")).extract()
     }
 
-    pub fn validate(&self) -> Result<()> {
+    pub fn validate(&self) -> figment::Result<()> {
         if self.session_secret.is_empty() {
-            return Err(Error::Config("session_secret cannot be empty".to_string()));
+            return Err(figment::Error::custom(
+                "session_secret cannot be empty".to_string(),
+            ));
         }
 
         Ok(())

@@ -1,19 +1,19 @@
 use axum::Router;
 use dotenvy::dotenv;
-use std::net::SocketAddr;
-use std::process::ExitCode;
+use tokio::net::TcpListener;
 use tokio::signal::unix::{signal, SignalKind};
-use tower_cookies::CookieManagerLayer;
 
+mod auth;
 mod config;
 mod db;
 mod error;
+mod middleware;
 mod model;
+mod routes;
 mod state;
-mod web;
 
 use crate::config::Config;
-use crate::error::Result;
+use crate::routes::routes;
 use crate::state::AppState;
 
 async fn shutdown_signal() {
@@ -28,7 +28,9 @@ async fn shutdown_signal() {
     println!("Shutting down gracefully...");
 }
 
-async fn run() -> Result<()> {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    dotenv().ok();
     let config = Config::load()?;
     config.validate()?;
 
@@ -37,29 +39,14 @@ async fn run() -> Result<()> {
     let app_state = AppState { config, pool };
 
     let app = Router::new()
-        .merge(web::routes(&app_state))
-        .layer(CookieManagerLayer::new())
+        .nest("/api", routes(&app_state))
         .with_state(app_state);
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
+    let listener = TcpListener::bind("127.0.0.1:3000").await?;
+    axum::serve(listener, app.into_make_service())
         .with_graceful_shutdown(shutdown_signal())
         .await
         .unwrap();
 
     Ok(())
-}
-
-#[tokio::main]
-async fn main() -> ExitCode {
-    dotenv().ok();
-
-    match run().await {
-        Ok(_) => ExitCode::SUCCESS,
-        Err(e) => {
-            eprintln!("Error: {e}");
-            ExitCode::FAILURE
-        }
-    }
 }
