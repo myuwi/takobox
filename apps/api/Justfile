@@ -1,5 +1,13 @@
+list:
+  @just --list
+
 watch:
-    watchexec -r -c -w . -i build gleam run
+  watchexec --restart --clear --wrap-process=session --watch . --ignore build -- "gleam run"
 
 test:
+  dbmate -e TEST_DATABASE_URL up
   gleam test
+
+migrate:
+  dbmate up
+  gleam run -m squirrel

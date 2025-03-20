@@ -3,13 +3,16 @@ import gleeunit/should
 import wisp/testing
 
 import app/router
+import test_support.{with_context}
 
 pub fn main() {
   gleeunit.main()
 }
 
 pub fn router_test() {
-  let response = router.handle_request(testing.get("/", []))
+  use ctx <- with_context()
+
+  let response = router.handle_request(testing.get("/", []), ctx)
 
   response.status
   |> should.equal(200)
