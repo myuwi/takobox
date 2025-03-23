@@ -2,7 +2,8 @@ import gleam/http.{Get}
 import wisp.{type Request, type Response}
 
 import app/context.{type Context}
-import app/routes/auth
+import app/routes/auth/login
+import app/routes/auth/register
 import app/web
 
 pub fn handle_request(req: Request, ctx: Context) -> Response {
@@ -28,8 +29,8 @@ pub fn auth_router(
   ctx: Context,
 ) -> Response {
   case path_segments {
-    ["login"] -> auth.login_handler(req, ctx)
-    ["register"] -> auth.register_handler(req, ctx)
+    ["login"] -> login.login_handler(req, ctx)
+    ["register"] -> register.register_handler(req, ctx)
     _ -> wisp.not_found()
   }
 }

@@ -1,6 +1,7 @@
+import app/model/auth_payload.{AuthPayload, auth_payload_decoder}
+import app/model/token.{Token, encode_token}
 import given
 import gleam/bool
-import gleam/dynamic/decode
 import gleam/http.{Post}
 import gleam/json
 import gleam/regexp
@@ -15,17 +16,7 @@ import app/context.{type Context}
 import app/sql
 import app/web
 
-pub type AuthBody {
-  AuthBody(username: String, password: String)
-}
-
-fn auth_body_decoder() -> decode.Decoder(AuthBody) {
-  use username <- decode.field("username", decode.string)
-  use password <- decode.field("password", decode.string)
-  decode.success(AuthBody(username:, password:))
-}
-
-fn validate_register_body(
+fn validate_register_payload(
   username: String,
   password: String,
 ) -> Result(Nil, String) {
@@ -59,11 +50,11 @@ fn create_user_query_error_to_string(err: pog.QueryError) -> String {
 
 pub fn register_handler(req: Request, ctx: Context) -> Response {
   use <- wisp.require_method(req, Post)
-  use auth_body <- web.require_json_decoded(req, auth_body_decoder())
-  let AuthBody(username, password) = auth_body
+  use auth_body <- web.require_json_decoded(req, auth_payload_decoder())
+  let AuthPayload(username, password) = auth_body
 
   use _ <- given.ok(
-    validate_register_body(username, password),
+    validate_register_payload(username, password),
     web.json_error_response(_, 400),
   )
 
@@ -82,40 +73,10 @@ pub fn register_handler(req: Request, ctx: Context) -> Response {
     uuid
     |> uuid.to_string()
     |> jwt.create_jwt(ctx.secret)
+    |> Token
 
-  json.object([#("token", json.string(token))])
-  |> json.to_string_tree()
-  |> wisp.json_response(201)
-}
-
-pub fn login_handler(req: Request, ctx: Context) -> Response {
-  use <- wisp.require_method(req, Post)
-  use auth_body <- web.require_json_decoded(req, auth_body_decoder())
-  let AuthBody(username, password) = auth_body
-
-  use res <- given.ok(sql.get_user_by_username(ctx.db, username), fn(_) {
-    web.json_error_response("Something went wrong", 500)
-  })
-
-  use user <- given.ok(
-    case res {
-      pog.Returned(rows: [user], ..) -> Ok(user)
-      _ -> Error("Couldn't find a user with that username")
-    },
-    web.json_error_response(_, 401),
-  )
-
-  use <- bool.lazy_guard(
-    !password.verify_password(password, user.password),
-    fn() { web.json_error_response("Incorrect password", 401) },
-  )
-
-  let token =
-    user.id
-    |> uuid.to_string()
-    |> jwt.create_jwt(ctx.secret)
-
-  json.object([#("token", json.string(token))])
+  token
+  |> encode_token()
   |> json.to_string_tree()
   |> wisp.json_response(201)
 }
