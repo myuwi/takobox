@@ -1,5 +1,5 @@
 [tools]
-gleam = "1.8.1"
-elixir = "1.18.2-otp-27"
-erlang = "27.2.4"
+gleam = "1.9.1"
+elixir = "1.18.3-otp-27"
+erlang = "27.3"
 rebar = "3.24.0"
