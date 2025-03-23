@@ -1,8 +1,8 @@
-import app/model/auth_payload.{AuthPayload, encode_auth_payload}
 import gleam/json
 import gleeunit/should
 import wisp/testing
 
+import app/model/auth_payload.{AuthPayload, encode_auth_payload}
 import app/model/token.{token_decoder}
 import app/router
 import test_support.{with_context}

@@ -1,25 +1,17 @@
-import app/auth/password
-import app/model/auth_payload.{AuthPayload, encode_auth_payload}
-import app/sql
 import gleam/json
 import gleeunit/should
 import wisp/testing
-import youid/uuid
 
+import app/model/auth_payload.{AuthPayload, encode_auth_payload}
 import app/model/token.{token_decoder}
+import app/repo/repo
 import app/router
 import test_support.{with_context}
 
 pub fn login_test() {
   use ctx <- with_context()
 
-  let assert Ok(_) =
-    sql.create_user(
-      ctx.db,
-      uuid.v4(),
-      "test",
-      password.hash_password("password"),
-    )
+  let assert Ok(_) = repo.create_user(ctx.db, "test", "password")
 
   let payload =
     AuthPayload(username: "test", password: "password")

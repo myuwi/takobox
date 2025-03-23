@@ -1,5 +1,3 @@
-import app/model/auth_payload.{AuthPayload, auth_payload_decoder}
-import app/model/token.{Token, encode_token}
 import given
 import gleam/bool
 import gleam/http.{Post}
@@ -11,9 +9,10 @@ import wisp.{type Request, type Response}
 import youid/uuid
 
 import app/auth/jwt
-import app/auth/password
 import app/context.{type Context}
-import app/sql
+import app/model/auth_payload.{AuthPayload, auth_payload_decoder}
+import app/model/token.{Token, encode_token}
+import app/repo/repo
 import app/web
 
 fn validate_register_payload(
@@ -50,27 +49,21 @@ fn create_user_query_error_to_string(err: pog.QueryError) -> String {
 
 pub fn register_handler(req: Request, ctx: Context) -> Response {
   use <- wisp.require_method(req, Post)
-  use auth_body <- web.require_json_decoded(req, auth_payload_decoder())
-  let AuthPayload(username, password) = auth_body
+  use auth_payload <- web.require_json_decoded(req, auth_payload_decoder())
+  let AuthPayload(username, password) = auth_payload
 
   use _ <- given.ok(
     validate_register_payload(username, password),
     web.json_error_response(_, 400),
   )
 
-  let uuid = uuid.v4()
-  let password_hash = password.hash_password(password)
-
-  use _ <- given.ok(
-    sql.create_user(ctx.db, uuid, username, password_hash),
-    fn(err) {
-      create_user_query_error_to_string(err)
-      |> web.json_error_response(400)
-    },
-  )
+  use user <- given.ok(repo.create_user(ctx.db, username, password), fn(err) {
+    create_user_query_error_to_string(err)
+    |> web.json_error_response(400)
+  })
 
   let token =
-    uuid
+    user.id
     |> uuid.to_string()
     |> jwt.create_jwt(ctx.secret)
     |> Token
