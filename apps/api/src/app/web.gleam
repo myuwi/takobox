@@ -1,6 +1,13 @@
 import gleam/dynamic/decode
+import gleam/http/request
 import gleam/json
+import gleam/result
+import gwt
 import wisp.{type Request, type Response}
+import youid/uuid.{type Uuid}
+
+import app/auth/jwt
+import app/context.{type Context}
 
 pub fn middleware(
   req: wisp.Request,
@@ -15,11 +22,11 @@ pub fn middleware(
 }
 
 pub fn require_json_decoded(
-  request: Request,
+  req: Request,
   decoder: decode.Decoder(a),
   next: fn(a) -> Response,
 ) -> Response {
-  use json <- wisp.require_json(request)
+  use json <- wisp.require_json(req)
   case decode.run(json, decoder) {
     Ok(a) -> next(a)
     Error(_) -> wisp.bad_request()
@@ -30,4 +37,30 @@ pub fn json_error_response(msg: String, code: Int) -> Response {
   json.object([#("message", json.string(msg))])
   |> json.to_string_tree()
   |> wisp.json_response(code)
+}
+
+pub fn require_auth(
+  req: Request,
+  ctx: Context,
+  next: fn(Uuid) -> Response,
+) -> Response {
+  let maybe_token = case request.get_header(req, "authorization") {
+    Ok("Bearer " <> token) -> Ok(token)
+    _ -> Error(Nil)
+  }
+
+  let maybe_id =
+    maybe_token
+    |> result.try(fn(token) {
+      token
+      |> jwt.decode_jwt(ctx.secret)
+      |> result.try(gwt.get_subject)
+      |> result.replace_error(Nil)
+      |> result.try(uuid.from_string)
+    })
+
+  case maybe_id {
+    Ok(id) -> next(id)
+    _ -> wisp.response(401)
+  }
 }

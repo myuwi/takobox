@@ -1,7 +1,11 @@
-import app/context.{type Context, Context}
 import envoy
 import gleam/result
 import pog
+import youid/uuid
+
+import app/auth/jwt
+import app/context.{type Context, Context}
+import app/repo/repo
 
 pub fn with_context(test_case: fn(Context) -> Nil) {
   let assert Ok(db) =
@@ -15,4 +19,13 @@ pub fn with_context(test_case: fn(Context) -> Nil) {
     test_case(ctx)
     Error("Rollback")
   })
+}
+
+pub fn with_session(ctx: Context, test_case: fn(String) -> Nil) {
+  let assert Ok(user) = repo.create_user(ctx.db, "test", "password")
+
+  user.id
+  |> uuid.to_string()
+  |> jwt.create_jwt(ctx.secret)
+  |> test_case()
 }

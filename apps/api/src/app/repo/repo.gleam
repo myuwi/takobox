@@ -1,7 +1,7 @@
 import gleam/option.{None, Some}
 import gleam/result
 import pog
-import youid/uuid
+import youid/uuid.{type Uuid}
 
 import app/auth/password
 import app/repo/sql
@@ -26,6 +26,18 @@ pub fn get_user_by_username(
   username: String,
 ) -> Result(option.Option(sql.GetUserByUsernameRow), pog.QueryError) {
   use res <- result.try(sql.get_user_by_username(conn, username))
+
+  case res {
+    pog.Returned(rows: [user], ..) -> Ok(Some(user))
+    _ -> Ok(None)
+  }
+}
+
+pub fn get_user_by_id(
+  conn: pog.Connection,
+  id: Uuid,
+) -> Result(option.Option(sql.GetUserByIdRow), pog.QueryError) {
+  use res <- result.try(sql.get_user_by_id(conn, id))
 
   case res {
     pog.Returned(rows: [user], ..) -> Ok(Some(user))

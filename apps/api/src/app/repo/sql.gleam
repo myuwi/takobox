@@ -2,6 +2,38 @@ import gleam/dynamic/decode
 import pog
 import youid/uuid.{type Uuid}
 
+/// A row you get from running the `get_user_by_id` query
+/// defined in `./src/app/repo/sql/get_user_by_id.sql`.
+///
+/// > 🐿️ This type definition was generated automatically using v3.0.1 of the
+/// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub type GetUserByIdRow {
+  GetUserByIdRow(id: Uuid, username: String, password: String)
+}
+
+/// Runs the `get_user_by_id` query
+/// defined in `./src/app/repo/sql/get_user_by_id.sql`.
+///
+/// > 🐿️ This function was generated automatically using v3.0.1 of
+/// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub fn get_user_by_id(db, arg_1) {
+  let decoder = {
+    use id <- decode.field(0, uuid_decoder())
+    use username <- decode.field(1, decode.string)
+    use password <- decode.field(2, decode.string)
+    decode.success(GetUserByIdRow(id:, username:, password:))
+  }
+
+  "select * from users where id = $1
+"
+  |> pog.query
+  |> pog.parameter(pog.text(uuid.to_string(arg_1)))
+  |> pog.returning(decoder)
+  |> pog.execute(db)
+}
+
 /// A row you get from running the `get_user_by_username` query
 /// defined in `./src/app/repo/sql/get_user_by_username.sql`.
 ///
