@@ -11,8 +11,8 @@ import youid/uuid
 import app/auth/jwt
 import app/context.{type Context}
 import app/model/auth_payload.{AuthPayload, auth_payload_decoder}
-import app/model/token.{Token, encode_token}
-import app/repo/repo
+import app/model/token.{Token}
+import app/repo/repo.{type DatabaseError}
 import app/web
 
 fn validate_register_payload(
@@ -38,12 +38,19 @@ fn validate_register_payload(
   Ok(Nil)
 }
 
-fn create_user_query_error_to_string(err: pog.QueryError) -> String {
+fn database_error_to_response(err: DatabaseError) -> Response {
   case err {
-    ConstraintViolated(_, "users_username_key", _) ->
-      "Username is already taken"
-    ConstraintViolated(_, "users_username_check", _) -> "Username is invalid"
-    _ -> "Unable to create user"
+    repo.QueryError(err) -> {
+      case err {
+        ConstraintViolated(_, "users_username_key", _) ->
+          "Username is already taken"
+        ConstraintViolated(_, "users_username_check", _) ->
+          "Username is invalid"
+        _ -> "Unable to create user"
+      }
+      |> web.json_error_response(400)
+    }
+    _ -> wisp.internal_server_error()
   }
 }
 
@@ -57,10 +64,10 @@ pub fn register_handler(req: Request, ctx: Context) -> Response {
     web.json_error_response(_, 400),
   )
 
-  use user <- given.ok(repo.create_user(ctx.db, username, password), fn(err) {
-    create_user_query_error_to_string(err)
-    |> web.json_error_response(400)
-  })
+  use user <- given.ok(
+    repo.create_user(ctx.db, username, password),
+    database_error_to_response,
+  )
 
   let token =
     user.id
@@ -69,7 +76,7 @@ pub fn register_handler(req: Request, ctx: Context) -> Response {
     |> Token
 
   token
-  |> encode_token()
+  |> token.encode_token()
   |> json.to_string_tree()
   |> wisp.json_response(201)
 }
