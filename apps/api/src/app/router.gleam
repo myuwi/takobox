@@ -13,11 +13,11 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
   case wisp.path_segments(req) {
     [] -> root.root_handler(req)
     ["auth", ..rest] -> auth_router(rest, req, ctx)
-    rest -> router(rest, req, ctx)
+    _ -> protected_router(req, ctx)
   }
 }
 
-pub fn auth_router(
+fn auth_router(
   path_segments: List(String),
   req: Request,
   ctx: Context,
@@ -29,15 +29,11 @@ pub fn auth_router(
   }
 }
 
-pub fn router(
-  path_segments: List(String),
-  req: Request,
-  ctx: Context,
-) -> Response {
+fn protected_router(req: Request, ctx: Context) -> Response {
   use user_id <- web.require_auth(req, ctx)
   let req_ctx = RequestContext(user_id:)
 
-  case path_segments {
+  case wisp.path_segments(req) {
     ["me"] -> me.me_handler(req, ctx, req_ctx)
     _ -> wisp.not_found()
   }
