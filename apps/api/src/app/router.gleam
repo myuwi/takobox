@@ -1,27 +1,20 @@
-import gleam/http.{Get}
 import wisp.{type Request, type Response}
 
 import app/context.{type Context, RequestContext}
 import app/routes/auth/login
 import app/routes/auth/register
 import app/routes/me
+import app/routes/root
 import app/web
 
 pub fn handle_request(req: Request, ctx: Context) -> Response {
   use req <- web.middleware(req)
 
   case wisp.path_segments(req) {
-    [] -> root_handler(req)
+    [] -> root.root_handler(req)
     ["auth", ..rest] -> auth_router(rest, req, ctx)
     rest -> router(rest, req, ctx)
   }
-}
-
-fn root_handler(req: Request) -> Response {
-  use <- wisp.require_method(req, Get)
-
-  wisp.ok()
-  |> wisp.string_body("Hello Takobox API!")
 }
 
 pub fn auth_router(
