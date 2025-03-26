@@ -6,7 +6,7 @@ import app/context.{type Context, type RequestContext}
 import app/model/user.{User}
 import app/repo/repo
 
-pub fn me_handler(
+pub fn handle_request(
   req: Request,
   ctx: Context,
   req_ctx: RequestContext,

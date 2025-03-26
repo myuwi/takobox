@@ -54,7 +54,7 @@ fn database_error_to_response(err: DatabaseError) -> Response {
   }
 }
 
-pub fn register_handler(req: Request, ctx: Context) -> Response {
+pub fn handle_request(req: Request, ctx: Context) -> Response {
   use <- wisp.require_method(req, Post)
   use auth_payload <- web.require_json_decoded(req, auth_payload_decoder())
   let AuthPayload(username, password) = auth_payload
