@@ -7,7 +7,7 @@ import app/model/token.{token_decoder}
 import app/router
 import test_support.{with_context}
 
-pub fn register_test() {
+pub fn succeeds_with_valid_credentials_test() {
   use ctx <- with_context()
 
   let payload =

@@ -8,7 +8,7 @@ import app/repo/repo
 import app/router
 import test_support.{with_context}
 
-pub fn login_test() {
+pub fn succeeds_with_valid_credentials_test() {
   use ctx <- with_context()
 
   let assert Ok(_) = repo.create_user(ctx.db, "test", "password")

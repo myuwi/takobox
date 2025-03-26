@@ -4,7 +4,7 @@ import wisp/testing
 import app/router
 import test_support.{with_context}
 
-pub fn router_test() {
+pub fn succeeds_test() {
   use ctx <- with_context()
 
   let response = router.handle_request(testing.get("/", []), ctx)

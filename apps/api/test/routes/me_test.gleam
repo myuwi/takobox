@@ -6,7 +6,7 @@ import app/model/user
 import app/router
 import test_support.{with_context, with_session}
 
-pub fn me_test() {
+pub fn succeeds_with_valid_session_test() {
   use ctx <- with_context()
   use token <- with_session(ctx)
 
