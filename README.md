@@ -9,7 +9,8 @@
 
 ## Built with
 
-- Rust - Programming Language
-- Axum - Web Framework
-- Askama - Templating Engine
+- Gleam - Backend Language
+- Bun - JavaScript Runtime
+- React - Frontend Framework
+- TanStack - Core Libraries
 - Tailwind CSS - CSS Framework
