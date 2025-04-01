@@ -7,8 +7,9 @@
     "build": "vite build && tsc",
     "serve": "vite preview",
     "test": "vitest run",
-    "format": "prettier",
-    "lint": "biome lint"
+    "lint": "conc -r -m 1 bun:lint:*",
+    "lint:biome": "biome lint",
+    "lint:prettier": "prettier --check ."
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.17",
@@ -33,6 +34,7 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
     "jsdom": "^26.0.0",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
