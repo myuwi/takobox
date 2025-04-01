@@ -3,7 +3,7 @@ import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { Label } from "@/components/Label";
 
-export const Route = createFileRoute("/(auth)/sign-up")({
+export const Route = createFileRoute("/(auth)/signup")({
   component: SignUp,
 });
 

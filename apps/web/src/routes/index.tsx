@@ -26,7 +26,7 @@ function App() {
             </Button>
           ) : (
             <Button asChild>
-              <Link to="/sign-up">Get started</Link>
+              <Link to="/signup">Get started</Link>
             </Button>
           )}
         </div>

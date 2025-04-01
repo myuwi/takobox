@@ -36,7 +36,7 @@ function Login() {
       <Button type="submit">Log in</Button>
       <span className="text-center text-zinc-500">
         Don't have an account yet?{" "}
-        <Link className="text-zinc-700 hover:underline" to="/sign-up">
+        <Link className="text-zinc-700 hover:underline" to="/signup">
           Create account
         </Link>
       </span>

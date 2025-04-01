@@ -25,7 +25,7 @@ export default function Nav({ user }: NavProps) {
               <Link to="/login">Log in</Link>
             </Button>
             <Button asChild>
-              <Link to="/sign-up">Sign up</Link>
+              <Link to="/signup">Sign up</Link>
             </Button>
           </>
         )}
