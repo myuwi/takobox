@@ -28,11 +28,11 @@ fn validate_register_payload(
     ),
   )
   use <- bool.guard(
-    string.length(username) < 4 && string.length(username) > 32,
+    string.length(username) < 4 || string.length(username) > 32,
     Error("Username must be between 4 and 32 characters"),
   )
   use <- bool.guard(
-    string.length(password) < 6 && string.length(password) > 32,
+    string.length(password) < 6 || string.length(password) > 32,
     Error("Password must be between 6 and 32 characters"),
   )
   Ok(Nil)

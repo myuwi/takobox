@@ -1,4 +1,5 @@
 import gleam/json
+import gleam/list
 import gleeunit/should
 import wisp/testing
 
@@ -24,6 +25,54 @@ pub fn succeeds_with_valid_credentials_test() {
   |> testing.string_body
   |> json.parse(token_decoder())
   |> should.be_ok()
+
+  Nil
+}
+
+pub fn fails_with_invalid_username_test() {
+  use ctx <- with_context()
+
+  let invalid_usernames = ["asd", "test*", "more_than_32_characters_long_name"]
+
+  invalid_usernames
+  |> list.each(fn(username) {
+    let payload =
+      AuthPayload(username:, password: "password")
+      |> encode_auth_payload()
+
+    let response =
+      router.handle_request(
+        testing.post_json("/auth/register", [], payload),
+        ctx,
+      )
+
+    response.status
+    |> should.equal(400)
+  })
+
+  Nil
+}
+
+pub fn fails_with_invalid_password_test() {
+  use ctx <- with_context()
+
+  let invalid_passwords = ["passw", "more_than_32_characters_long_pass"]
+
+  invalid_passwords
+  |> list.each(fn(password) {
+    let payload =
+      AuthPayload(username: "test", password:)
+      |> encode_auth_payload()
+
+    let response =
+      router.handle_request(
+        testing.post_json("/auth/register", [], payload),
+        ctx,
+      )
+
+    response.status
+    |> should.equal(400)
+  })
 
   Nil
 }
