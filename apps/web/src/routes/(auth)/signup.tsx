@@ -1,35 +1,47 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { Label } from "@/components/Label";
+import type { AuthPayload } from "@/model/AuthPayload";
+import { useRegisterMutation } from "@/queries/register";
 
 export const Route = createFileRoute("/(auth)/signup")({
   component: SignUp,
 });
 
 function SignUp() {
+  const { register, handleSubmit } = useForm<AuthPayload>();
+  const navigate = useNavigate();
+  const { mutateAsync: registerMutation } = useRegisterMutation();
+
+  const onSubmit = async (values: AuthPayload) => {
+    console.log(values);
+    await registerMutation(values);
+    navigate({ to: "/" });
+  };
+
   return (
-    <form className="flex w-full max-w-xs flex-col gap-6">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex w-full max-w-xs flex-col gap-6"
+    >
       <h1 className="text-2xl">Create account</h1>
       <div className="flex flex-col gap-4">
         <Label className="flex flex-col gap-2">
           Username
           <Input
-            className="input"
+            {...register("username", { required: true })}
             type="text"
-            name="username"
             placeholder="Username"
-            required
           />
         </Label>
         <Label className="flex flex-col gap-2">
           Password
           <Input
-            className="input"
+            {...register("password", { required: true })}
             type="password"
-            name="password"
             placeholder="Password"
-            required
           />
         </Label>
       </div>
