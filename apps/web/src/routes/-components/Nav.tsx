@@ -1,22 +1,27 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/Button";
+import { Skeleton } from "@/components/Skeleton";
+import { useMeQuery } from "@/queries/me";
+import { logout } from "@/utils/session";
 
-interface NavProps {
-  user: null;
-}
+export default function Nav() {
+  const { data: user, isLoading } = useMeQuery();
 
-export default function Nav({ user }: NavProps) {
   return (
     <nav className="mx-auto flex max-w-screen-xl items-center justify-between gap-4 px-6 py-4">
       <Link to="/" className="text-xl">
         Tako<span className="text-primary">box</span>
       </Link>
       <div className="flex items-center justify-end gap-4">
-        {user ? (
+        {user || isLoading ? (
           <>
-            <span>Logged in as {user}</span>
-            <Button variant="outline" asChild>
-              <Link to="/">Log out</Link>
+            {user ? (
+              <span>Logged in as {user.username}</span>
+            ) : (
+              <Skeleton className="h-4 w-32" />
+            )}
+            <Button onClick={logout} variant="outline">
+              Log out
             </Button>
           </>
         ) : (

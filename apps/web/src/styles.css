@@ -9,6 +9,7 @@
   --color-primary-foreground: var(--color-zinc-700);
   --color-accent: var(--color-zinc-100);
   --color-accent-foreground: var(--color-zinc-700);
+  --color-muted: var(--color-zinc-100);
   --color-border: var(--color-zinc-200);
   --color-input: var(--color-border);
   --color-ring: var(--color-foreground);
