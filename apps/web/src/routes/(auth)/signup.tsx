@@ -16,9 +16,8 @@ function SignUp() {
   const { mutateAsync: registerMutation } = useRegisterMutation();
 
   const onSubmit = async (values: AuthPayload) => {
-    console.log(values);
     await registerMutation(values);
-    navigate({ to: "/" });
+    await navigate({ to: "/" });
   };
 
   return (

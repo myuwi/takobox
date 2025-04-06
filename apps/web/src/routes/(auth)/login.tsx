@@ -16,9 +16,8 @@ function Login() {
   const { mutateAsync: loginMutation } = useLoginMutation();
 
   const onSubmit = async (values: AuthPayload) => {
-    console.log(values);
     await loginMutation(values);
-    navigate({ to: "/" });
+    await navigate({ to: "/" });
   };
 
   return (
@@ -47,7 +46,7 @@ function Login() {
       </div>
       <Button type="submit">Log in</Button>
       <span className="text-center text-zinc-500">
-        Don't have an account yet?{" "}
+        Don&apos;t have an account yet?{" "}
         <Link className="text-zinc-700 hover:underline" to="/signup">
           Create account
         </Link>

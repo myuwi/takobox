@@ -8,7 +8,7 @@
     "serve": "vite preview",
     "test": "vitest run",
     "lint": "conc -r -m 1 bun:lint:*",
-    "lint:biome": "biome lint",
+    "lint:eslint": "eslint",
     "lint:prettier": "prettier --check ."
   },
   "dependencies": {
@@ -30,8 +30,8 @@
     "tailwindcss": "^4.0.17"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
     "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
+    "@takobox/eslint-config": "workspace:*",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
     "@types/node": "^22.13.14",
@@ -39,6 +39,7 @@
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.2",
+    "eslint": "^9.24.0",
     "jsdom": "^26.0.0",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
