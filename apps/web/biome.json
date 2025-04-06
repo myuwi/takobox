@@ -16,7 +16,22 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "all": true,
+      "correctness": {
+        "useImportExtensions": "off"
+      },
+      "performance": {
+        "useTopLevelRegex": "off"
+      },
+      "suspicious": {
+        "noConsoleLog": "off",
+        "noReactSpecificProps": "off"
+      },
+      "style": {
+        "noDefaultExport": "off",
+        "noImplicitBoolean": "off",
+        "useNamingConvention": "off"
+      }
     }
   }
 }

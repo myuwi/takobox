@@ -16,9 +16,8 @@ function Login() {
   const { mutateAsync: loginMutation } = useLoginMutation();
 
   const onSubmit = async (values: AuthPayload) => {
-    console.log(values);
     await loginMutation(values);
-    navigate({ to: "/" });
+    await navigate({ to: "/" });
   };
 
   return (

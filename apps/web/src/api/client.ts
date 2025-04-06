@@ -12,7 +12,7 @@ export const client = ky.extend({
       },
     ],
     afterResponse: [
-      async (_req, _opts, res) => {
+      (_req, _opts, res) => {
         if (res.status === 401) {
           localStorage.removeItem("token");
           window.location.href = "/login";

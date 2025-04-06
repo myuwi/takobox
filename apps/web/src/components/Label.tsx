@@ -1,3 +1,3 @@
-import * as LabelPrimitive from "@radix-ui/react-label";
+import { Label as LabelPrimitive } from "radix-ui";
 
 export const Label = LabelPrimitive.Root;

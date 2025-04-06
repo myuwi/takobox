@@ -8,6 +8,7 @@
     "serve": "vite preview",
     "test": "vitest run",
     "lint": "conc -r -m 1 bun:lint:*",
+    "lint:tsc": "tsc --noEmit",
     "lint:biome": "biome lint",
     "lint:prettier": "prettier --check ."
   },
