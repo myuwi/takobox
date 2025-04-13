@@ -3,8 +3,8 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { Label } from "@/components/Label";
-import type { AuthPayload } from "@/model/AuthPayload";
 import { useRegisterMutation } from "@/queries/register";
+import type { AuthPayload } from "@/types/AuthPayload";
 
 export const Route = createFileRoute("/(auth)/signup")({
   component: SignUp,

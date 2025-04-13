@@ -1,6 +1,6 @@
-import type { AuthPayload } from "@/model/AuthPayload";
-import type { Token } from "@/model/Token";
-import type { User } from "@/model/User";
+import type { AuthPayload } from "@/types/AuthPayload";
+import type { Token } from "@/types/Token";
+import type { User } from "@/types/User";
 import { client } from "./client";
 
 export const login = (payload: AuthPayload) =>
