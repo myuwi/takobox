@@ -1,12 +1,11 @@
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/Button";
-import { Skeleton } from "@/components/Skeleton";
 import { useMeQuery } from "@/queries/me";
 import { logout } from "@/utils/session";
 
 export default function Nav() {
-  const { data: user, isLoading } = useMeQuery();
+  const { data: user } = useMeQuery();
 
   const handleLogout = useServerFn(logout);
 
@@ -16,13 +15,9 @@ export default function Nav() {
         Tako<span className="text-primary">box</span>
       </Link>
       <div className="flex items-center justify-end gap-4">
-        {user || isLoading ? (
+        {user ? (
           <>
-            {user ? (
-              <span>Logged in as {user.username}</span>
-            ) : (
-              <Skeleton className="h-4 w-32" />
-            )}
+            <span>Logged in as {user.username}</span>
             <Button onClick={() => handleLogout()} variant="outline">
               Log out
             </Button>
