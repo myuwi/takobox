@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
+import { Alert } from "@/components/Alert";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { Label } from "@/components/Label";
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/(auth)/login")({
 function Login() {
   const { register, handleSubmit } = useForm<AuthPayload>();
   const navigate = useNavigate();
-  const { mutateAsync: loginMutation } = useLoginMutation();
+  const { mutateAsync: loginMutation, error } = useLoginMutation();
 
   const onSubmit = async (values: AuthPayload) => {
     await loginMutation(values);
@@ -27,6 +28,7 @@ function Login() {
     >
       <h1 className="text-2xl">Log in</h1>
       <div className="flex flex-col gap-4">
+        {error?.data.message && <Alert>{error.data.message}</Alert>}
         <Label className="flex flex-col gap-2">
           Username
           <Input
