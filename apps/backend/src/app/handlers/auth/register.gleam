@@ -24,16 +24,16 @@ fn validate_register_payload(
   use <- bool.guard(
     !regexp.check(re, username),
     Error(
-      "Username may only contain lowercase letters (a-z), numbers (0-9), underscores (_), and hyphens (-)",
+      "Username may only contain lowercase letters (a-z), numbers (0-9), underscores (_), and hyphens (-).",
     ),
   )
   use <- bool.guard(
     string.length(username) < 4 || string.length(username) > 32,
-    Error("Username must be between 4 and 32 characters"),
+    Error("Username must be between 4 and 32 characters."),
   )
   use <- bool.guard(
     string.length(password) < 6 || string.length(password) > 32,
-    Error("Password must be between 6 and 32 characters"),
+    Error("Password must be between 6 and 32 characters."),
   )
   Ok(Nil)
 }
@@ -43,10 +43,10 @@ fn database_error_to_response(err: DatabaseError) -> Response {
     repo.QueryError(err) -> {
       case err {
         ConstraintViolated(_, "users_username_key", _) ->
-          "Username is already taken"
+          "Username already taken."
         ConstraintViolated(_, "users_username_check", _) ->
           "Username is invalid"
-        _ -> "Unable to create user"
+        _ -> "Unable to create user."
       }
       |> web.json_error_response(400)
     }

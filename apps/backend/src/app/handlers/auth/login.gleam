@@ -16,7 +16,7 @@ import app/web
 fn database_error_to_response(error: DatabaseError) -> Response {
   case error {
     repo.RowNotFound ->
-      "Couldn't find a user with that username"
+      "Could not find a user with that username."
       |> web.json_error_response(401)
     _ -> wisp.internal_server_error()
   }
@@ -33,7 +33,7 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
 
   use <- bool.lazy_guard(
     !password.verify_password(password, user.password),
-    fn() { web.json_error_response("Incorrect password", 401) },
+    fn() { web.json_error_response("Incorrect password.", 401) },
   )
 
   let token_string =
