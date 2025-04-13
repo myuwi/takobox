@@ -69,14 +69,15 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
     database_error_to_response,
   )
 
-  let token =
+  let token_string =
     user.id
     |> uuid.to_string()
     |> jwt.create_jwt(ctx.secret)
-    |> Token
 
-  token
+  token_string
+  |> Token
   |> token.encode_token()
   |> json.to_string_tree()
   |> wisp.json_response(201)
+  |> wisp.set_cookie(req, "token", token_string, wisp.PlainText, 30 * 86_400)
 }

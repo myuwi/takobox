@@ -1,5 +1,6 @@
 import type { AuthPayload } from "@/model/AuthPayload";
 import type { Token } from "@/model/Token";
+import type { User } from "@/model/User";
 import { client } from "./client";
 
 export const login = (payload: AuthPayload) =>
@@ -7,3 +8,5 @@ export const login = (payload: AuthPayload) =>
 
 export const register = (payload: AuthPayload) =>
   client.post("auth/register", { json: payload }).json<Token>();
+
+export const me = () => client.get("me").json<User>();

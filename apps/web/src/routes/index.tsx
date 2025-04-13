@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({
 });
 
 function App() {
-  const { data: user, isLoading } = useMeQuery();
+  const { data: user } = useMeQuery();
 
   return (
     <>
@@ -21,7 +21,7 @@ function App() {
           Lightweight, self-hostable and blazingly fast.
         </h2>
         <div className="flex flex-row gap-4">
-          {user || isLoading ? (
+          {user ? (
             <Button asChild>
               <Link to="/">Go to Dashboard</Link>
             </Button>

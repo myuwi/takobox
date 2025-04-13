@@ -44,10 +44,12 @@ pub fn require_auth(
   ctx: Context,
   next: fn(Uuid) -> Response,
 ) -> Response {
-  let maybe_token = case request.get_header(req, "authorization") {
-    Ok("Bearer " <> token) -> Ok(token)
-    _ -> Error(Nil)
-  }
+  let maybe_token =
+    case request.get_header(req, "authorization") {
+      Ok("Bearer " <> token) -> Ok(token)
+      _ -> Error(Nil)
+    }
+    |> result.lazy_or(fn() { wisp.get_cookie(req, "token", wisp.PlainText) })
 
   let maybe_id =
     maybe_token

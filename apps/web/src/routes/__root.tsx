@@ -8,20 +8,19 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { meOptions } from "@/queries/me";
 import css from "../styles.css?url";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
+  beforeLoad: async ({ context }) => {
+    await context.queryClient.ensureQueryData(meOptions);
+  },
   head: () => ({
     meta: [
-      {
-        charSet: "utf-8",
-      },
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1",
-      },
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Takobox" },
     ],
     links: [
@@ -33,7 +32,11 @@ export const Route = createRootRouteWithContext<{
       },
     ],
   }),
-  component: () => (
+  component: Root,
+});
+
+function Root() {
+  return (
     <html lang="en">
       <head>
         <HeadContent />
@@ -47,5 +50,5 @@ export const Route = createRootRouteWithContext<{
         </StrictMode>
       </body>
     </html>
-  ),
-});
+  );
+}

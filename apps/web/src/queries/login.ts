@@ -1,11 +1,14 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { login } from "@/api/auth";
+import { meOptions } from "./me";
 
 export function useLoginMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: login,
-    onSuccess: (data) => {
-      localStorage.setItem("token", data.token);
+    onSuccess: async (_) => {
+      await queryClient.refetchQueries({ queryKey: meOptions.queryKey });
     },
   });
 }

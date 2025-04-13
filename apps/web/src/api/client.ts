@@ -1,21 +1,16 @@
+import { getHeader } from "@tanstack/react-start/server";
 import ky from "ky";
 
+const isServer = typeof window === "undefined";
+
 export const client = ky.extend({
-  prefixUrl: "/api",
+  prefixUrl: isServer ? "http://localhost:8000" : "/api",
+  retry: 0,
   hooks: {
     beforeRequest: [
       (req) => {
-        const token = localStorage.getItem("token");
-        if (token) {
-          req.headers.set("Authorization", `Bearer ${token}`);
-        }
-      },
-    ],
-    afterResponse: [
-      (_req, _opts, res) => {
-        if (res.status === 401) {
-          localStorage.removeItem("token");
-          window.location.href = "/login";
+        if (isServer) {
+          req.headers.set("cookie", getHeader("cookie") ?? "");
         }
       },
     ],

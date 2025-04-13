@@ -4,7 +4,15 @@ import { routerWithQueryClient } from "@tanstack/react-router-with-query";
 import { routeTree } from "./routeTree.gen";
 
 export function createRouter() {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: false,
+        staleTime: 10 * 1000,
+      },
+    },
+  });
 
   return routerWithQueryClient(
     createTanStackRouter({

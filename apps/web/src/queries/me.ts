@@ -1,12 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
-import { me } from "@/api/users";
+import { createServerFn } from "@tanstack/react-start";
+import { getCookie } from "@tanstack/react-start/server";
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { me } from "@/api/auth";
+
+const getMe = createServerFn().handler(async () => {
+  const token = getCookie("token");
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    return await me();
+  } catch (_) {
+    return null;
+  }
+});
+
+export const meOptions = queryOptions({
+  queryKey: ["me"],
+  queryFn: getMe,
+});
 
 export function useMeQuery() {
-  const enabled = !!globalThis.localStorage?.getItem("token");
-
-  return useQuery({
-    queryKey: ["me"],
-    queryFn: me,
-    enabled,
-  });
+  return useQuery(meOptions);
 }

@@ -36,14 +36,15 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
     fn() { web.json_error_response("Incorrect password", 401) },
   )
 
-  let token =
+  let token_string =
     user.id
     |> uuid.to_string()
     |> jwt.create_jwt(ctx.secret)
-    |> Token
 
-  token
+  token_string
+  |> Token
   |> token.encode_token()
   |> json.to_string_tree()
   |> wisp.json_response(200)
+  |> wisp.set_cookie(req, "token", token_string, wisp.PlainText, 30 * 86_400)
 }
