@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "$schema": "../../node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
@@ -8,7 +8,7 @@
   "files": {
     "ignoreUnknown": false,
     "ignore": ["src/routeTree.gen.ts"],
-    "include": ["src/*", "index.html", "vite.config.ts"]
+    "include": ["src/*", "index.html", "app.config.ts"]
   },
   "formatter": {
     "enabled": false
