@@ -4,7 +4,7 @@ import pog
 import youid/uuid
 
 import app/auth/jwt
-import app/context.{type Context, Context}
+import app/context.{type Context, Context, Production}
 import app/repo/repo
 
 pub fn with_context(test_case: fn(Context) -> Nil) {
@@ -14,7 +14,7 @@ pub fn with_context(test_case: fn(Context) -> Nil) {
     |> result.map(pog.connect)
 
   pog.transaction(db, fn(db) {
-    let ctx = Context(db:, secret: "test_secret")
+    let ctx = Context(db:, secret: "test_secret", env: Production)
 
     test_case(ctx)
     Error("Rollback")

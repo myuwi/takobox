@@ -13,6 +13,7 @@ import app/context.{type Context}
 import app/model/auth_payload.{AuthPayload, auth_payload_decoder}
 import app/model/token.{Token}
 import app/repo/repo.{type DatabaseError}
+import app/util/cookie
 import app/web
 
 fn validate_register_payload(
@@ -79,5 +80,5 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
   |> token.encode_token()
   |> json.to_string_tree()
   |> wisp.json_response(201)
-  |> wisp.set_cookie(req, "token", token_string, wisp.PlainText, 30 * 86_400)
+  |> cookie.set_cookie(ctx, "token", token_string, 30 * 86_400)
 }

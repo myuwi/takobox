@@ -8,6 +8,7 @@ import youid/uuid.{type Uuid}
 
 import app/auth/jwt
 import app/context.{type Context}
+import app/util/cookie
 
 pub fn middleware(
   req: wisp.Request,
@@ -49,7 +50,7 @@ pub fn require_auth(
       Ok("Bearer " <> token) -> Ok(token)
       _ -> Error(Nil)
     }
-    |> result.lazy_or(fn() { wisp.get_cookie(req, "token", wisp.PlainText) })
+    |> result.lazy_or(fn() { cookie.get_cookie(req, "token") })
 
   let maybe_id =
     maybe_token

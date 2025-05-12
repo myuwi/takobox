@@ -12,14 +12,16 @@ import app/router
 pub fn main() {
   wisp.configure_logger()
 
-  let assert Ok(secret) = envoy.get("SECRET")
-
   let assert Ok(db) =
     envoy.get("DATABASE_URL")
     |> result.try(pog.url_config)
     |> result.map(pog.connect)
 
-  let ctx = Context(db:, secret:)
+  let assert Ok(secret) = envoy.get("SECRET")
+
+  let env = context.read_env()
+
+  let ctx = Context(db:, secret:, env:)
 
   let assert Ok(_) =
     router.handle_request(_, ctx)
