@@ -1,13 +1,42 @@
+import type { PropsWithChildren } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
+import { LogOut, User } from "lucide-react";
 import { Button } from "@/components/Button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/DropdownMenu";
 import { useMeQuery } from "@/queries/me";
 import { logout } from "@/utils/session";
 
+function AccountDropdown({ children }: PropsWithChildren) {
+  const handleLogout = useServerFn(logout);
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end">
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem onClick={() => handleLogout()}>
+            <LogOut />
+            <span>Log out</span>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export default function Nav() {
   const { data: user } = useMeQuery();
-
-  const handleLogout = useServerFn(logout);
 
   return (
     <nav className="mx-auto flex max-w-screen-xl items-center justify-between gap-4 px-6 py-4">
@@ -17,10 +46,12 @@ export default function Nav() {
       <div className="flex items-center justify-end gap-4">
         {user ? (
           <>
-            <span>Logged in as {user.username}</span>
-            <Button onClick={() => handleLogout()} variant="outline">
-              Log out
-            </Button>
+            <AccountDropdown>
+              <Button variant="ghost">
+                <span>Logged in as {user.username}</span>
+                <User size={20} />
+              </Button>
+            </AccountDropdown>
           </>
         ) : (
           <>

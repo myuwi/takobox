@@ -5,11 +5,17 @@
 
   --color-background: #fff;
   --color-foreground: var(--color-zinc-700);
+  --color-popover: var(--color-background);
+  --color-popover-foreground: var(--color-foreground);
+
   --color-primary: oklch(0.85 0.11 70);
   --color-primary-foreground: var(--color-zinc-700);
   --color-accent: var(--color-zinc-100);
   --color-accent-foreground: var(--color-zinc-700);
+  --color-destructive: var(--color-red-500);
+  --color-destructive-foreground: #fff;
   --color-muted: var(--color-zinc-100);
+
   --color-border: var(--color-zinc-200);
   --color-input: var(--color-border);
   --color-ring: var(--color-foreground);
