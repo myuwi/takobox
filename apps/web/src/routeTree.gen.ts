@@ -15,6 +15,8 @@ import { Route as authLayoutImport } from './routes/(auth)/_layout'
 import { Route as IndexImport } from './routes/index'
 import { Route as authSignupImport } from './routes/(auth)/signup'
 import { Route as authLoginImport } from './routes/(auth)/login'
+import { Route as appDashboardLayoutImport } from './routes/(app)/dashboard/_layout'
+import { Route as appDashboardIndexImport } from './routes/(app)/dashboard/index'
 
 // Create/Update Routes
 
@@ -41,6 +43,18 @@ const authLoginRoute = authLoginImport.update({
   getParentRoute: () => authLayoutRoute,
 } as any)
 
+const appDashboardLayoutRoute = appDashboardLayoutImport.update({
+  id: '/(app)/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const appDashboardIndexRoute = appDashboardIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => appDashboardLayoutRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -59,6 +73,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authLayoutImport
       parentRoute: typeof rootRoute
     }
+    '/(app)/dashboard': {
+      id: '/(app)/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof appDashboardLayoutImport
+      parentRoute: typeof rootRoute
+    }
     '/(auth)/login': {
       id: '/(auth)/login'
       path: '/login'
@@ -72,6 +93,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/signup'
       preLoaderRoute: typeof authSignupImport
       parentRoute: typeof authLayoutImport
+    }
+    '/(app)/dashboard/': {
+      id: '/(app)/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof appDashboardIndexImport
+      parentRoute: typeof appDashboardLayoutImport
     }
   }
 }
@@ -92,43 +120,68 @@ const authLayoutRouteWithChildren = authLayoutRoute._addFileChildren(
   authLayoutRouteChildren,
 )
 
+interface appDashboardLayoutRouteChildren {
+  appDashboardIndexRoute: typeof appDashboardIndexRoute
+}
+
+const appDashboardLayoutRouteChildren: appDashboardLayoutRouteChildren = {
+  appDashboardIndexRoute: appDashboardIndexRoute,
+}
+
+const appDashboardLayoutRouteWithChildren =
+  appDashboardLayoutRoute._addFileChildren(appDashboardLayoutRouteChildren)
+
 export interface FileRoutesByFullPath {
   '/': typeof authLayoutRouteWithChildren
+  '/dashboard': typeof appDashboardLayoutRouteWithChildren
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
+  '/dashboard/': typeof appDashboardIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof authLayoutRouteWithChildren
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
+  '/dashboard': typeof appDashboardIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/(auth)': typeof authLayoutRouteWithChildren
+  '/(app)/dashboard': typeof appDashboardLayoutRouteWithChildren
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/signup': typeof authSignupRoute
+  '/(app)/dashboard/': typeof appDashboardIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/signup'
+  fullPaths: '/' | '/dashboard' | '/login' | '/signup' | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/signup'
-  id: '__root__' | '/' | '/(auth)' | '/(auth)/login' | '/(auth)/signup'
+  to: '/' | '/login' | '/signup' | '/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/(auth)'
+    | '/(app)/dashboard'
+    | '/(auth)/login'
+    | '/(auth)/signup'
+    | '/(app)/dashboard/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   authLayoutRoute: typeof authLayoutRouteWithChildren
+  appDashboardLayoutRoute: typeof appDashboardLayoutRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authLayoutRoute: authLayoutRouteWithChildren,
+  appDashboardLayoutRoute: appDashboardLayoutRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -142,7 +195,8 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/(auth)"
+        "/(auth)",
+        "/(app)/dashboard"
       ]
     },
     "/": {
@@ -155,6 +209,12 @@ export const routeTree = rootRoute
         "/(auth)/signup"
       ]
     },
+    "/(app)/dashboard": {
+      "filePath": "(app)/dashboard/_layout.tsx",
+      "children": [
+        "/(app)/dashboard/"
+      ]
+    },
     "/(auth)/login": {
       "filePath": "(auth)/login.tsx",
       "parent": "/(auth)"
@@ -162,6 +222,10 @@ export const routeTree = rootRoute
     "/(auth)/signup": {
       "filePath": "(auth)/signup.tsx",
       "parent": "/(auth)"
+    },
+    "/(app)/dashboard/": {
+      "filePath": "(app)/dashboard/index.tsx",
+      "parent": "/(app)/dashboard"
     }
   }
 }
