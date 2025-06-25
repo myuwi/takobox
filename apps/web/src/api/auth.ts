@@ -3,10 +3,17 @@ import type { Token } from "@/types/Token";
 import type { User } from "@/types/User";
 import { client } from "./client";
 
-export const login = (payload: AuthPayload) =>
-  client.post("auth/login", { json: payload }).json<Token>();
+export const login = async (payload: AuthPayload) => {
+  const { data } = await client.post<Token>("auth/login", payload);
+  return data;
+};
 
-export const register = (payload: AuthPayload) =>
-  client.post("auth/register", { json: payload }).json<Token>();
+export const register = async (payload: AuthPayload) => {
+  const { data } = await client.post<Token>("auth/register", payload);
+  return data;
+};
 
-export const me = () => client.get("me").json<User>();
+export const me = async () => {
+  const { data } = await client.get<User>("me");
+  return data;
+};

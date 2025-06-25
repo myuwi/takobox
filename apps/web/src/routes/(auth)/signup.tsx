@@ -28,7 +28,7 @@ function SignUp() {
     >
       <h1 className="text-2xl">Create account</h1>
       <div className="flex flex-col gap-4">
-        {error?.data.message && <Alert>{error.data.message}</Alert>}
+        {error?.message && <Alert>{error.message}</Alert>}
         <Label className="flex flex-col gap-2">
           Username
           <Input
