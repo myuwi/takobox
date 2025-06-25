@@ -2,9 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CloudUpload } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/Button";
+import { filesOptions, useFilesQuery } from "@/queries/files";
 
 export const Route = createFileRoute("/(app)/dashboard/")({
   component: RouteComponent,
+  beforeLoad: async ({ context }) => {
+    await context.queryClient.ensureQueryData(filesOptions);
+  },
 });
 
 function onDrop(files: File[]) {
@@ -13,6 +17,7 @@ function onDrop(files: File[]) {
 }
 
 function RouteComponent() {
+  const { data: _files } = useFilesQuery();
   const { getInputProps, getRootProps, isDragActive } = useDropzone({ onDrop });
 
   return (
