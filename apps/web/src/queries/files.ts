@@ -19,12 +19,19 @@ interface UploadFileMutationOptions {
   onUploadProgress?: ProgressCallback;
 }
 
+interface UploadFileMutationArgs {
+  file: File;
+  signal?: AbortSignal;
+}
+
 export function useUploadFileMutation(opts: UploadFileMutationOptions = {}) {
   const { onUploadProgress } = opts;
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (file: File) => uploadFile(file, onUploadProgress),
+    mutationFn: ({ file, signal }: UploadFileMutationArgs) => {
+      return uploadFile(file, onUploadProgress, signal);
+    },
     onSuccess: async (_) => {
       await queryClient.refetchQueries({ queryKey: filesOptions.queryKey });
     },

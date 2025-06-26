@@ -1,5 +1,6 @@
 import gleam/dynamic/decode
 import gleam/http/request
+import gleam/int
 import gleam/json
 import gleam/result
 import gwt
@@ -65,5 +66,22 @@ pub fn require_auth(
   case maybe_id {
     Ok(id) -> next(id)
     _ -> wisp.response(401)
+  }
+}
+
+pub fn limit_request_size(
+  req: Request,
+  max_size: Int,
+  next: fn() -> Response,
+) -> Response {
+  req
+  |> request.get_header("content-length")
+  |> result.then(int.parse)
+  |> result.unwrap(0)
+  |> fn(content_length) {
+    case content_length {
+      size if size <= max_size -> next()
+      _ -> wisp.response(413)
+    }
   }
 }

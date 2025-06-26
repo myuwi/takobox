@@ -34,9 +34,9 @@ fn upload_file(
   _ctx: Context,
   _req_ctx: RequestContext,
 ) -> Response {
-  let req = req |> wisp.set_max_files_size(32_000_000)
   use <- wisp.require_method(req, Post)
   use <- wisp.require_content_type(req, "multipart/form-data")
+  use <- web.limit_request_size(req, 32 * 1024 * 1024)
   use form <- wisp.require_form(req)
 
   // TODO: Do this check at the formdata parser level to avoid saving extra files on disk?
