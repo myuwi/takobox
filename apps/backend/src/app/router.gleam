@@ -5,6 +5,7 @@ import app/handlers/auth
 import app/handlers/files
 import app/handlers/me
 import app/handlers/root
+import app/handlers/settings
 import app/web
 
 pub fn handle_request(req: Request, ctx: Context) -> Response {
@@ -13,6 +14,7 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
   case wisp.path_segments(req) {
     [] -> root.handle_request(req)
     ["auth", ..rest] -> auth.router(rest, req, ctx)
+    ["settings"] -> settings.handle_request(req, ctx)
     _ -> protected_router(req, ctx)
   }
 }

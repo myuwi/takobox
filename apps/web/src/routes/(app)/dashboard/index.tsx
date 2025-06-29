@@ -6,16 +6,21 @@ import { Button } from "@/components/Button";
 import { Progress } from "@/components/Progress";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { filesOptions, useFilesQuery } from "@/queries/files";
+import { settingsOptions, useSettingsQuery } from "@/queries/settings";
 
 export const Route = createFileRoute("/(app)/dashboard/")({
   component: RouteComponent,
   beforeLoad: async ({ context }) => {
-    await context.queryClient.ensureQueryData(filesOptions);
+    await Promise.all([
+      context.queryClient.ensureQueryData(filesOptions),
+      context.queryClient.ensureQueryData(settingsOptions),
+    ]);
   },
 });
 
 function RouteComponent() {
   const { data: _files } = useFilesQuery();
+  const { data: settings } = useSettingsQuery();
   const { uploadFile, uploads, abortUpload } = useFileUpload();
 
   const onDrop: DropzoneOptions["onDrop"] = (files, rejectedFiles) => {
@@ -33,8 +38,7 @@ function RouteComponent() {
   const { getInputProps, getRootProps, isDragActive, fileRejections } =
     useDropzone({
       onDrop,
-      // TODO: fetch from the server
-      maxSize: 32 * 1024 * 1024,
+      maxSize: settings?.maxFileSize,
     });
 
   return (

@@ -6,6 +6,7 @@ import gleam/list
 import wisp.{type Request, type Response}
 
 import app/context.{type Context, type RequestContext}
+import app/model/settings
 import app/web
 
 pub fn router(
@@ -36,8 +37,9 @@ fn upload_file(
 ) -> Response {
   use <- wisp.require_method(req, Post)
   use <- wisp.require_content_type(req, "multipart/form-data")
+  let max_file_size = settings.default().max_file_size
   // FIXME: The client doesn't receive the response when the body has not yet been fully consumed
-  use <- web.limit_request_size(req, 32 * 1024 * 1024)
+  use <- web.limit_request_size(req, max_file_size)
   use form <- wisp.require_form(req)
 
   // TODO: Do this check at the formdata parser level to avoid saving extra files on disk?
