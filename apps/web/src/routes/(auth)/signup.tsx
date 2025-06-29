@@ -6,6 +6,7 @@ import { Input } from "@/components/Input";
 import { Label } from "@/components/Label";
 import { useRegisterMutation } from "@/queries/register";
 import type { AuthPayload } from "@/types/AuthPayload";
+import { formatError } from "@/utils/error";
 
 export const Route = createFileRoute("/(auth)/signup")({
   component: SignUp,
@@ -28,7 +29,7 @@ function SignUp() {
     >
       <h1 className="text-2xl">Create account</h1>
       <div className="flex flex-col gap-4">
-        {error?.message && <Alert>{error.message}</Alert>}
+        {error && <Alert>{formatError(error)}</Alert>}
         <Label className="flex flex-col gap-2">
           Username
           <Input

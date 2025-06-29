@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CloudUpload, X } from "lucide-react";
-import { useDropzone } from "react-dropzone";
+import { useDropzone, type DropzoneOptions } from "react-dropzone";
+import { Alert } from "@/components/Alert";
 import { Button } from "@/components/Button";
 import { Progress } from "@/components/Progress";
 import { useFileUpload } from "@/hooks/useFileUpload";
@@ -17,19 +18,35 @@ function RouteComponent() {
   const { data: _files } = useFilesQuery();
   const { uploadFile, uploads, abortUpload } = useFileUpload();
 
-  const onDrop = (files: File[]) => {
-    console.log(files);
+  const onDrop: DropzoneOptions["onDrop"] = (files, rejectedFiles) => {
+    if (rejectedFiles.length > 0) {
+      return;
+    }
+
+    // TODO: check quota before upload
 
     for (const file of files) {
       uploadFile(file);
     }
   };
 
-  const { getInputProps, getRootProps, isDragActive } = useDropzone({ onDrop });
+  const { getInputProps, getRootProps, isDragActive, fileRejections } =
+    useDropzone({
+      onDrop,
+      // TODO: fetch from the server
+      maxSize: 32 * 1024 * 1024,
+    });
 
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-base font-medium">Uploads</h1>
+
+      {/* TODO: replace with a list of rejected files. also show failed uploads there */}
+      {fileRejections.length > 0 && (
+        <Alert>
+          Some of the selected files exceed the maximum file size limit.
+        </Alert>
+      )}
 
       {uploads.map(({ id, file, url, progress }) => {
         const handleAbort = () => abortUpload(file);

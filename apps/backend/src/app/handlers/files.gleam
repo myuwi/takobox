@@ -36,6 +36,7 @@ fn upload_file(
 ) -> Response {
   use <- wisp.require_method(req, Post)
   use <- wisp.require_content_type(req, "multipart/form-data")
+  // FIXME: The client doesn't receive the response when the body has not yet been fully consumed
   use <- web.limit_request_size(req, 32 * 1024 * 1024)
   use form <- wisp.require_form(req)
 

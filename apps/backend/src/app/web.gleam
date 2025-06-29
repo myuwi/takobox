@@ -1,5 +1,6 @@
 import gleam/dynamic/decode
 import gleam/http/request
+import gleam/http/response
 import gleam/int
 import gleam/json
 import gleam/result
@@ -81,7 +82,9 @@ pub fn limit_request_size(
   |> fn(content_length) {
     case content_length {
       size if size <= max_size -> next()
-      _ -> wisp.response(413)
+      _ ->
+        wisp.response(413)
+        |> response.set_header("Connection", "close")
     }
   }
 }
