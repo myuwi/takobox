@@ -1,17 +1,14 @@
 import given
 import gleam/bool
 import gleam/http.{Post}
-import gleam/json
+import gleam/result
 import wisp.{type Request, type Response}
 import youid/uuid
 
-import app/auth/jwt
 import app/auth/password
 import app/context.{type Context}
 import app/model/auth_payload.{AuthPayload, auth_payload_decoder}
-import app/model/token.{Token}
 import app/repo/repo.{type DatabaseError}
-import app/util/cookie
 import app/web
 
 fn database_error_to_response(error: DatabaseError) -> Response {
@@ -37,15 +34,12 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
     fn() { web.json_error_response("Incorrect password.", 401) },
   )
 
-  let token_string =
+  // TODO: Handle error?
+  let assert Ok(session_id) =
     user.id
-    |> uuid.to_string()
-    |> jwt.create_jwt(ctx.secret)
+    |> repo.create_session(ctx.db, _, 30 * 86_400)
+    |> result.map(fn(session) { uuid.to_string(session.id) })
 
-  token_string
-  |> Token
-  |> token.encode_token()
-  |> json.to_string_tree()
-  |> wisp.json_response(200)
-  |> cookie.set_cookie(ctx, "token", token_string, 30 * 86_400)
+  wisp.ok()
+  |> wisp.set_cookie(req, "session", session_id, wisp.Signed, 30 * 86_400)
 }

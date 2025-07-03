@@ -11,6 +11,16 @@ pub type DatabaseError {
   QueryError(pog.QueryError)
 }
 
+fn get_one(res: pog.Returned(a)) -> Result(a, DatabaseError) {
+  case res.rows {
+    [row] -> Ok(row)
+    [_, ..] -> Error(MultipleRowsReturned)
+    _ -> Error(RowNotFound)
+  }
+}
+
+// Users
+
 pub fn create_user(
   conn: pog.Connection,
   username: String,
@@ -42,10 +52,32 @@ pub fn get_user_by_id(
   |> result.try(get_one)
 }
 
-fn get_one(res: pog.Returned(a)) -> Result(a, DatabaseError) {
-  case res.rows {
-    [row] -> Ok(row)
-    [_, ..] -> Error(MultipleRowsReturned)
-    _ -> Error(RowNotFound)
-  }
+// Sessions
+
+pub fn create_session(
+  conn: pog.Connection,
+  user_id: Uuid,
+  expires_in_seconds: Int,
+) -> Result(sql.CreateSessionRow, DatabaseError) {
+  sql.create_session(conn, user_id, expires_in_seconds)
+  |> result.map_error(QueryError)
+  |> result.try(get_one)
+}
+
+pub fn get_session_by_id(
+  conn: pog.Connection,
+  id: Uuid,
+) -> Result(sql.GetSessionByIdRow, DatabaseError) {
+  sql.get_session_by_id(conn, id)
+  |> result.map_error(QueryError)
+  |> result.try(get_one)
+}
+
+pub fn delete_session(
+  conn: pog.Connection,
+  id: Uuid,
+) -> Result(Nil, DatabaseError) {
+  sql.delete_session(conn, id)
+  |> result.map_error(QueryError)
+  |> result.replace(Nil)
 }

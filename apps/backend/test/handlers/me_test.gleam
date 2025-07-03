@@ -9,13 +9,14 @@ import test_support.{with_context, with_session}
 
 pub fn succeeds_with_valid_session_test() {
   use ctx <- with_context()
-  use token <- with_session(ctx)
+  use session <- with_session(ctx)
 
-  let response =
-    router.handle_request(
-      testing.get("/me", [#("authorization", "Bearer " <> token)]),
-      ctx,
-    )
+  let req =
+    testing.get("/me", [])
+    |> wisp.set_secret_key_base(ctx.secret)
+    |> testing.set_cookie("session", session, wisp.Signed)
+
+  let response = router.handle_request(req, ctx)
 
   response.status
   |> should.equal(200)

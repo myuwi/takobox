@@ -20,8 +20,8 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
 }
 
 fn protected_router(req: Request, ctx: Context) -> Response {
-  use user_id <- web.require_auth(req, ctx)
-  let req_ctx = RequestContext(user_id:)
+  use session <- web.require_auth(req, ctx)
+  let req_ctx = RequestContext(user_id: session.user_id)
 
   case wisp.path_segments(req) {
     ["me"] -> me.handle_request(req, ctx, req_ctx)

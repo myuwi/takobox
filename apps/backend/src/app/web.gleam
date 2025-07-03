@@ -4,13 +4,12 @@ import gleam/http/response
 import gleam/int
 import gleam/json
 import gleam/result
-import gwt
 import wisp.{type Request, type Response}
-import youid/uuid.{type Uuid}
+import youid/uuid
 
-import app/auth/jwt
 import app/context.{type Context}
-import app/util/cookie
+import app/model/session.{type Session, Session}
+import app/repo/repo
 
 pub fn middleware(
   req: wisp.Request,
@@ -45,28 +44,32 @@ pub fn json_error_response(msg: String, code: Int) -> Response {
 pub fn require_auth(
   req: Request,
   ctx: Context,
-  next: fn(Uuid) -> Response,
+  next: fn(Session) -> Response,
 ) -> Response {
-  let maybe_token =
-    case request.get_header(req, "authorization") {
-      Ok("Bearer " <> token) -> Ok(token)
-      _ -> Error(Nil)
-    }
-    |> result.lazy_or(fn() { cookie.get_cookie(req, "token") })
-
-  let maybe_id =
-    maybe_token
-    |> result.try(fn(token) {
-      token
-      |> jwt.decode_jwt(ctx.secret)
-      |> result.try(gwt.get_subject)
+  // TODO: Check for session expiration
+  let maybe_session =
+    wisp.get_cookie(req, "session", wisp.Signed)
+    |> result.try(uuid.from_string)
+    |> result.try(fn(id) {
+      repo.get_session_by_id(ctx.db, id)
       |> result.replace_error(Nil)
-      |> result.try(uuid.from_string)
     })
 
-  case maybe_id {
-    Ok(id) -> next(id)
-    _ -> wisp.response(401)
+  case maybe_session {
+    Ok(session) -> {
+      let session =
+        Session(
+          id: session.id,
+          user_id: session.user_id,
+          expires_at: session.expires_at,
+          created_at: session.created_at,
+        )
+      next(session)
+    }
+    _ -> {
+      wisp.response(401)
+      |> wisp.set_cookie(req, "session", "", wisp.Signed, 0)
+    }
   }
 }
 

@@ -1,10 +1,10 @@
-import gleam/json
+import gleam/http/response
 import gleam/list
+import gleam/result
 import gleeunit/should
 import wisp/testing
 
 import app/model/auth_payload.{AuthPayload, encode_auth_payload}
-import app/model/token.{token_decoder}
 import app/router
 import test_support.{with_context}
 
@@ -22,11 +22,14 @@ pub fn succeeds_with_valid_credentials_test() {
   |> should.equal(201)
 
   response
-  |> testing.string_body
-  |> json.parse(token_decoder())
+  |> response.get_header("set-cookie")
+  |> result.try(fn(cookie) {
+    case cookie {
+      "session=" <> _ -> Ok(Nil)
+      _ -> Error(Nil)
+    }
+  })
   |> should.be_ok()
-
-  Nil
 }
 
 pub fn fails_with_invalid_username_test() {

@@ -25,7 +25,7 @@ pub fn main() {
 
   let assert Ok(_) =
     router.handle_request(_, ctx)
-    |> wisp_mist.handler(secret)
+    |> wisp_mist.handler(ctx.secret)
     |> mist.new()
     |> mist.bind("0.0.0.0")
     |> mist.port(8000)

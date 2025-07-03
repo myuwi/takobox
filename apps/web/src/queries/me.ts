@@ -4,9 +4,8 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { me } from "@/api/auth";
 
 const getMe = createServerFn().handler(async () => {
-  const token = getCookie("token");
-
-  if (!token) {
+  const session = getCookie("session");
+  if (!session) {
     return null;
   }
 
