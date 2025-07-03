@@ -80,7 +80,7 @@ pub fn limit_request_size(
 ) -> Response {
   req
   |> request.get_header("content-length")
-  |> result.then(int.parse)
+  |> result.try(int.parse)
   |> result.unwrap(0)
   |> fn(content_length) {
     case content_length {

@@ -1,35 +1,36 @@
 {
   "$schema": "../../node_modules/@biomejs/biome/configuration_schema.json",
-  "vcs": {
-    "enabled": false,
-    "clientKind": "git",
-    "useIgnoreFile": false
-  },
   "files": {
-    "ignoreUnknown": false,
-    "ignore": ["src/routeTree.gen.ts"],
-    "include": ["src/*", "index.html", "app.config.ts"]
+    "includes": ["**", "!src/routeTree.gen.ts"]
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "off"
+      }
+    }
   },
   "formatter": {
     "enabled": false
   },
   "linter": {
-    "enabled": true,
+    "domains": {
+      "react": "all",
+      "project": "all",
+      "test": "all",
+      "next": "none",
+      "solid": "none"
+    },
     "rules": {
-      "all": true,
+      "recommended": true,
       "correctness": {
         "useImportExtensions": "off"
       },
       "performance": {
         "useTopLevelRegex": "off"
       },
-      "suspicious": {
-        "noConsoleLog": "off",
-        "noReactSpecificProps": "off"
-      },
       "style": {
         "noDefaultExport": "off",
-        "noImplicitBoolean": "off",
         "useNamingConvention": "off"
       }
     }
