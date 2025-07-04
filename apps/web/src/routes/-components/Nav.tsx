@@ -45,12 +45,14 @@ export default function Nav() {
       </Link>
       <div className="flex items-center justify-end gap-4">
         {user ? (
-          <AccountDropdown>
-            <Button variant="ghost">
-              <span>Logged in as {user.username}</span>
-              <User size={20} />
-            </Button>
-          </AccountDropdown>
+          <>
+            <AccountDropdown>
+              <Button variant="ghost">
+                <span>Logged in as {user.username}</span>
+                <User size={20} />
+              </Button>
+            </AccountDropdown>
+          </>
         ) : (
           <>
             <Button variant="ghost" asChild>
