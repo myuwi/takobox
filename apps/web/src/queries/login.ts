@@ -8,7 +8,7 @@ export function useLoginMutation() {
   return useMutation({
     mutationFn: login,
     onSuccess: async (_) => {
-      await queryClient.refetchQueries({ queryKey: meOptions.queryKey });
+      await queryClient.invalidateQueries({ queryKey: meOptions.queryKey });
     },
   });
 }

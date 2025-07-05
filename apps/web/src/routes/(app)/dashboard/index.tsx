@@ -12,8 +12,8 @@ export const Route = createFileRoute("/(app)/dashboard/")({
   component: RouteComponent,
   beforeLoad: async ({ context }) => {
     await Promise.all([
-      context.queryClient.ensureQueryData(filesOptions),
-      context.queryClient.ensureQueryData(settingsOptions),
+      context.queryClient.prefetchQuery(filesOptions),
+      context.queryClient.prefetchQuery(settingsOptions),
     ]);
   },
 });

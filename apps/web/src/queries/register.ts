@@ -8,7 +8,7 @@ export function useRegisterMutation() {
   return useMutation({
     mutationFn: register,
     onSuccess: async (_) => {
-      await queryClient.refetchQueries({ queryKey: meOptions.queryKey });
+      await queryClient.invalidateQueries({ queryKey: meOptions.queryKey });
     },
   });
 }

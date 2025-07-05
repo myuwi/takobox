@@ -15,7 +15,7 @@ export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
   beforeLoad: async ({ context }) => {
-    await context.queryClient.ensureQueryData(meOptions);
+    await context.queryClient.prefetchQuery(meOptions);
   },
   head: () => ({
     meta: [
