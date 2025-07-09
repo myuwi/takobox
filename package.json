@@ -3,7 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "preinstall": "bunx only-allow bun"
+    "preinstall": "bunx only-allow bun",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
+    "docker:dev:down": "docker-compose -f docker-compose.dev.yml down"
   },
   "workspaces": [
     "apps/*"

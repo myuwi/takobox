@@ -1,0 +1,12 @@
+{$BASE_URL} {
+  route {
+    handle_path /api/* {
+      reverse_proxy http://backend:8000
+    }
+    file_server {
+      root /app/uploads
+      pass_thru
+    }
+    reverse_proxy http://web:3000
+  }
+}

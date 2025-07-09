@@ -10,5 +10,17 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  caddy:
+    image: caddy:2-alpine
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./uploads:/app/uploads:ro
+    ports:
+      - 80:80
+    extra_hosts:
+      - "web backend:host-gateway"
+    environment:
+      - BASE_URL=":80"
+
 volumes:
   postgres_data:

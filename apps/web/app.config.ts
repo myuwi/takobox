@@ -16,12 +16,6 @@ export default defineConfig({
     ],
   },
   server: {
-    devProxy: {
-      "/api": {
-        target: "http://localhost:8000",
-        changeOrigin: true,
-      },
-    },
     preset: "bun",
   },
 });
