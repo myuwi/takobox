@@ -14,7 +14,7 @@ pub fn handle_request(
   use <- wisp.require_method(req, Get)
 
   // A user id should always correspond to a single valid user
-  let assert Ok(user) = repo.get_user_by_id(ctx.db, req_ctx.user_id)
+  let assert Ok(user) = repo.get_user_by_id(ctx.db, req_ctx.session.user_id)
 
   User(id: user.id, username: user.username)
   |> user.encode_user()

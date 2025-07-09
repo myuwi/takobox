@@ -1,6 +1,6 @@
+import app/model/session.{type Session}
 import envoy
 import pog
-import youid/uuid.{type Uuid}
 
 pub type Environment {
   Development
@@ -23,7 +23,6 @@ pub type Context {
   )
 }
 
-// TODO: Store session instead of just user_id
 pub type RequestContext {
-  RequestContext(user_id: Uuid)
+  RequestContext(session: Session)
 }

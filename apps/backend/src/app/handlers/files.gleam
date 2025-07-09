@@ -29,7 +29,8 @@ pub fn router(
 
 fn get_files(req: Request, ctx: Context, req_ctx: RequestContext) -> Response {
   use <- wisp.require_method(req, Get)
-  let assert Ok(files) = repo.get_files_by_user_id(ctx.db, req_ctx.user_id)
+  let assert Ok(files) =
+    repo.get_files_by_user_id(ctx.db, req_ctx.session.user_id)
 
   files
   |> list.map(encode_file)
@@ -81,7 +82,7 @@ fn upload_file(req: Request, ctx: Context, req_ctx: RequestContext) -> Response 
   let assert Ok(_) =
     repo.create_file(
       conn: ctx.db,
-      user_id: req_ctx.user_id,
+      user_id: req_ctx.session.user_id,
       name:,
       original: file.file_name,
       size: file_info.size,
