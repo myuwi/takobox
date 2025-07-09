@@ -1,8 +1,10 @@
+import gleam/list
 import gleam/result
 import pog
 import youid/uuid.{type Uuid}
 
 import app/auth/password
+import app/model/file.{type File, File}
 import app/repo/sql
 
 pub type DatabaseError {
@@ -80,4 +82,38 @@ pub fn delete_session(
   sql.delete_session(conn, id)
   |> result.map_error(QueryError)
   |> result.replace(Nil)
+}
+
+// Files
+
+pub fn create_file(
+  conn conn: pog.Connection,
+  user_id user_id: Uuid,
+  name name: String,
+  original original: String,
+  size size: Int,
+) -> Result(sql.CreateFileRow, DatabaseError) {
+  sql.create_file(conn, user_id, name, original, size)
+  |> result.map_error(QueryError)
+  |> result.try(get_one)
+}
+
+pub fn get_files_by_user_id(
+  conn: pog.Connection,
+  user_id: Uuid,
+) -> Result(List(File), DatabaseError) {
+  sql.get_files_by_user_id(conn, user_id)
+  |> result.map(fn(res) {
+    list.map(res.rows, fn(row) {
+      File(
+        id: row.id,
+        user_id: row.user_id,
+        name: row.name,
+        original: row.original,
+        size: row.size,
+        created_at: row.created_at,
+      )
+    })
+  })
+  |> result.map_error(QueryError)
 }

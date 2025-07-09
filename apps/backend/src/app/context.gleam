@@ -15,9 +15,15 @@ pub fn read_env() -> Environment {
 }
 
 pub type Context {
-  Context(db: pog.Connection, secret: String, env: Environment)
+  Context(
+    env: Environment,
+    db: pog.Connection,
+    secret: String,
+    uploads_path: String,
+  )
 }
 
+// TODO: Store session instead of just user_id
 pub type RequestContext {
   RequestContext(user_id: Uuid)
 }

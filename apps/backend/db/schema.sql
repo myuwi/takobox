@@ -15,6 +15,20 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: files; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.files (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    name text NOT NULL,
+    original text NOT NULL,
+    size bigint NOT NULL,
+    created_at timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+--
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -30,8 +44,8 @@ CREATE TABLE public.schema_migrations (
 CREATE TABLE public.sessions (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     user_id uuid NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    expires_at timestamp with time zone NOT NULL
+    created_at timestamp without time zone DEFAULT now() NOT NULL,
+    expires_at timestamp without time zone NOT NULL
 );
 
 
@@ -45,6 +59,14 @@ CREATE TABLE public.users (
     password text NOT NULL,
     CONSTRAINT users_username_check CHECK ((username = lower(username)))
 );
+
+
+--
+-- Name: files files_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.files
+    ADD CONSTRAINT files_pkey PRIMARY KEY (id);
 
 
 --
@@ -80,6 +102,14 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: files files_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.files
+    ADD CONSTRAINT files_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: sessions sessions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -98,4 +128,5 @@ ALTER TABLE ONLY public.sessions
 
 INSERT INTO public.schema_migrations (version) VALUES
     ('20250224134749'),
-    ('20250702083057');
+    ('20250702083057'),
+    ('20250707145013');

@@ -46,7 +46,6 @@ pub fn require_auth(
   ctx: Context,
   next: fn(Session) -> Response,
 ) -> Response {
-  // TODO: Check for session expiration
   let maybe_session =
     wisp.get_cookie(req, "session", wisp.Signed)
     |> result.try(uuid.from_string)
@@ -61,8 +60,8 @@ pub fn require_auth(
         Session(
           id: session.id,
           user_id: session.user_id,
-          expires_at: session.expires_at,
           created_at: session.created_at,
+          expires_at: session.expires_at,
         )
       next(session)
     }

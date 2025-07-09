@@ -1,12 +1,17 @@
+import filepath
 import given
 import gleam/http.{Get, Post}
 import gleam/int
 import gleam/json
 import gleam/list
+import gleam/result
+import simplifile
 import wisp.{type Request, type Response}
 
 import app/context.{type Context, type RequestContext}
+import app/model/file.{encode_file}
 import app/model/settings
+import app/repo/repo
 import app/web
 
 pub fn router(
@@ -22,21 +27,21 @@ pub fn router(
   }
 }
 
-fn get_files(req: Request, _ctx: Context, _req_ctx: RequestContext) -> Response {
+fn get_files(req: Request, ctx: Context, req_ctx: RequestContext) -> Response {
   use <- wisp.require_method(req, Get)
+  let assert Ok(files) = repo.get_files_by_user_id(ctx.db, req_ctx.user_id)
 
-  json.array([], of: json.object)
+  files
+  |> list.map(encode_file)
+  |> json.preprocessed_array()
   |> json.to_string_tree()
   |> wisp.json_response(200)
 }
 
-fn upload_file(
-  req: Request,
-  _ctx: Context,
-  _req_ctx: RequestContext,
-) -> Response {
+fn upload_file(req: Request, ctx: Context, req_ctx: RequestContext) -> Response {
   use <- wisp.require_method(req, Post)
   use <- wisp.require_content_type(req, "multipart/form-data")
+  // TODO: Move to req_ctx?
   let max_file_size = settings.default().max_file_size
   // FIXME: The client doesn't receive the response when the body has not yet been fully consumed
   use <- web.limit_request_size(req, max_file_size)
@@ -48,7 +53,7 @@ fn upload_file(
     files -> Error(files)
   }
 
-  use file <- given.ok(maybe_file, fn(files) {
+  use #(_, file) <- given.ok(maybe_file, fn(files) {
     web.json_error_response(
       "Expected 1 file, but received "
         <> files |> list.length() |> int.to_string()
@@ -57,7 +62,30 @@ fn upload_file(
     )
   })
 
-  echo file
+  let ext = filepath.extension(file.file_name)
+
+  // TODO: retry on db collision
+  let name =
+    wisp.random_string(12)
+    <> ext
+    |> result.map(fn(ext) { "." <> ext })
+    |> result.unwrap("")
+
+  let assert Ok(file_info) = simplifile.file_info(file.path)
+
+  let new_path = filepath.join(ctx.uploads_path, name)
+
+  // TODO: Move instead
+  let assert Ok(Nil) = simplifile.copy_file(file.path, new_path)
+
+  let assert Ok(_) =
+    repo.create_file(
+      conn: ctx.db,
+      user_id: req_ctx.user_id,
+      name:,
+      original: file.file_name,
+      size: file_info.size,
+    )
 
   wisp.ok()
 }

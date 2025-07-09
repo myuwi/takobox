@@ -1,4 +1,5 @@
 import envoy
+import gleam/erlang/process
 import gleam/result
 import pog
 import youid/uuid
@@ -6,19 +7,25 @@ import youid/uuid
 import app/context.{type Context, Context, Production}
 import app/repo/repo
 
-pub fn with_context(test_case: fn(Context) -> Nil) {
-  let assert Ok(db) =
+fn test_config() -> pog.Config {
+  let name = process.new_name("test")
+  let assert Ok(config) =
     envoy.get("TEST_DATABASE_URL")
-    |> result.try(pog.url_config)
-    |> result.map(pog.connect)
+    |> result.try(pog.url_config(name, _))
 
-  use db <- pog.transaction(db)
+  config
+}
+
+pub fn with_context(test_case: fn(Context) -> Nil) {
+  let assert Ok(actor) = pog.start(test_config())
+  use db <- pog.transaction(actor.data)
 
   let ctx =
     Context(
       db:,
       secret: "tJitWtqfgFgNhpj1CUKuJbhiDn7L+eoieYDQJWfv7IC9XdH16keoKF7Ob2VSq3OLb4puwAmIg96yH9fX",
       env: Production,
+      uploads_path: "../../uploads",
     )
 
   test_case(ctx)

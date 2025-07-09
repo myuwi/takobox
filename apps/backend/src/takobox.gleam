@@ -9,19 +9,29 @@ import wisp/wisp_mist
 import app/context.{Context}
 import app/router
 
+const uploads_path = "../../uploads/"
+
+fn db_config() -> pog.Config {
+  let name = process.new_name("pog_pool")
+
+  let assert Ok(config) =
+    envoy.get("DATABASE_URL")
+    |> result.try(pog.url_config(name, _))
+
+  config
+}
+
 pub fn main() {
   wisp.configure_logger()
 
-  let assert Ok(db) =
-    envoy.get("DATABASE_URL")
-    |> result.try(pog.url_config)
-    |> result.map(pog.connect)
+  let assert Ok(actor) = pog.start(db_config())
+  let db = actor.data
 
   let assert Ok(secret) = envoy.get("SECRET")
 
   let env = context.read_env()
 
-  let ctx = Context(db:, secret:, env:)
+  let ctx = Context(db:, secret:, env:, uploads_path:)
 
   let assert Ok(_) =
     router.handle_request(_, ctx)

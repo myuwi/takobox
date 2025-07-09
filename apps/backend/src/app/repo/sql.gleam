@@ -1,11 +1,12 @@
 import gleam/dynamic/decode
+import gleam/time/timestamp.{type Timestamp}
 import pog
 import youid/uuid.{type Uuid}
 
 /// A row you get from running the `get_user_by_id` query
 /// defined in `./src/app/repo/sql/get_user_by_id.sql`.
 ///
-/// > 🐿️ This type definition was generated automatically using v3.0.1 of the
+/// > 🐿️ This type definition was generated automatically using v4.0.0 of the
 /// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub type GetUserByIdRow {
@@ -15,7 +16,7 @@ pub type GetUserByIdRow {
 /// Runs the `get_user_by_id` query
 /// defined in `./src/app/repo/sql/get_user_by_id.sql`.
 ///
-/// > 🐿️ This function was generated automatically using v3.0.1 of
+/// > 🐿️ This function was generated automatically using v4.0.0 of
 /// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub fn get_user_by_id(db, arg_1) {
@@ -34,10 +35,113 @@ pub fn get_user_by_id(db, arg_1) {
   |> pog.execute(db)
 }
 
+/// A row you get from running the `create_file` query
+/// defined in `./src/app/repo/sql/create_file.sql`.
+///
+/// > 🐿️ This type definition was generated automatically using v4.0.0 of the
+/// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub type CreateFileRow {
+  CreateFileRow(
+    id: Uuid,
+    user_id: Uuid,
+    name: String,
+    original: String,
+    size: Int,
+    created_at: Timestamp,
+  )
+}
+
+/// Runs the `create_file` query
+/// defined in `./src/app/repo/sql/create_file.sql`.
+///
+/// > 🐿️ This function was generated automatically using v4.0.0 of
+/// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub fn create_file(db, arg_1, arg_2, arg_3, arg_4) {
+  let decoder = {
+    use id <- decode.field(0, uuid_decoder())
+    use user_id <- decode.field(1, uuid_decoder())
+    use name <- decode.field(2, decode.string)
+    use original <- decode.field(3, decode.string)
+    use size <- decode.field(4, decode.int)
+    use created_at <- decode.field(5, pog.timestamp_decoder())
+    decode.success(CreateFileRow(
+      id:,
+      user_id:,
+      name:,
+      original:,
+      size:,
+      created_at:,
+    ))
+  }
+
+  "insert into files (user_id, name, original, size)
+values ($1, $2, $3, $4)
+returning *
+"
+  |> pog.query
+  |> pog.parameter(pog.text(uuid.to_string(arg_1)))
+  |> pog.parameter(pog.text(arg_2))
+  |> pog.parameter(pog.text(arg_3))
+  |> pog.parameter(pog.int(arg_4))
+  |> pog.returning(decoder)
+  |> pog.execute(db)
+}
+
+/// A row you get from running the `get_files_by_user_id` query
+/// defined in `./src/app/repo/sql/get_files_by_user_id.sql`.
+///
+/// > 🐿️ This type definition was generated automatically using v4.0.0 of the
+/// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub type GetFilesByUserIdRow {
+  GetFilesByUserIdRow(
+    id: Uuid,
+    user_id: Uuid,
+    name: String,
+    original: String,
+    size: Int,
+    created_at: Timestamp,
+  )
+}
+
+/// Runs the `get_files_by_user_id` query
+/// defined in `./src/app/repo/sql/get_files_by_user_id.sql`.
+///
+/// > 🐿️ This function was generated automatically using v4.0.0 of
+/// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub fn get_files_by_user_id(db, arg_1) {
+  let decoder = {
+    use id <- decode.field(0, uuid_decoder())
+    use user_id <- decode.field(1, uuid_decoder())
+    use name <- decode.field(2, decode.string)
+    use original <- decode.field(3, decode.string)
+    use size <- decode.field(4, decode.int)
+    use created_at <- decode.field(5, pog.timestamp_decoder())
+    decode.success(GetFilesByUserIdRow(
+      id:,
+      user_id:,
+      name:,
+      original:,
+      size:,
+      created_at:,
+    ))
+  }
+
+  "select * from files where user_id = $1
+"
+  |> pog.query
+  |> pog.parameter(pog.text(uuid.to_string(arg_1)))
+  |> pog.returning(decoder)
+  |> pog.execute(db)
+}
+
 /// A row you get from running the `get_user_by_username` query
 /// defined in `./src/app/repo/sql/get_user_by_username.sql`.
 ///
-/// > 🐿️ This type definition was generated automatically using v3.0.1 of the
+/// > 🐿️ This type definition was generated automatically using v4.0.0 of the
 /// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub type GetUserByUsernameRow {
@@ -47,7 +151,7 @@ pub type GetUserByUsernameRow {
 /// Runs the `get_user_by_username` query
 /// defined in `./src/app/repo/sql/get_user_by_username.sql`.
 ///
-/// > 🐿️ This function was generated automatically using v3.0.1 of
+/// > 🐿️ This function was generated automatically using v4.0.0 of
 /// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub fn get_user_by_username(db, arg_1) {
@@ -69,35 +173,36 @@ pub fn get_user_by_username(db, arg_1) {
 /// A row you get from running the `create_session` query
 /// defined in `./src/app/repo/sql/create_session.sql`.
 ///
-/// > 🐿️ This type definition was generated automatically using v3.0.1 of the
+/// > 🐿️ This type definition was generated automatically using v4.0.0 of the
 /// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub type CreateSessionRow {
-  CreateSessionRow(id: Uuid, user_id: Uuid, created_at: Int, expires_at: Int)
+  CreateSessionRow(
+    id: Uuid,
+    user_id: Uuid,
+    created_at: Timestamp,
+    expires_at: Timestamp,
+  )
 }
 
 /// Runs the `create_session` query
 /// defined in `./src/app/repo/sql/create_session.sql`.
 ///
-/// > 🐿️ This function was generated automatically using v3.0.1 of
+/// > 🐿️ This function was generated automatically using v4.0.0 of
 /// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub fn create_session(db, arg_1, arg_2) {
   let decoder = {
     use id <- decode.field(0, uuid_decoder())
     use user_id <- decode.field(1, uuid_decoder())
-    use created_at <- decode.field(2, decode.int)
-    use expires_at <- decode.field(3, decode.int)
+    use created_at <- decode.field(2, pog.timestamp_decoder())
+    use expires_at <- decode.field(3, pog.timestamp_decoder())
     decode.success(CreateSessionRow(id:, user_id:, created_at:, expires_at:))
   }
 
   "insert into sessions (user_id, expires_at)
 values ($1, now() + make_interval(secs => $2::integer))
-returning
-  id,
-  user_id,
-  (extract(epoch from created_at))::bigint as created_at,
-  (extract(epoch from expires_at))::bigint as expires_at
+returning *
 "
   |> pog.query
   |> pog.parameter(pog.text(uuid.to_string(arg_1)))
@@ -109,7 +214,7 @@ returning
 /// Runs the `delete_session` query
 /// defined in `./src/app/repo/sql/delete_session.sql`.
 ///
-/// > 🐿️ This function was generated automatically using v3.0.1 of
+/// > 🐿️ This function was generated automatically using v4.0.0 of
 /// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub fn delete_session(db, arg_1) {
@@ -127,33 +232,34 @@ where id = $1
 /// A row you get from running the `get_session_by_id` query
 /// defined in `./src/app/repo/sql/get_session_by_id.sql`.
 ///
-/// > 🐿️ This type definition was generated automatically using v3.0.1 of the
+/// > 🐿️ This type definition was generated automatically using v4.0.0 of the
 /// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub type GetSessionByIdRow {
-  GetSessionByIdRow(id: Uuid, user_id: Uuid, created_at: Int, expires_at: Int)
+  GetSessionByIdRow(
+    id: Uuid,
+    user_id: Uuid,
+    created_at: Timestamp,
+    expires_at: Timestamp,
+  )
 }
 
 /// Runs the `get_session_by_id` query
 /// defined in `./src/app/repo/sql/get_session_by_id.sql`.
 ///
-/// > 🐿️ This function was generated automatically using v3.0.1 of
+/// > 🐿️ This function was generated automatically using v4.0.0 of
 /// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub fn get_session_by_id(db, arg_1) {
   let decoder = {
     use id <- decode.field(0, uuid_decoder())
     use user_id <- decode.field(1, uuid_decoder())
-    use created_at <- decode.field(2, decode.int)
-    use expires_at <- decode.field(3, decode.int)
+    use created_at <- decode.field(2, pog.timestamp_decoder())
+    use expires_at <- decode.field(3, pog.timestamp_decoder())
     decode.success(GetSessionByIdRow(id:, user_id:, created_at:, expires_at:))
   }
 
-  "select
-  id,
-  user_id,
-  (extract(epoch from created_at))::bigint as created_at,
-  (extract(epoch from expires_at))::bigint as expires_at
+  "select *
 from sessions
 where id = $1
   and expires_at > now()
@@ -167,7 +273,7 @@ where id = $1
 /// A row you get from running the `create_user` query
 /// defined in `./src/app/repo/sql/create_user.sql`.
 ///
-/// > 🐿️ This type definition was generated automatically using v3.0.1 of the
+/// > 🐿️ This type definition was generated automatically using v4.0.0 of the
 /// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub type CreateUserRow {
@@ -177,7 +283,7 @@ pub type CreateUserRow {
 /// Runs the `create_user` query
 /// defined in `./src/app/repo/sql/create_user.sql`.
 ///
-/// > 🐿️ This function was generated automatically using v3.0.1 of
+/// > 🐿️ This function was generated automatically using v4.0.0 of
 /// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub fn create_user(db, arg_1, arg_2, arg_3) {
@@ -206,6 +312,6 @@ fn uuid_decoder() {
   use bit_array <- decode.then(decode.bit_array)
   case uuid.from_bit_array(bit_array) {
     Ok(uuid) -> decode.success(uuid)
-    Error(_) -> decode.failure(uuid.v7(), "uuid")
+    Error(_) -> decode.failure(uuid.v7(), "Uuid")
   }
 }
