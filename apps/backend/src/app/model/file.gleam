@@ -21,20 +21,20 @@ pub fn encode_file(file: File) -> json.Json {
   let File(id:, user_id:, name:, original:, size:, created_at:) = file
   json.object([
     #("id", json.string(encode_uuid(id))),
-    #("user_id", json.string(encode_uuid(user_id))),
+    #("userId", json.string(encode_uuid(user_id))),
     #("name", json.string(name)),
     #("original", json.string(original)),
     #("size", json.int(size)),
-    #("created_at", json.string(encode_timestamp(created_at))),
+    #("createdAt", json.string(encode_timestamp(created_at))),
   ])
 }
 
 pub fn file_decoder() -> decode.Decoder(File) {
   use id <- decode.field("id", uuid_decoder())
-  use user_id <- decode.field("user_id", uuid_decoder())
+  use user_id <- decode.field("userId", uuid_decoder())
   use name <- decode.field("name", decode.string)
   use original <- decode.field("original", decode.string)
   use size <- decode.field("size", decode.int)
-  use created_at <- decode.field("created_at", timestamp_decoder())
+  use created_at <- decode.field("createdAt", timestamp_decoder())
   decode.success(File(id:, user_id:, name:, original:, size:, created_at:))
 }

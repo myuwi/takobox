@@ -3,6 +3,7 @@ import { CloudUpload, X } from "lucide-react";
 import { useDropzone, type DropzoneOptions } from "react-dropzone";
 import { Alert } from "@/components/Alert";
 import { Button } from "@/components/Button";
+import { FileGrid } from "@/components/FileGrid";
 import { Progress } from "@/components/Progress";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { filesOptions, useFilesQuery } from "@/queries/files";
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/(app)/dashboard/")({
 });
 
 function RouteComponent() {
-  const { data: _files } = useFilesQuery();
+  const { data: files } = useFilesQuery();
   const { data: settings } = useSettingsQuery();
   const { uploadFile, uploads, abortUpload } = useFileUpload();
 
@@ -35,9 +36,10 @@ function RouteComponent() {
     }
   };
 
-  const { getInputProps, getRootProps, isDragActive, fileRejections } =
+  const { open, getInputProps, getRootProps, isDragActive, fileRejections } =
     useDropzone({
       onDrop,
+      noClick: true,
       maxSize: settings?.maxFileSize,
     });
 
@@ -83,14 +85,22 @@ function RouteComponent() {
       })}
 
       <div
-        className="flex w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-md border border-border p-24 select-none data-[dragging=true]:bg-accent"
+        className="flex w-full flex-col items-center justify-center gap-3 rounded-md inset-ring inset-ring-transparent data-[dragging=true]:bg-accent data-[dragging=true]:inset-ring-border"
         data-dragging={isDragActive}
         {...getRootProps()}
       >
-        <CloudUpload />
-        <p>Drag and drop or browse files to upload</p>
-        <Button variant="outline">Browse files</Button>
         <input {...getInputProps()} />
+        {files && files.length > 0 ? (
+          <FileGrid files={files} />
+        ) : (
+          <div className="flex w-full flex-col items-center justify-center gap-3 rounded-md p-24 inset-ring inset-ring-border">
+            <CloudUpload />
+            <p>Drag and drop or browse files to upload</p>
+            <Button variant="outline" onClick={open}>
+              Browse files
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
