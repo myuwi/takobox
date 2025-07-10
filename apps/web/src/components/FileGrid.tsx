@@ -1,6 +1,27 @@
 import { useState, type KeyboardEvent, type MouseEvent } from "react";
 import { File } from "lucide-react";
 import type { FileDto } from "@/types/FileDto";
+import { formatBytes } from "@/utils/files";
+
+interface SelectedFilesIndicatorProps {
+  files: FileDto[];
+}
+
+const SelectedFilesIndicator = ({ files }: SelectedFilesIndicatorProps) => {
+  if (!files[0]) return null;
+
+  const totalBytes = files.reduce((acc, file) => acc + file.size, 0);
+  const identifier =
+    files.length > 1 ? `${files.length} files` : `"${files[0].original}"`;
+
+  const text = `${identifier} selected (${formatBytes(totalBytes)})`;
+
+  return (
+    <div className="absolute right-1 bottom-1 rounded-md border border-border bg-accent px-2 py-1">
+      {text}
+    </div>
+  );
+};
 
 interface FileGridProps {
   files: FileDto[];
@@ -17,7 +38,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
 
   return (
     <div
-      className="grid w-full grid-flow-row grid-cols-[repeat(auto-fill,8rem)] justify-around gap-2"
+      className="relative grid w-full grid-flow-row grid-cols-[repeat(auto-fill,8rem)] justify-around gap-2"
       onClick={handleGridClick}
     >
       {files.map((file) => {
@@ -77,6 +98,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
           </div>
         );
       })}
+      <SelectedFilesIndicator files={selectedFiles} />
     </div>
   );
 };
