@@ -1,5 +1,8 @@
+import { createIsomorphicFn } from "@tanstack/react-start";
 import { getHeader } from "@tanstack/react-start/server";
 import axios, { type AxiosError } from "axios";
+
+const getServerCookie = createIsomorphicFn().server(() => getHeader("cookie"));
 
 const isServer = typeof window === "undefined";
 
@@ -8,8 +11,9 @@ export const client = axios.create({
 });
 
 client.interceptors.request.use((config) => {
-  if (isServer) {
-    config.headers.set("cookie", getHeader("cookie") ?? "");
+  const cookie = getServerCookie();
+  if (cookie) {
+    config.headers.set("cookie", cookie);
   }
   return config;
 });
