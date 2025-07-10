@@ -23,6 +23,11 @@
     },
     "rules": {
       "recommended": true,
+      "a11y": {
+        "noStaticElementInteractions": "off",
+        "useKeyWithClickEvents": "off",
+        "useSemanticElements": "off"
+      },
       "correctness": {
         "useImportExtensions": "off"
       },

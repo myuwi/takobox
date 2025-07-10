@@ -40,6 +40,7 @@ function RouteComponent() {
     useDropzone({
       onDrop,
       noClick: true,
+      noKeyboard: true,
       maxSize: settings?.maxFileSize,
     });
 
