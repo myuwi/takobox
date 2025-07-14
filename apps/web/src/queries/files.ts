@@ -4,7 +4,12 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { getFiles, uploadFile, type ProgressCallback } from "@/api/files";
+import {
+  deleteFile,
+  getFiles,
+  uploadFile,
+  type ProgressCallback,
+} from "@/api/files";
 
 export const filesOptions = queryOptions({
   queryKey: ["files"],
@@ -32,6 +37,17 @@ export function useUploadFileMutation(opts: UploadFileMutationOptions = {}) {
     mutationFn: ({ file, signal }: UploadFileMutationArgs) => {
       return uploadFile(file, onUploadProgress, signal);
     },
+    onSuccess: async (_) => {
+      await queryClient.refetchQueries({ queryKey: filesOptions.queryKey });
+    },
+  });
+}
+
+export function useDeleteFileMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteFile,
     onSuccess: async (_) => {
       await queryClient.refetchQueries({ queryKey: filesOptions.queryKey });
     },

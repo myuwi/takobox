@@ -28,3 +28,8 @@ export const uploadFile = async (
   });
   return data;
 };
+
+export const deleteFile = async (id: string) => {
+  const { data } = await client.delete(`files/${id}`);
+  return data;
+};

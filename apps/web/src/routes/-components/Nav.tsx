@@ -19,13 +19,13 @@ function AccountDropdown({ children }: PropsWithChildren) {
   const handleLogout = useServerFn(logout);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end">
+      <DropdownMenuContent className="w-48" align="end">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => handleLogout()}>
+          <DropdownMenuItem danger onClick={() => handleLogout()}>
             <LogOut />
             <span>Log out</span>
           </DropdownMenuItem>
