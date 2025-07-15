@@ -1,6 +1,5 @@
 import filepath
 import given
-import gleam/http.{Delete, Get, Post}
 import gleam/int
 import gleam/json
 import gleam/list
@@ -15,22 +14,7 @@ import app/model/settings
 import app/repo/repo
 import app/web
 
-pub fn router(
-  path_segments: List(String),
-  req: Request,
-  ctx: Context,
-  req_ctx: RequestContext,
-) -> Response {
-  case req.method, path_segments {
-    Get, [] -> get_files(req, ctx, req_ctx)
-    Post, [] -> upload_file(req, ctx, req_ctx)
-    Delete, [id] -> delete_file(req, ctx, req_ctx, id)
-    _, _ -> wisp.not_found()
-  }
-}
-
-fn get_files(req: Request, ctx: Context, req_ctx: RequestContext) -> Response {
-  use <- wisp.require_method(req, Get)
+pub fn index(_req: Request, ctx: Context, req_ctx: RequestContext) -> Response {
   let assert Ok(files) =
     repo.get_files_by_user_id(ctx.db, req_ctx.session.user_id)
 
@@ -41,8 +25,7 @@ fn get_files(req: Request, ctx: Context, req_ctx: RequestContext) -> Response {
   |> wisp.json_response(200)
 }
 
-fn upload_file(req: Request, ctx: Context, req_ctx: RequestContext) -> Response {
-  use <- wisp.require_method(req, Post)
+pub fn create(req: Request, ctx: Context, req_ctx: RequestContext) -> Response {
   use <- wisp.require_content_type(req, "multipart/form-data")
   // TODO: Move to req_ctx?
   let max_file_size = settings.default().max_file_size
@@ -93,14 +76,12 @@ fn upload_file(req: Request, ctx: Context, req_ctx: RequestContext) -> Response 
   wisp.ok()
 }
 
-fn delete_file(
-  req: Request,
+pub fn delete(
+  _req: Request,
   ctx: Context,
   req_ctx: RequestContext,
   id: String,
 ) -> Response {
-  use <- wisp.require_method(req, Delete)
-
   use file_id <- given.ok(uuid.from_string(id), fn(_) {
     web.json_error_response("Invalid file id", 400)
   })

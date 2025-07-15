@@ -1,3 +1,4 @@
+import gleam/http.{Delete, Get, Post}
 import wisp.{type Request, type Response}
 
 import app/context.{type Context, RequestContext}
@@ -11,21 +12,29 @@ import app/web
 pub fn handle_request(req: Request, ctx: Context) -> Response {
   use req <- web.middleware(req)
 
-  case wisp.path_segments(req) {
-    [] -> root.handle_request(req)
-    ["auth", ..rest] -> auth.router(rest, req, ctx)
-    ["settings"] -> settings.handle_request(req, ctx)
-    _ -> protected_router(req, ctx)
+  case req.method, wisp.path_segments(req) {
+    Get, [] -> root.index(req, ctx)
+    Get, ["settings"] -> settings.show(req, ctx)
+
+    Post, ["auth", "login"] -> auth.login(req, ctx)
+    Post, ["auth", "register"] -> auth.register(req, ctx)
+    Post, ["auth", "logout"] -> auth.logout(req, ctx)
+
+    _, _ -> protected_routes(req, ctx)
   }
 }
 
-fn protected_router(req: Request, ctx: Context) -> Response {
+fn protected_routes(req: Request, ctx: Context) -> Response {
   use session <- web.require_auth(req, ctx)
   let req_ctx = RequestContext(session: session)
 
-  case wisp.path_segments(req) {
-    ["me"] -> me.handle_request(req, ctx, req_ctx)
-    ["files", ..rest] -> files.router(rest, req, ctx, req_ctx)
-    _ -> wisp.not_found()
+  case req.method, wisp.path_segments(req) {
+    Get, ["me"] -> me.show(req, ctx, req_ctx)
+
+    Get, ["files"] -> files.index(req, ctx, req_ctx)
+    Post, ["files"] -> files.create(req, ctx, req_ctx)
+    Delete, ["files", id] -> files.delete(req, ctx, req_ctx, id)
+
+    _, _ -> wisp.not_found()
   }
 }

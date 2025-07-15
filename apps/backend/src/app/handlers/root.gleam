@@ -1,9 +1,8 @@
-import gleam/http.{Get}
 import wisp.{type Request, type Response}
 
-pub fn handle_request(req: Request) -> Response {
-  use <- wisp.require_method(req, Get)
+import app/context.{type Context}
 
+pub fn index(_req: Request, _ctx: Context) -> Response {
   wisp.ok()
   |> wisp.string_body("Hello Takobox API!")
 }

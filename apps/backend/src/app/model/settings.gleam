@@ -6,7 +6,7 @@ pub type Settings {
 }
 
 pub fn default() -> Settings {
-  Settings(max_file_size: 32 * 1024 * 1024)
+  Settings(max_file_size: 32_000_000)
 }
 
 pub fn encode_settings(settings: Settings) -> json.Json {
