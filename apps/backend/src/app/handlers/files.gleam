@@ -1,12 +1,13 @@
 import filepath
 import given
-import gleam/http.{Get, Post}
+import gleam/http.{Delete, Get, Post}
 import gleam/int
 import gleam/json
 import gleam/list
 import gleam/result
 import simplifile
 import wisp.{type Request, type Response}
+import youid/uuid
 
 import app/context.{type Context, type RequestContext}
 import app/model/file.{encode_file}
@@ -23,6 +24,7 @@ pub fn router(
   case req.method, path_segments {
     Get, [] -> get_files(req, ctx, req_ctx)
     Post, [] -> upload_file(req, ctx, req_ctx)
+    Delete, [id] -> delete_file(req, ctx, req_ctx, id)
     _, _ -> wisp.not_found()
   }
 }
@@ -87,6 +89,48 @@ fn upload_file(req: Request, ctx: Context, req_ctx: RequestContext) -> Response 
       original: file.file_name,
       size: file_info.size,
     )
+
+  wisp.ok()
+}
+
+fn delete_file(
+  req: Request,
+  ctx: Context,
+  req_ctx: RequestContext,
+  id: String,
+) -> Response {
+  use <- wisp.require_method(req, Delete)
+
+  use file_id <- given.ok(uuid.from_string(id), fn(_) {
+    web.json_error_response("Invalid file id", 400)
+  })
+
+  let res =
+    repo.delete_file_by_id(
+      conn: ctx.db,
+      id: file_id,
+      user_id: req_ctx.session.user_id,
+    )
+
+  use deleted_file <- given.ok(res, fn(_) {
+    web.json_error_response(
+      "File doesn't exist or belongs to another user",
+      404,
+    )
+  })
+
+  let file_path = filepath.join(ctx.uploads_path, deleted_file.name)
+
+  case simplifile.delete(file_path) {
+    Error(delete_error) ->
+      wisp.log_warning(
+        "Deleting file \""
+        <> deleted_file.name
+        <> "\" failed with the error: "
+        <> simplifile.describe_error(delete_error),
+      )
+    _ -> Nil
+  }
 
   wisp.ok()
 }

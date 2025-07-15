@@ -304,6 +304,58 @@ pub fn create_user(db, arg_1, arg_2, arg_3) {
   |> pog.execute(db)
 }
 
+/// A row you get from running the `delete_file_by_id` query
+/// defined in `./src/app/repo/sql/delete_file_by_id.sql`.
+///
+/// > 🐿️ This type definition was generated automatically using v4.0.0 of the
+/// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub type DeleteFileByIdRow {
+  DeleteFileByIdRow(
+    id: Uuid,
+    user_id: Uuid,
+    name: String,
+    original: String,
+    size: Int,
+    created_at: Timestamp,
+  )
+}
+
+/// Runs the `delete_file_by_id` query
+/// defined in `./src/app/repo/sql/delete_file_by_id.sql`.
+///
+/// > 🐿️ This function was generated automatically using v4.0.0 of
+/// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub fn delete_file_by_id(db, arg_1, arg_2) {
+  let decoder = {
+    use id <- decode.field(0, uuid_decoder())
+    use user_id <- decode.field(1, uuid_decoder())
+    use name <- decode.field(2, decode.string)
+    use original <- decode.field(3, decode.string)
+    use size <- decode.field(4, decode.int)
+    use created_at <- decode.field(5, pog.timestamp_decoder())
+    decode.success(DeleteFileByIdRow(
+      id:,
+      user_id:,
+      name:,
+      original:,
+      size:,
+      created_at:,
+    ))
+  }
+
+  "delete from files 
+where id = $1 and user_id = $2
+returning *
+"
+  |> pog.query
+  |> pog.parameter(pog.text(uuid.to_string(arg_1)))
+  |> pog.parameter(pog.text(uuid.to_string(arg_2)))
+  |> pog.returning(decoder)
+  |> pog.execute(db)
+}
+
 // --- Encoding/decoding utils -------------------------------------------------
 
 /// A decoder to decode `Uuid`s coming from a Postgres query.

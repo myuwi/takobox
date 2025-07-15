@@ -117,3 +117,13 @@ pub fn get_files_by_user_id(
   })
   |> result.map_error(QueryError)
 }
+
+pub fn delete_file_by_id(
+  conn conn: pog.Connection,
+  id id: Uuid,
+  user_id user_id: Uuid,
+) -> Result(sql.DeleteFileByIdRow, DatabaseError) {
+  sql.delete_file_by_id(conn, id, user_id)
+  |> result.map_error(QueryError)
+  |> result.try(get_one)
+}
