@@ -4,7 +4,8 @@ import { Button } from "@/components/Button";
 
 export const Sidebar = () => {
   return (
-    <div className="flex w-72 flex-col gap-4">
+    <div className="flex w-64 flex-col gap-4">
+      {/* TODO: Actually hook this up */}
       <Button size="lg">
         <Plus />
         <span>Upload file</span>

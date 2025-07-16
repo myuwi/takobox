@@ -5,7 +5,7 @@ import {
   type PropsWithChildren,
   type SyntheticEvent,
 } from "react";
-import { Ellipsis, File, Trash } from "lucide-react";
+import { Check, Ellipsis, File, Trash } from "lucide-react";
 import { useDeleteFileMutation } from "@/queries/files";
 import type { FileDto } from "@/types/FileDto";
 import { formatBytes } from "@/utils/files";
@@ -89,8 +89,9 @@ export const FileGrid = ({ files }: FileGridProps) => {
 
   return (
     <div
-      className="relative grid w-full grid-flow-row grid-cols-[repeat(auto-fill,10rem)] gap-4"
+      className="group/grid relative grid h-full w-full grid-cols-[repeat(auto-fill,10rem)] content-start gap-4"
       onClick={handleGridClick}
+      data-selecting={selectedFiles.length > 0}
     >
       {files.map((file) => {
         const selected = selectedFiles.includes(file);
@@ -131,6 +132,11 @@ export const FileGrid = ({ files }: FileGridProps) => {
           }
         };
 
+        const handleCheckboxClick = (e: MouseEvent<HTMLSpanElement>) => {
+          e.stopPropagation();
+          handleSelect(true);
+        };
+
         const handleMenuOpenChange = (open: boolean) => {
           if (open) {
             setSelectedFiles([file]);
@@ -148,7 +154,17 @@ export const FileGrid = ({ files }: FileGridProps) => {
             onDoubleClick={handleDoubleClick}
             onKeyDown={handleKeyDown}
           >
-            <div className="relative flex aspect-4/3 w-full flex-col items-center justify-center rounded-md p-2 group-not-aria-selected:group-hover:bg-accent/50 group-aria-selected:bg-accent">
+            <div className="relative flex aspect-4/3 w-full flex-col items-center justify-center rounded-md bg-accent/50 p-2 group-hover:bg-accent group-aria-selected:bg-accent">
+              <span
+                className="invisible absolute top-2 left-2 rounded-sm p-0.5 inset-ring inset-ring-primary-foreground group-hover:visible group-aria-selected:visible group-aria-selected:bg-primary-foreground group-aria-selected:text-white group-data-[selecting=true]/grid:visible"
+                onClick={handleCheckboxClick}
+                onDoubleClick={stopPropagation}
+              >
+                <Check
+                  size={16}
+                  className="group-not-aria-selected:invisible"
+                />
+              </span>
               <File />
               <ContextMenuDropdown
                 file={file}
@@ -165,7 +181,9 @@ export const FileGrid = ({ files }: FileGridProps) => {
                 </Button>
               </ContextMenuDropdown>
             </div>
-            <span className="w-full px-2 break-all">{file.original}</span>
+            <span className="w-full px-2 text-center break-all">
+              {file.original}
+            </span>
           </div>
         );
       })}

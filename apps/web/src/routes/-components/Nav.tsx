@@ -39,7 +39,7 @@ export default function Nav() {
   const { data: user } = useMeQuery();
 
   return (
-    <nav className="mx-auto flex max-w-screen-xl items-center justify-between gap-4 px-6 py-4">
+    <nav className="mx-auto flex w-full max-w-screen-xl items-center justify-between gap-4 px-6 py-4">
       <Link to="/" className="text-xl">
         Tako<span className="text-primary">box</span>
       </Link>
