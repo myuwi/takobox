@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useState,
   type KeyboardEvent,
   type MouseEvent,
@@ -71,6 +72,36 @@ const SelectedFilesIndicator = ({ files }: SelectedFilesIndicatorProps) => {
     <div className="absolute right-1 bottom-1 rounded-md bg-accent px-2 py-1">
       {text}
     </div>
+  );
+};
+
+interface FileThumbnailProps {
+  file: FileDto;
+}
+
+const FileThumbnail = ({ file }: FileThumbnailProps) => {
+  const src = `/thumbs/${file.name.replace(/\.\w*$/, ".webp")}`;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+
+    const img = new Image();
+    img.src = src;
+    img.onload = () => setLoading(false);
+    img.onerror = () => setError(true);
+  }, [src]);
+
+  return loading || error ? (
+    <File className="absolute" />
+  ) : (
+    <img
+      alt=""
+      src={src}
+      className="absolute h-full w-full rounded-md object-cover"
+    />
   );
 };
 
@@ -154,9 +185,10 @@ export const FileGrid = ({ files }: FileGridProps) => {
             onDoubleClick={handleDoubleClick}
             onKeyDown={handleKeyDown}
           >
-            <div className="relative flex aspect-4/3 w-full flex-col items-center justify-center rounded-md bg-accent/50 p-2 group-hover:bg-accent group-aria-selected:bg-accent">
+            <div className="relative flex aspect-4/3 w-full flex-col items-center justify-center overflow-hidden rounded-md bg-accent/50 p-2 group-hover:bg-accent group-aria-selected:bg-accent">
+              <FileThumbnail file={file} />
               <span
-                className="invisible absolute top-2 left-2 rounded-sm p-0.5 inset-ring inset-ring-primary-foreground group-hover:visible group-aria-selected:visible group-aria-selected:bg-primary-foreground group-aria-selected:text-white group-data-[selecting=true]/grid:visible"
+                className="invisible absolute top-2 left-2 rounded-sm bg-accent p-0.5 inset-ring inset-ring-primary-foreground group-hover:visible group-aria-selected:visible group-aria-selected:bg-primary-foreground group-aria-selected:text-white group-data-[selecting=true]/grid:visible"
                 onClick={handleCheckboxClick}
                 onDoubleClick={stopPropagation}
               >
@@ -165,15 +197,14 @@ export const FileGrid = ({ files }: FileGridProps) => {
                   className="group-not-aria-selected:invisible"
                 />
               </span>
-              <File />
               <ContextMenuDropdown
                 file={file}
                 onOpenChange={handleMenuOpenChange}
               >
                 <Button
-                  variant="ghost"
+                  variant="accent"
                   size="icon"
-                  className="invisible absolute right-1 bottom-1 size-8 p-1 group-hover:visible group-aria-selected:visible"
+                  className="invisible absolute right-1 bottom-1 size-6 p-1 group-hover:visible group-aria-selected:visible"
                   onClick={stopPropagation}
                   onDoubleClick={stopPropagation}
                 >

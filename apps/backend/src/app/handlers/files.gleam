@@ -4,7 +4,7 @@ import gleam/int
 import gleam/json
 import gleam/list
 import gleam/result
-import simplifile
+import simplifile.{Enoent}
 import wisp.{type Request, type Response}
 import youid/uuid
 
@@ -12,6 +12,7 @@ import app/context.{type Context, type RequestContext}
 import app/model/file.{encode_file}
 import app/model/settings
 import app/repo/repo
+import app/util/thumbnails.{ShellError, UnsupportedFiletype}
 import app/web
 
 pub fn index(_req: Request, ctx: Context, req_ctx: RequestContext) -> Response {
@@ -49,29 +50,38 @@ pub fn create(req: Request, ctx: Context, req_ctx: RequestContext) -> Response {
   })
 
   let ext = filepath.extension(file.file_name)
-
-  // TODO: retry on db collision
-  let name =
-    wisp.random_string(12)
-    <> ext
+  let ext_string =
+    ext
     |> result.map(fn(ext) { "." <> ext })
     |> result.unwrap("")
 
+  // TODO: retry on db collision
+  let file_id = wisp.random_string(12)
+  let file_name = file_id <> ext_string
+
   let assert Ok(file_info) = simplifile.file_info(file.path)
 
-  let new_path = filepath.join(ctx.uploads_path, name)
+  let upload_path = filepath.join(ctx.uploads_path, file_name)
 
   // TODO: Move instead
-  let assert Ok(Nil) = simplifile.copy_file(file.path, new_path)
+  let assert Ok(Nil) = simplifile.copy_file(file.path, upload_path)
 
   let assert Ok(_) =
     repo.create_file(
       conn: ctx.db,
       user_id: req_ctx.session.user_id,
-      name:,
+      name: file_name,
       original: file.file_name,
       size: file_info.size,
     )
+
+  case thumbnails.create_thumbnail(upload_path, ctx) {
+    Ok(_) | Error(UnsupportedFiletype) -> Nil
+    Error(ShellError(_, message)) ->
+      wisp.log_error(
+        "Error creating thumbnail for \"" <> upload_path <> "\": " <> message,
+      )
+  }
 
   wisp.ok()
 }
@@ -101,16 +111,29 @@ pub fn delete(
   })
 
   let file_path = filepath.join(ctx.uploads_path, deleted_file.name)
+  let file_id = filepath.strip_extension(deleted_file.name)
+  let thumb_path = filepath.join(ctx.thumbs_path, file_id <> ".webp")
 
   case simplifile.delete(file_path) {
+    Ok(_) -> Nil
     Error(delete_error) ->
       wisp.log_warning(
         "Deleting file \""
-        <> deleted_file.name
+        <> file_path
         <> "\" failed with the error: "
         <> simplifile.describe_error(delete_error),
       )
-    _ -> Nil
+  }
+
+  case simplifile.delete(thumb_path) {
+    Ok(_) | Error(Enoent) -> Nil
+    Error(delete_error) ->
+      wisp.log_warning(
+        "Deleting file \""
+        <> thumb_path
+        <> "\" failed with the error: "
+        <> simplifile.describe_error(delete_error),
+      )
   }
 
   wisp.ok()

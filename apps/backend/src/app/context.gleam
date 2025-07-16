@@ -20,6 +20,7 @@ pub type Context {
     db: pog.Connection,
     secret: String,
     uploads_path: String,
+    thumbs_path: String,
   )
 }
 

@@ -26,6 +26,7 @@ pub fn with_context(test_case: fn(Context) -> Nil) {
       secret: "tJitWtqfgFgNhpj1CUKuJbhiDn7L+eoieYDQJWfv7IC9XdH16keoKF7Ob2VSq3OLb4puwAmIg96yH9fX",
       env: Production,
       uploads_path: "../../uploads",
+      thumbs_path: "../../uploads/thumbs",
     )
 
   test_case(ctx)

@@ -3,6 +3,7 @@ import gleam/erlang/process
 import gleam/result
 import mist
 import pog
+import simplifile
 import wisp
 import wisp/wisp_mist
 
@@ -10,6 +11,8 @@ import app/context.{Context}
 import app/router
 
 const uploads_path = "../../uploads/"
+
+const thumbs_path = "../../uploads/thumbs/"
 
 fn db_config() -> pog.Config {
   let name = process.new_name("pog_pool")
@@ -31,7 +34,10 @@ pub fn main() {
 
   let env = context.read_env()
 
-  let ctx = Context(db:, secret:, env:, uploads_path:)
+  let ctx = Context(db:, secret:, env:, uploads_path:, thumbs_path:)
+
+  let _ = simplifile.create_directory_all(ctx.uploads_path)
+  let _ = simplifile.create_directory_all(ctx.thumbs_path)
 
   let assert Ok(_) =
     router.handle_request(_, ctx)
