@@ -10,11 +10,9 @@ function RouteComponent() {
   return (
     <div className="flex h-full w-full flex-col items-stretch">
       <Nav />
-      <div className="mx-auto flex w-full max-w-screen-xl grow gap-10 px-6 py-4">
+      <div className="mx-auto flex w-full max-w-screen-xl grow gap-4 px-6 py-4">
         <Sidebar />
-        <main className="w-full">
-          <Outlet />
-        </main>
+        <Outlet />
       </div>
     </div>
   );

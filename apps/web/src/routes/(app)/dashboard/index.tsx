@@ -45,7 +45,7 @@ function RouteComponent() {
     });
 
   return (
-    <div className="flex h-full flex-col gap-4">
+    <main className="flex h-full w-full flex-col gap-4 [&_>_*]:mx-4">
       <h1 className="text-base font-medium">Uploads</h1>
 
       {/* TODO: replace with a list of rejected files. also show failed uploads there */}
@@ -86,7 +86,7 @@ function RouteComponent() {
       })}
 
       <div
-        className="flex h-full w-full grow flex-col items-center justify-center gap-3 rounded-md inset-ring inset-ring-transparent data-[dragging=true]:bg-accent data-[dragging=true]:inset-ring-border"
+        className="mx-0! -mt-2 flex h-full w-full grow flex-col items-center justify-center gap-3 rounded-md inset-ring inset-ring-transparent data-[dragging=true]:bg-accent data-[dragging=true]:inset-ring-border"
         data-dragging={isDragActive}
         {...getRootProps()}
       >
@@ -94,7 +94,7 @@ function RouteComponent() {
         {files && files.length > 0 ? (
           <FileGrid files={files} />
         ) : (
-          <div className="flex w-full grow flex-col items-center justify-center gap-3 rounded-md p-24 inset-ring inset-ring-border">
+          <div className="mt-24 flex w-full grow flex-col items-center gap-3 rounded-md p-4">
             <CloudUpload />
             <p>Drag and drop or browse files to upload</p>
             <Button variant="outline" onClick={open}>
@@ -103,6 +103,6 @@ function RouteComponent() {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }
