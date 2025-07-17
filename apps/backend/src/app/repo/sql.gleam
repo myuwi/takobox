@@ -170,6 +170,58 @@ pub fn get_user_by_username(db, arg_1) {
   |> pog.execute(db)
 }
 
+/// A row you get from running the `get_file_by_id` query
+/// defined in `./src/app/repo/sql/get_file_by_id.sql`.
+///
+/// > 🐿️ This type definition was generated automatically using v4.0.0 of the
+/// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub type GetFileByIdRow {
+  GetFileByIdRow(
+    id: Uuid,
+    user_id: Uuid,
+    name: String,
+    original: String,
+    size: Int,
+    created_at: Timestamp,
+  )
+}
+
+/// Runs the `get_file_by_id` query
+/// defined in `./src/app/repo/sql/get_file_by_id.sql`.
+///
+/// > 🐿️ This function was generated automatically using v4.0.0 of
+/// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub fn get_file_by_id(db, arg_1, arg_2) {
+  let decoder = {
+    use id <- decode.field(0, uuid_decoder())
+    use user_id <- decode.field(1, uuid_decoder())
+    use name <- decode.field(2, decode.string)
+    use original <- decode.field(3, decode.string)
+    use size <- decode.field(4, decode.int)
+    use created_at <- decode.field(5, pog.timestamp_decoder())
+    decode.success(GetFileByIdRow(
+      id:,
+      user_id:,
+      name:,
+      original:,
+      size:,
+      created_at:,
+    ))
+  }
+
+  "select * from files
+where id = $1 and user_id = $2
+limit 1
+"
+  |> pog.query
+  |> pog.parameter(pog.text(uuid.to_string(arg_1)))
+  |> pog.parameter(pog.text(uuid.to_string(arg_2)))
+  |> pog.returning(decoder)
+  |> pog.execute(db)
+}
+
 /// A row you get from running the `create_session` query
 /// defined in `./src/app/repo/sql/create_session.sql`.
 ///

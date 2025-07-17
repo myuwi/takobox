@@ -33,3 +33,8 @@ export const deleteFile = async (id: string) => {
   const { data } = await client.delete(`files/${id}`);
   return data;
 };
+
+export const regenerateThumbnail = async (id: string) => {
+  const { data } = await client.post(`files/${id}/regenerate-thumbnail`);
+  return data;
+};

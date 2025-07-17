@@ -75,7 +75,7 @@ pub fn create(req: Request, ctx: Context, req_ctx: RequestContext) -> Response {
       size: file_info.size,
     )
 
-  case thumbnails.create_thumbnail(upload_path, ctx) {
+  case thumbnails.generate_thumbnail(upload_path, ctx) {
     Ok(_) | Error(UnsupportedFiletype) -> Nil
     Error(ShellError(_, message)) ->
       wisp.log_error(
@@ -93,7 +93,7 @@ pub fn delete(
   id: String,
 ) -> Response {
   use file_id <- given.ok(uuid.from_string(id), fn(_) {
-    web.json_error_response("Invalid file id", 400)
+    web.json_error_response("Invalid file id.", 400)
   })
 
   let res =
@@ -105,7 +105,7 @@ pub fn delete(
 
   use deleted_file <- given.ok(res, fn(_) {
     web.json_error_response(
-      "File doesn't exist or belongs to another user",
+      "File doesn't exist or belongs to another user.",
       404,
     )
   })
@@ -137,4 +137,47 @@ pub fn delete(
   }
 
   wisp.ok()
+}
+
+pub fn regenerate_thumbnail(
+  _req: Request,
+  ctx: Context,
+  req_ctx: RequestContext,
+  id: String,
+) -> Response {
+  use file_id <- given.ok(uuid.from_string(id), fn(_) {
+    web.json_error_response("Invalid file id.", 400)
+  })
+
+  let file =
+    repo.get_file_by_id(
+      conn: ctx.db,
+      id: file_id,
+      user_id: req_ctx.session.user_id,
+    )
+
+  use file <- given.ok(file, fn(_) {
+    web.json_error_response(
+      "File doesn't exist or belongs to another user.",
+      404,
+    )
+  })
+
+  let upload_path = filepath.join(ctx.uploads_path, file.name)
+
+  case thumbnails.generate_thumbnail(upload_path, ctx) {
+    Ok(_) -> wisp.ok()
+    Error(UnsupportedFiletype) -> {
+      web.json_error_response("Filetype doesn't support thumbnails.", 400)
+    }
+    Error(ShellError(_, message)) -> {
+      wisp.log_error(
+        "Error creating thumbnail for \"" <> upload_path <> "\": " <> message,
+      )
+      web.json_error_response(
+        "Unable to generate thumbnail for the selected file.",
+        500,
+      )
+    }
+  }
 }

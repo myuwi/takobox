@@ -98,6 +98,26 @@ pub fn create_file(
   |> result.try(get_one)
 }
 
+pub fn get_file_by_id(
+  conn conn: pog.Connection,
+  id id: Uuid,
+  user_id user_id: Uuid,
+) -> Result(File, DatabaseError) {
+  sql.get_file_by_id(conn, id, user_id)
+  |> result.map_error(QueryError)
+  |> result.try(get_one)
+  |> result.map(fn(row) {
+    File(
+      id: row.id,
+      user_id: row.user_id,
+      name: row.name,
+      original: row.original,
+      size: row.size,
+      created_at: row.created_at,
+    )
+  })
+}
+
 pub fn get_files_by_user_id(
   conn: pog.Connection,
   user_id: Uuid,

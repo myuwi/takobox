@@ -32,7 +32,7 @@ fn create_static_thumbnail(
   )
 }
 
-pub fn create_thumbnail(
+pub fn generate_thumbnail(
   file_path: String,
   ctx: Context,
 ) -> Result(String, ThumbnailError) {

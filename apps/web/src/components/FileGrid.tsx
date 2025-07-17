@@ -1,12 +1,13 @@
 import {
-  useEffect,
+  useCallback,
   useState,
   type KeyboardEvent,
   type MouseEvent,
   type PropsWithChildren,
   type SyntheticEvent,
 } from "react";
-import { Check, Ellipsis, File, Trash } from "lucide-react";
+import { Check, Ellipsis, File, RefreshCcw, Trash } from "lucide-react";
+import { regenerateThumbnail } from "@/api/files";
 import { useDeleteFileMutation } from "@/queries/files";
 import type { FileDto } from "@/types/FileDto";
 import { formatBytes } from "@/utils/files";
@@ -33,18 +34,33 @@ const ContextMenuDropdown = ({
 }: ContextMenuDropdownProps) => {
   const { mutateAsync: deleteFile } = useDeleteFileMutation();
 
+  // FIXME: Deselect deleted file
   const handleDelete = () => deleteFile(file.id);
+
+  const handleRegenerateThumbnail = async () => {
+    const src = `/thumbs/${file.name.replace(/\.\w*$/, ".webp")}`;
+    await regenerateThumbnail(file.id);
+    await fetch(src, { cache: "reload" });
+    document.body
+      .querySelectorAll<HTMLImageElement>(`img[src="${src}"]`)
+      .forEach((img) => {
+        img.src = src;
+      });
+  };
 
   return (
     <DropdownMenu onOpenChange={onOpenChange} modal={false}>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-48"
         align="end"
         onClick={stopPropagation}
         onDoubleClick={stopPropagation}
       >
         <DropdownMenuGroup>
+          <DropdownMenuItem onClick={handleRegenerateThumbnail}>
+            <RefreshCcw />
+            <span>Regenerate thumbnail</span>
+          </DropdownMenuItem>
           <DropdownMenuItem danger onClick={handleDelete}>
             <Trash />
             <span>Delete</span>
@@ -81,27 +97,31 @@ interface FileThumbnailProps {
 
 const FileThumbnail = ({ file }: FileThumbnailProps) => {
   const src = `/thumbs/${file.name.replace(/\.\w*$/, ".webp")}`;
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    setLoading(true);
-    setError(false);
+  const imgRef = useCallback(
+    (img: HTMLImageElement | null) => {
+      if (!img) return;
+      img.src = src;
+    },
+    [src],
+  );
 
-    const img = new Image();
-    img.src = src;
-    img.onload = () => setLoading(false);
-    img.onerror = () => setError(true);
-  }, [src]);
-
-  return loading || error ? (
-    <File className="absolute" />
-  ) : (
-    <img
-      alt=""
-      src={src}
-      className="absolute h-full w-full rounded-md object-cover"
-    />
+  return (
+    <>
+      <File
+        className="absolute"
+        style={{ display: loaded ? "none" : undefined }}
+      />
+      <img
+        ref={imgRef}
+        alt=""
+        className="pointer-events-none absolute h-full w-full rounded-md object-cover"
+        style={{ display: loaded ? undefined : "none" }}
+        onError={() => setLoaded(false)}
+        onLoad={() => setLoaded(true)}
+      />
+    </>
   );
 };
 
