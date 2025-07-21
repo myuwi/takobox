@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Button } from "@/components/Button";
+import { Button } from "@/components/primitives/Button";
 import { useMeQuery } from "@/queries/me";
 import Nav from "./-components/Nav";
 

@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
-import { Alert } from "@/components/Alert";
-import { Button } from "@/components/Button";
-import { Input } from "@/components/Input";
-import { Label } from "@/components/Label";
+import { Alert } from "@/components/primitives/Alert";
+import { Button } from "@/components/primitives/Button";
+import { Input } from "@/components/primitives/Input";
+import { Label } from "@/components/primitives/Label";
 import { useLoginMutation } from "@/queries/login";
 import type { AuthPayload } from "@/types/AuthPayload";
 import { formatError } from "@/utils/error";

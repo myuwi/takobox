@@ -14,14 +14,14 @@ import { selectedFilesAtom } from "@/atoms/selected-files";
 import { useDeleteFileMutation } from "@/queries/files";
 import type { FileDto } from "@/types/FileDto";
 import { formatBytes } from "@/utils/files";
-import { Button } from "./Button";
+import { Button } from "./primitives/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./DropdownMenu";
+} from "./primitives/DropdownMenu";
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation();
 

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/Button";
+import { Button } from "@/components/primitives/Button";
 
 export const Route = createFileRoute("/(auth)")({
   component: Layout,

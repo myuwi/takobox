@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CloudUpload, X } from "lucide-react";
 import { useDropzone, type DropzoneOptions } from "react-dropzone";
-import { Alert } from "@/components/Alert";
-import { Button } from "@/components/Button";
 import { FileGrid } from "@/components/FileGrid";
-import { Progress } from "@/components/Progress";
+import { Alert } from "@/components/primitives/Alert";
+import { Button } from "@/components/primitives/Button";
+import { Progress } from "@/components/primitives/Progress";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { filesOptions, useFilesQuery } from "@/queries/files";
 import { settingsOptions, useSettingsQuery } from "@/queries/settings";

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Folder, Plus } from "lucide-react";
-import { Button } from "@/components/Button";
+import { Button } from "@/components/primitives/Button";
 
 export const Sidebar = () => {
   return (

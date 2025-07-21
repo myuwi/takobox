@@ -2,7 +2,7 @@ import type { PropsWithChildren } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { LogOut, User } from "lucide-react";
-import { Button } from "@/components/Button";
+import { Button } from "@/components/primitives/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/DropdownMenu";
+} from "@/components/primitives/DropdownMenu";
 import { useMeQuery } from "@/queries/me";
 import { logout } from "@/utils/session";
 
