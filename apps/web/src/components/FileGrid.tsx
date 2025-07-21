@@ -1,13 +1,16 @@
 import {
   useCallback,
+  useEffect,
   useState,
   type KeyboardEvent,
   type MouseEvent,
   type PropsWithChildren,
   type SyntheticEvent,
 } from "react";
+import { useAtom, useSetAtom } from "jotai";
 import { Check, Ellipsis, File, RefreshCcw, Trash } from "lucide-react";
 import { regenerateThumbnail } from "@/api/files";
+import { selectedFilesAtom } from "@/atoms/selected-files";
 import { useDeleteFileMutation } from "@/queries/files";
 import type { FileDto } from "@/types/FileDto";
 import { formatBytes } from "@/utils/files";
@@ -24,18 +27,29 @@ const stopPropagation = (e: SyntheticEvent) => e.stopPropagation();
 
 interface ContextMenuDropdownProps extends PropsWithChildren {
   file: FileDto;
-  onOpenChange: (open: boolean) => void;
+  onOpen: () => void;
 }
 
 const ContextMenuDropdown = ({
   children,
   file,
-  onOpenChange,
+  onOpen,
 }: ContextMenuDropdownProps) => {
+  const setSelectedFiles = useSetAtom(selectedFilesAtom);
   const { mutateAsync: deleteFile } = useDeleteFileMutation();
 
-  // FIXME: Deselect deleted file
-  const handleDelete = () => deleteFile(file.id);
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      onOpen();
+    }
+  };
+
+  const handleDelete = async () => {
+    await deleteFile(file.id);
+    setSelectedFiles((selectedFiles) =>
+      selectedFiles.filter((f) => f !== file),
+    );
+  };
 
   const handleRegenerateThumbnail = async () => {
     const src = `/thumbs/${file.name.replace(/\.\w*$/, ".webp")}`;
@@ -49,7 +63,7 @@ const ContextMenuDropdown = ({
   };
 
   return (
-    <DropdownMenu onOpenChange={onOpenChange} modal={false}>
+    <DropdownMenu onOpenChange={handleOpenChange} modal={false}>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
@@ -130,13 +144,18 @@ interface FileGridProps {
 }
 
 export const FileGrid = ({ files }: FileGridProps) => {
-  const [selectedFiles, setSelectedFiles] = useState<FileDto[]>([]);
+  const [selectedFiles, setSelectedFiles] = useAtom(selectedFilesAtom);
 
   const handleGridClick = (e: MouseEvent<HTMLDivElement>) => {
     if (!e.ctrlKey && !e.shiftKey) {
       setSelectedFiles([]);
     }
   };
+
+  // Clean up selected files when file grid unmounts
+  useEffect(() => {
+    return () => setSelectedFiles([]);
+  }, []);
 
   return (
     <div
@@ -188,11 +207,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
           handleSelect(true);
         };
 
-        const handleMenuOpenChange = (open: boolean) => {
-          if (open) {
-            setSelectedFiles([file]);
-          }
-        };
+        const handleMenuOpen = () => setSelectedFiles([file]);
 
         return (
           <div
@@ -217,10 +232,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
                   className="group-not-aria-selected:invisible"
                 />
               </span>
-              <ContextMenuDropdown
-                file={file}
-                onOpenChange={handleMenuOpenChange}
-              >
+              <ContextMenuDropdown file={file} onOpen={handleMenuOpen}>
                 <Button
                   variant="accent"
                   size="icon"
