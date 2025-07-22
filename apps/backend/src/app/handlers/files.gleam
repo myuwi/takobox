@@ -41,7 +41,7 @@ pub fn create(req: Request, ctx: Context, req_ctx: RequestContext) -> Response {
   }
 
   use #(_, file) <- given.ok(maybe_file, fn(files) {
-    web.json_error_response(
+    web.json_message_response(
       "Expected 1 file, but received "
         <> files |> list.length() |> int.to_string()
         <> ".",
@@ -93,7 +93,7 @@ pub fn delete(
   id: String,
 ) -> Response {
   use file_id <- given.ok(uuid.from_string(id), fn(_) {
-    web.json_error_response("Invalid file id.", 400)
+    web.json_message_response("Invalid file id.", 400)
   })
 
   let res =
@@ -104,7 +104,7 @@ pub fn delete(
     )
 
   use deleted_file <- given.ok(res, fn(_) {
-    web.json_error_response(
+    web.json_message_response(
       "File doesn't exist or belongs to another user.",
       404,
     )
@@ -146,7 +146,7 @@ pub fn regenerate_thumbnail(
   id: String,
 ) -> Response {
   use file_id <- given.ok(uuid.from_string(id), fn(_) {
-    web.json_error_response("Invalid file id.", 400)
+    web.json_message_response("Invalid file id.", 400)
   })
 
   let file =
@@ -157,7 +157,7 @@ pub fn regenerate_thumbnail(
     )
 
   use file <- given.ok(file, fn(_) {
-    web.json_error_response(
+    web.json_message_response(
       "File doesn't exist or belongs to another user.",
       404,
     )
@@ -168,13 +168,13 @@ pub fn regenerate_thumbnail(
   case thumbnails.generate_thumbnail(upload_path, ctx) {
     Ok(_) -> wisp.ok()
     Error(UnsupportedFiletype) -> {
-      web.json_error_response("Filetype doesn't support thumbnails.", 400)
+      web.json_message_response("Filetype doesn't support thumbnails.", 400)
     }
     Error(ShellError(_, message)) -> {
       wisp.log_error(
         "Error creating thumbnail for \"" <> upload_path <> "\": " <> message,
       )
-      web.json_error_response(
+      web.json_message_response(
         "Unable to generate thumbnail for the selected file.",
         500,
       )

@@ -17,7 +17,7 @@ pub fn middleware(
 ) -> wisp.Response {
   let req = wisp.method_override(req)
   use <- wisp.log_request(req)
-  use <- wisp.rescue_crashes
+  use <- wisp.rescue_crashes()
   use req <- wisp.handle_head(req)
 
   handle_request(req)
@@ -35,7 +35,7 @@ pub fn require_json_decoded(
   }
 }
 
-pub fn json_error_response(msg: String, code: Int) -> Response {
+pub fn json_message_response(msg: String, code: Int) -> Response {
   json.object([#("message", json.string(msg))])
   |> json.to_string_tree()
   |> wisp.json_response(code)

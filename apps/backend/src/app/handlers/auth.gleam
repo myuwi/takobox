@@ -17,7 +17,7 @@ fn login_database_error_to_response(error: DatabaseError) -> Response {
   case error {
     repo.RowNotFound ->
       "Could not find a user with that username."
-      |> web.json_error_response(401)
+      |> web.json_message_response(401)
     _ -> wisp.internal_server_error()
   }
 }
@@ -55,7 +55,7 @@ fn register_database_error_to_response(err: DatabaseError) -> Response {
           "Username is invalid"
         _ -> "Unable to create user."
       }
-      |> web.json_error_response(400)
+      |> web.json_message_response(400)
     }
     _ -> wisp.internal_server_error()
   }
@@ -72,7 +72,7 @@ pub fn login(req: Request, ctx: Context) -> Response {
 
   use <- bool.lazy_guard(
     !password.verify_password(password, user.password),
-    fn() { web.json_error_response("Incorrect password.", 401) },
+    fn() { web.json_message_response("Incorrect password.", 401) },
   )
 
   // TODO: Handle error?
@@ -91,7 +91,7 @@ pub fn register(req: Request, ctx: Context) -> Response {
 
   use _ <- given.ok(
     validate_register_payload(username, password),
-    web.json_error_response(_, 400),
+    web.json_message_response(_, 400),
   )
 
   use user <- given.ok(
