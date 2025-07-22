@@ -155,7 +155,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
   // Clean up selected files when file grid unmounts
   useEffect(() => {
     return () => setSelectedFiles([]);
-  }, []);
+  }, [setSelectedFiles]);
 
   return (
     <div
