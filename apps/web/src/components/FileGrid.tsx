@@ -159,7 +159,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
 
   return (
     <div
-      className="group/grid relative grid h-full w-full grid-cols-[repeat(auto-fill,10rem)] content-start gap-4 p-4"
+      className="group/grid relative grid h-full w-full grid-cols-[repeat(auto-fill,10rem)] content-start gap-4 overflow-auto p-4"
       onClick={handleGridClick}
       data-selecting={selectedFiles.length > 0}
     >

@@ -45,7 +45,7 @@ function RouteComponent() {
     });
 
   return (
-    <main className="flex h-full w-full flex-col gap-4 [&_>_*]:mx-4">
+    <main className="flex w-full flex-col gap-4 [&_>_*]:mx-4">
       <h1 className="text-base font-medium">Uploads</h1>
 
       {/* TODO: replace with a list of rejected files. also show failed uploads there */}
@@ -86,7 +86,7 @@ function RouteComponent() {
       })}
 
       <div
-        className="mx-0! -mt-2 flex h-full w-full grow flex-col items-center justify-center gap-3 rounded-md inset-ring inset-ring-transparent data-[dragging=true]:bg-accent data-[dragging=true]:inset-ring-border"
+        className="mx-0! -mt-2 flex w-full grow flex-col items-center justify-center gap-3 overflow-hidden rounded-md inset-ring inset-ring-transparent data-[dragging=true]:bg-accent data-[dragging=true]:inset-ring-border"
         data-dragging={isDragActive}
         {...getRootProps()}
       >
