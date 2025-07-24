@@ -130,7 +130,9 @@ pub fn get_files_by_user_id(db, arg_1) {
     ))
   }
 
-  "select * from files where user_id = $1
+  "select * from files
+where user_id = $1
+order by created_at desc
 "
   |> pog.query
   |> pog.parameter(pog.text(uuid.to_string(arg_1)))
