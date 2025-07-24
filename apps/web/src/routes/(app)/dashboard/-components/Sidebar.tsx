@@ -1,12 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { Folder, Plus } from "lucide-react";
+import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/primitives/Button";
+import { useUploads } from "@/hooks/useUploads";
 
 export const Sidebar = () => {
+  const { uploadFiles } = useUploads();
+
+  const { open, getInputProps } = useDropzone({ onDrop: uploadFiles });
+
   return (
     <div className="flex w-54 shrink-0 flex-col gap-4">
-      {/* TODO: Actually hook this up */}
-      <Button size="lg">
+      <input {...getInputProps()} />
+      <Button size="lg" onClick={open}>
         <Plus />
         <span>Upload file</span>
       </Button>

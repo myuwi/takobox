@@ -1,48 +1,40 @@
+import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { CloudUpload, X } from "lucide-react";
-import { useDropzone, type DropzoneOptions } from "react-dropzone";
+import { useDropzone } from "react-dropzone";
 import { FileGrid } from "@/components/FileGrid";
 import { Alert } from "@/components/primitives/Alert";
 import { Button } from "@/components/primitives/Button";
 import { Progress } from "@/components/primitives/Progress";
-import { useFileUpload } from "@/hooks/useFileUpload";
+import { useUploads } from "@/hooks/useUploads";
 import { filesOptions, useFilesQuery } from "@/queries/files";
-import { settingsOptions, useSettingsQuery } from "@/queries/settings";
 
 export const Route = createFileRoute("/(app)/dashboard/")({
   component: RouteComponent,
   beforeLoad: async ({ context }) => {
-    await Promise.all([
-      context.queryClient.prefetchQuery(filesOptions),
-      context.queryClient.prefetchQuery(settingsOptions),
-    ]);
+    await context.queryClient.prefetchQuery(filesOptions);
   },
 });
 
 function RouteComponent() {
   const { data: files } = useFilesQuery();
-  const { data: settings } = useSettingsQuery();
-  const { uploadFile, uploads, abortUpload } = useFileUpload();
+  const {
+    uploads,
+    uploadFiles,
+    abortUpload,
+    fileRejections,
+    resetFileRejections,
+  } = useUploads();
 
-  const onDrop: DropzoneOptions["onDrop"] = (files, rejectedFiles) => {
-    if (rejectedFiles.length > 0) {
-      return;
-    }
+  useEffect(() => {
+    return () => resetFileRejections();
+  }, [resetFileRejections]);
 
-    // TODO: check quota before upload
-
-    for (const file of files) {
-      uploadFile(file);
-    }
-  };
-
-  const { open, getInputProps, getRootProps, isDragActive, fileRejections } =
-    useDropzone({
-      onDrop,
-      noClick: true,
-      noKeyboard: true,
-      maxSize: settings?.maxFileSize,
-    });
+  const { open, getInputProps, getRootProps, isDragActive } = useDropzone({
+    onDrop: uploadFiles,
+    noClick: true,
+    noKeyboard: true,
+  });
 
   return (
     <main className="flex w-full flex-col gap-4 [&_>_*]:mx-4">
@@ -50,7 +42,7 @@ function RouteComponent() {
 
       {/* TODO: replace with a list of rejected files. also show failed uploads there */}
       {fileRejections.length > 0 && (
-        <Alert>
+        <Alert onDismiss={() => resetFileRejections()}>
           Some of the selected files exceed the maximum file size limit.
         </Alert>
       )}

@@ -9,13 +9,17 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { meOptions } from "@/queries/me";
+import { settingsOptions } from "@/queries/settings";
 import css from "../styles.css?url";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
   beforeLoad: async ({ context }) => {
-    await context.queryClient.prefetchQuery(meOptions);
+    await Promise.all([
+      context.queryClient.prefetchQuery(meOptions),
+      context.queryClient.prefetchQuery(settingsOptions),
+    ]);
   },
   head: () => ({
     meta: [

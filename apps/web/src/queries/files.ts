@@ -20,21 +20,21 @@ export function useFilesQuery() {
   return useQuery(filesOptions);
 }
 
-interface UploadFileMutationOptions {
-  onUploadProgress?: ProgressCallback;
-}
-
 interface UploadFileMutationArgs {
   file: File;
   signal?: AbortSignal;
+  onUploadProgress?: ProgressCallback;
 }
 
-export function useUploadFileMutation(opts: UploadFileMutationOptions = {}) {
-  const { onUploadProgress } = opts;
+export function useUploadFileMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ file, signal }: UploadFileMutationArgs) => {
+    mutationFn: ({
+      file,
+      signal,
+      onUploadProgress,
+    }: UploadFileMutationArgs) => {
       return uploadFile(file, onUploadProgress, signal);
     },
     onSuccess: async (_) => {
