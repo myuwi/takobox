@@ -1,7 +1,7 @@
 list:
   @just --list
 
-watch:
+dev:
   watchexec --restart --clear --wrap-process=session --watch . --ignore build -- "gleam run"
 
 test:
