@@ -139,6 +139,37 @@ pub fn delete(
   wisp.ok()
 }
 
+pub fn download(
+  _req: Request,
+  ctx: Context,
+  req_ctx: RequestContext,
+  id: String,
+) -> Response {
+  use file_id <- given.ok(uuid.from_string(id), fn(_) {
+    web.json_message_response("Invalid file id.", 400)
+  })
+
+  // TODO: Don't check user id?
+  let res =
+    repo.get_file_by_id(
+      conn: ctx.db,
+      id: file_id,
+      user_id: req_ctx.session.user_id,
+    )
+
+  use found_file <- given.ok(res, fn(_) {
+    web.json_message_response(
+      "File doesn't exist or belongs to another user.",
+      404,
+    )
+  })
+
+  let file_path = filepath.join(ctx.uploads_path, found_file.name)
+
+  wisp.ok()
+  |> wisp.file_download(named: found_file.original, from: file_path)
+}
+
 pub fn regenerate_thumbnail(
   _req: Request,
   ctx: Context,

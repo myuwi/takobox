@@ -34,6 +34,7 @@ fn protected_routes(req: Request, ctx: Context) -> Response {
     Get, ["files"] -> files.index(req, ctx, req_ctx)
     Post, ["files"] -> files.create(req, ctx, req_ctx)
     Delete, ["files", id] -> files.delete(req, ctx, req_ctx, id)
+    Get, ["files", id, "download"] -> files.download(req, ctx, req_ctx, id)
     Post, ["files", id, "regenerate-thumbnail"] ->
       files.regenerate_thumbnail(req, ctx, req_ctx, id)
 

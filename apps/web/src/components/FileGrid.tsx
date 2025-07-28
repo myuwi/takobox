@@ -8,7 +8,14 @@ import {
   type SyntheticEvent,
 } from "react";
 import { useAtom, useSetAtom } from "jotai";
-import { Check, Ellipsis, File, RefreshCcw, Trash } from "lucide-react";
+import {
+  Check,
+  Download,
+  Ellipsis,
+  File,
+  RefreshCcw,
+  Trash,
+} from "lucide-react";
 import { regenerateThumbnail } from "@/api/files";
 import { selectedFilesAtom } from "@/atoms/selected-files";
 import { useDeleteFileMutation } from "@/queries/files";
@@ -74,6 +81,12 @@ const ContextMenuDropdown = ({
           <DropdownMenuItem onClick={handleRegenerateThumbnail}>
             <RefreshCcw />
             <span>Regenerate thumbnail</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <a href={`/api/files/${file.id}/download`}>
+              <Download />
+              <span>Download</span>
+            </a>
           </DropdownMenuItem>
           <DropdownMenuItem danger onClick={handleDelete}>
             <Trash />
