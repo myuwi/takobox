@@ -13,6 +13,7 @@ import {
   Download,
   Ellipsis,
   File,
+  LinkIcon,
   RefreshCcw,
   Trash,
 } from "lucide-react";
@@ -20,6 +21,7 @@ import { regenerateThumbnail } from "@/api/files";
 import { selectedFilesAtom } from "@/atoms/selected-files";
 import { useDeleteFileMutation } from "@/queries/files";
 import type { FileDto } from "@/types/FileDto";
+import { copyToClipboard } from "@/utils/clipboard";
 import { formatBytes } from "@/utils/files";
 import { Button } from "./primitives/Button";
 import {
@@ -51,11 +53,15 @@ const ContextMenuDropdown = ({
     }
   };
 
-  const handleDelete = async () => {
-    await deleteFile(file.id);
-    setSelectedFiles((selectedFiles) =>
-      selectedFiles.filter((f) => f !== file),
-    );
+  const downloadUrl = `/api/files/${file.id}/download`;
+
+  const handleCopyToClipboard = async () => {
+    try {
+      const url = new URL(file.name, location.origin);
+      await copyToClipboard(url.toString());
+    } catch (err) {
+      console.warn("Failed to copy link to clipboard", err);
+    }
   };
 
   const handleRegenerateThumbnail = async () => {
@@ -69,6 +75,13 @@ const ContextMenuDropdown = ({
       });
   };
 
+  const handleDelete = async () => {
+    await deleteFile(file.id);
+    setSelectedFiles((selectedFiles) =>
+      selectedFiles.filter((f) => f !== file),
+    );
+  };
+
   return (
     <DropdownMenu onOpenChange={handleOpenChange} modal={false}>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
@@ -78,15 +91,19 @@ const ContextMenuDropdown = ({
         onDoubleClick={stopPropagation}
       >
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={handleRegenerateThumbnail}>
-            <RefreshCcw />
-            <span>Regenerate thumbnail</span>
-          </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <a href={`/api/files/${file.id}/download`}>
+            <a href={downloadUrl}>
               <Download />
               <span>Download</span>
             </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleCopyToClipboard}>
+            <LinkIcon />
+            <span>Copy link</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleRegenerateThumbnail}>
+            <RefreshCcw />
+            <span>Regenerate thumbnail</span>
           </DropdownMenuItem>
           <DropdownMenuItem danger onClick={handleDelete}>
             <Trash />
