@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { LogOut, User } from "lucide-react";
+import { logout } from "@/api/auth";
 import { Button } from "@/components/primitives/Button";
 import {
   DropdownMenu,
@@ -13,10 +13,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/primitives/DropdownMenu";
 import { useMeQuery } from "@/queries/me";
-import { logout } from "@/utils/session";
 
 function AccountDropdown({ children }: PropsWithChildren) {
-  const handleLogout = useServerFn(logout);
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    await logout();
+    await navigate({
+      to: "/",
+      reloadDocument: true,
+    });
+  };
 
   return (
     <DropdownMenu modal={false}>
