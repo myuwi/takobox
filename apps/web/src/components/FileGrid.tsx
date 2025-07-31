@@ -105,7 +105,7 @@ const ContextMenuDropdown = ({
             <RefreshCcw />
             <span>Regenerate thumbnail</span>
           </DropdownMenuItem>
-          <DropdownMenuItem danger onClick={handleDelete}>
+          <DropdownMenuItem variant="destructive" onClick={handleDelete}>
             <Trash />
             <span>Delete</span>
           </DropdownMenuItem>

@@ -31,7 +31,10 @@ function AccountDropdown({ children }: PropsWithChildren) {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem danger onClick={() => handleLogout()}>
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => handleLogout()}
+          >
             <LogOut />
             <span>Log out</span>
           </DropdownMenuItem>
