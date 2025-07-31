@@ -13,5 +13,5 @@ export default {
     "^[.]",
   ],
   tailwindStylesheet: "./src/styles.css",
-  tailwindFunctions: ["cva"],
+  tailwindFunctions: ["cva", "twx"],
 };

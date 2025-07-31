@@ -41,14 +41,21 @@ function AccountDropdown({ children }: PropsWithChildren) {
   );
 }
 
-export default function Nav() {
+interface NavProps {
+  menuButton?: React.ReactNode;
+}
+
+export default function Nav({ menuButton }: NavProps) {
   const { data: user } = useMeQuery();
 
   return (
-    <nav className="mx-auto flex w-full max-w-screen-xl items-center justify-between gap-4 px-6 py-4">
-      <Link to="/" className="text-xl">
-        Tako<span className="text-primary">box</span>
-      </Link>
+    <nav className="mx-auto flex w-full max-w-screen-xl items-center justify-between gap-4 p-4">
+      <div className="flex items-center gap-2">
+        {menuButton}
+        <Link to="/" className="text-xl">
+          Tako<span className="text-primary">box</span>
+        </Link>
+      </div>
       <div className="flex items-center justify-end gap-4">
         {user ? (
           <AccountDropdown>
