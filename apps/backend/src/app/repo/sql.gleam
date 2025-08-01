@@ -10,7 +10,12 @@ import youid/uuid.{type Uuid}
 /// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub type GetUserByIdRow {
-  GetUserByIdRow(id: Uuid, username: String, password: String)
+  GetUserByIdRow(
+    id: Uuid,
+    username: String,
+    password: String,
+    created_at: Timestamp,
+  )
 }
 
 /// Runs the `get_user_by_id` query
@@ -24,7 +29,8 @@ pub fn get_user_by_id(db, arg_1) {
     use id <- decode.field(0, uuid_decoder())
     use username <- decode.field(1, decode.string)
     use password <- decode.field(2, decode.string)
-    decode.success(GetUserByIdRow(id:, username:, password:))
+    use created_at <- decode.field(3, pog.timestamp_decoder())
+    decode.success(GetUserByIdRow(id:, username:, password:, created_at:))
   }
 
   "select * from users where id = $1
@@ -147,7 +153,12 @@ order by created_at desc
 /// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub type GetUserByUsernameRow {
-  GetUserByUsernameRow(id: Uuid, username: String, password: String)
+  GetUserByUsernameRow(
+    id: Uuid,
+    username: String,
+    password: String,
+    created_at: Timestamp,
+  )
 }
 
 /// Runs the `get_user_by_username` query
@@ -161,7 +172,8 @@ pub fn get_user_by_username(db, arg_1) {
     use id <- decode.field(0, uuid_decoder())
     use username <- decode.field(1, decode.string)
     use password <- decode.field(2, decode.string)
-    decode.success(GetUserByUsernameRow(id:, username:, password:))
+    use created_at <- decode.field(3, pog.timestamp_decoder())
+    decode.success(GetUserByUsernameRow(id:, username:, password:, created_at:))
   }
 
   "select * from users where username = $1
@@ -331,7 +343,12 @@ where id = $1
 /// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub type CreateUserRow {
-  CreateUserRow(id: Uuid, username: String, password: String)
+  CreateUserRow(
+    id: Uuid,
+    username: String,
+    password: String,
+    created_at: Timestamp,
+  )
 }
 
 /// Runs the `create_user` query
@@ -340,20 +357,20 @@ pub type CreateUserRow {
 /// > 🐿️ This function was generated automatically using v4.0.0 of
 /// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
-pub fn create_user(db, arg_1, arg_2, arg_3) {
+pub fn create_user(db, arg_1, arg_2) {
   let decoder = {
     use id <- decode.field(0, uuid_decoder())
     use username <- decode.field(1, decode.string)
     use password <- decode.field(2, decode.string)
-    decode.success(CreateUserRow(id:, username:, password:))
+    use created_at <- decode.field(3, pog.timestamp_decoder())
+    decode.success(CreateUserRow(id:, username:, password:, created_at:))
   }
 
-  "insert into users (id, username, password) values ($1, $2, $3) returning *
+  "insert into users (username, password) values ($1, $2) returning *
 "
   |> pog.query
-  |> pog.parameter(pog.text(uuid.to_string(arg_1)))
+  |> pog.parameter(pog.text(arg_1))
   |> pog.parameter(pog.text(arg_2))
-  |> pog.parameter(pog.text(arg_3))
   |> pog.returning(decoder)
   |> pog.execute(db)
 }

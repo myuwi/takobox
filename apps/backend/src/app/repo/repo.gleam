@@ -28,10 +28,9 @@ pub fn create_user(
   username: String,
   password: String,
 ) -> Result(sql.CreateUserRow, DatabaseError) {
-  let uuid = uuid.v4()
   let password_hash = password.hash_password(password)
 
-  sql.create_user(conn, uuid, username, password_hash)
+  sql.create_user(conn, username, password_hash)
   |> result.map_error(QueryError)
   |> result.try(get_one)
 }

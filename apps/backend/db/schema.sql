@@ -54,9 +54,10 @@ CREATE TABLE public.sessions (
 --
 
 CREATE TABLE public.users (
-    id uuid NOT NULL,
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
     username text NOT NULL,
     password text NOT NULL,
+    created_at timestamp without time zone DEFAULT now() NOT NULL,
     CONSTRAINT users_username_check CHECK ((username = lower(username)))
 );
 
@@ -129,4 +130,5 @@ ALTER TABLE ONLY public.sessions
 INSERT INTO public.schema_migrations (version) VALUES
     ('20250224134749'),
     ('20250702083057'),
-    ('20250707145013');
+    ('20250707145013'),
+    ('20250801090641');
