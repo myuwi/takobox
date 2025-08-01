@@ -257,20 +257,17 @@ export const FileGrid = ({ files }: FileGridProps) => {
                 onClick={handleCheckboxClick}
                 onDoubleClick={stopPropagation}
               >
-                <Check
-                  size={16}
-                  className="group-not-aria-selected:invisible"
-                />
+                <Check className="size-4 group-not-aria-selected:invisible" />
               </span>
               <ContextMenuDropdown file={file} onOpen={handleMenuOpen}>
                 <Button
                   variant="accent"
-                  size="icon"
-                  className="invisible absolute right-1 bottom-1 size-6 p-1 group-hover:visible group-aria-selected:visible"
+                  size="icon-sm"
+                  className="invisible absolute right-1 bottom-1 group-hover:visible group-aria-selected:visible"
                   onClick={stopPropagation}
                   onDoubleClick={stopPropagation}
                 >
-                  <Ellipsis size={16} />
+                  <Ellipsis />
                 </Button>
               </ContextMenuDropdown>
             </div>

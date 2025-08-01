@@ -14,8 +14,8 @@ export const Alert = ({ children, onDismiss }: AlertProps) => {
       {onDismiss && (
         <Button
           variant="ghost"
-          size="icon"
-          className="ml-auto size-6 p-1"
+          size="icon-sm"
+          className="ml-auto"
           onClick={onDismiss}
         >
           <X />

@@ -48,7 +48,7 @@ export const Sidebar = () => {
         <SidebarGroup>
           <SidebarGroupLabel>
             <span>Collections</span>
-            <Button variant="ghost" size="icon" className="size-7 p-1">
+            <Button variant="ghost" size="icon-sm">
               <Plus className="p-0.5" />
             </Button>
           </SidebarGroupLabel>

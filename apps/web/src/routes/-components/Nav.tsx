@@ -64,7 +64,7 @@ export default function Nav({ menuButton }: NavProps) {
           <AccountDropdown>
             <Button variant="ghost">
               <span>Logged in as {user.username}</span>
-              <User size={20} />
+              <User />
             </Button>
           </AccountDropdown>
         ) : (
