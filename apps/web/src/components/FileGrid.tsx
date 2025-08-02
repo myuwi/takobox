@@ -1,6 +1,7 @@
 import {
-  useCallback,
   useEffect,
+  useLayoutEffect,
+  useRef,
   useState,
   type KeyboardEvent,
   type MouseEvent,
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 import { regenerateThumbnail } from "@/api/files";
 import { selectedFilesAtom } from "@/atoms/selected-files";
+import { thumbnailExtensions } from "@/constants/extensions";
 import { useDeleteFileMutation } from "@/queries/files";
 import type { FileDto } from "@/types/FileDto";
 import { copyToClipboard } from "@/utils/clipboard";
@@ -141,31 +143,36 @@ interface FileThumbnailProps {
 
 const FileThumbnail = ({ file }: FileThumbnailProps) => {
   const src = `/thumbs/${file.name.replace(/\.\w*$/, ".webp")}`;
-  const [loaded, setLoaded] = useState(false);
-
-  const imgRef = useCallback(
-    (img: HTMLImageElement | null) => {
-      if (!img) return;
-      img.src = src;
-    },
-    [src],
+  const canHaveThumbnail = thumbnailExtensions.some((ext) =>
+    file.name.endsWith(`.${ext}`),
   );
 
+  const [loaded, setLoaded] = useState(canHaveThumbnail);
+
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useLayoutEffect(() => {
+    const img = imgRef.current;
+
+    if (canHaveThumbnail && img?.complete) {
+      const loaded = img.naturalWidth > 0;
+      setLoaded(loaded);
+    }
+  }, [canHaveThumbnail]);
+
   return (
-    <>
-      <File
-        className="absolute"
-        style={{ display: loaded ? "none" : undefined }}
-      />
+    <div className="group flex aspect-4/3 w-full items-center justify-center overflow-hidden p-2">
+      <File style={{ display: loaded ? "none" : undefined }} />
       <img
-        ref={imgRef}
         alt=""
-        className="pointer-events-none absolute h-full w-full rounded-md object-cover"
+        ref={imgRef}
+        src={canHaveThumbnail ? src : undefined}
+        className="pointer-events-none max-h-full max-w-full rounded-sm object-contain"
         style={{ display: loaded ? undefined : "none" }}
-        onError={() => setLoaded(false)}
         onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(false)}
       />
-    </>
+    </div>
   );
 };
 
@@ -189,7 +196,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
 
   return (
     <div
-      className="group/grid relative grid h-full w-full grid-cols-[repeat(auto-fill,10rem)] content-start gap-4 overflow-auto p-4 max-md:justify-around"
+      className="group/grid relative grid h-full w-full grid-cols-[repeat(auto-fill,10rem)] content-start justify-around gap-2 overflow-auto p-2"
       onClick={handleGridClick}
       data-selecting={selectedFiles.length > 0}
     >
@@ -242,7 +249,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
         return (
           <div
             key={file.id}
-            className="group flex h-min w-40 flex-col items-center gap-1 select-none"
+            className="group flex h-min w-40 flex-col items-center rounded-md p-2 select-none hover:bg-accent/50 aria-selected:bg-accent"
             role="gridcell"
             tabIndex={0}
             aria-selected={selected}
@@ -250,10 +257,10 @@ export const FileGrid = ({ files }: FileGridProps) => {
             onDoubleClick={handleDoubleClick}
             onKeyDown={handleKeyDown}
           >
-            <div className="relative flex aspect-4/3 w-full flex-col items-center justify-center overflow-hidden rounded-md bg-accent/50 p-2 group-hover:bg-accent group-aria-selected:bg-accent">
+            <div className="relative w-full">
               <FileThumbnail file={file} />
               <span
-                className="invisible absolute top-2 left-2 rounded-sm bg-accent p-0.5 inset-ring inset-ring-primary-foreground group-hover:visible group-aria-selected:visible group-aria-selected:bg-primary-foreground group-aria-selected:text-white group-data-[selecting=true]/grid:visible"
+                className="invisible absolute top-0 left-0 rounded-sm bg-accent p-0.5 inset-ring inset-ring-primary-foreground group-hover:visible group-aria-selected:visible group-aria-selected:bg-primary-foreground group-aria-selected:text-white group-data-[selecting=true]/grid:visible"
                 onClick={handleCheckboxClick}
                 onDoubleClick={stopPropagation}
               >
@@ -263,7 +270,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
                 <Button
                   variant="accent"
                   size="icon-sm"
-                  className="invisible absolute right-1 bottom-1 group-hover:visible group-aria-selected:visible"
+                  className="invisible absolute right-0 bottom-0 group-hover:visible group-aria-selected:visible"
                   onClick={stopPropagation}
                   onDoubleClick={stopPropagation}
                 >
@@ -271,7 +278,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
                 </Button>
               </ContextMenuDropdown>
             </div>
-            <span className="w-full px-2 text-center break-all">
+            <span className="line-clamp-1 px-2 text-center break-all">
               {file.original}
             </span>
           </div>

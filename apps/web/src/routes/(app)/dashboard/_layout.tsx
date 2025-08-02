@@ -28,7 +28,7 @@ function RouteComponent() {
           </Button>
         }
       />
-      <div className="mx-auto flex w-full max-w-screen-xl grow gap-4 overflow-hidden p-4">
+      <div className="mx-auto flex w-full max-w-screen-xl grow gap-4 overflow-hidden p-4 pt-0">
         <Sidebar />
         <Outlet />
       </div>
