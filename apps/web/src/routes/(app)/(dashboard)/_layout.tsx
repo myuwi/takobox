@@ -2,9 +2,9 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
 import { Menu } from "lucide-react";
 import { sidebarOpenMobileAtom } from "@/atoms/sidebar";
+import { Nav } from "@/components/Nav";
 import { Button } from "@/components/primitives/Button";
-import Nav from "../../-components/Nav";
-import { Sidebar } from "./-components/Sidebar";
+import { Sidebar } from "@/components/Sidebar";
 
 export const Route = createFileRoute("/(app)/(dashboard)")({
   component: RouteComponent,

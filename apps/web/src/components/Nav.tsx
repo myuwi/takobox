@@ -14,7 +14,7 @@ import {
 } from "@/components/primitives/DropdownMenu";
 import { useMeQuery } from "@/queries/me";
 
-function AccountDropdown({ children }: PropsWithChildren) {
+const AccountDropdown = ({ children }: PropsWithChildren) => {
   const navigate = useNavigate();
   const handleLogout = async () => {
     await logout();
@@ -42,13 +42,13 @@ function AccountDropdown({ children }: PropsWithChildren) {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};
 
 interface NavProps {
   menuButton?: React.ReactNode;
 }
 
-export default function Nav({ menuButton }: NavProps) {
+export const Nav = ({ menuButton }: NavProps) => {
   const { data: user } = useMeQuery();
 
   return (
@@ -80,4 +80,4 @@ export default function Nav({ menuButton }: NavProps) {
       </div>
     </nav>
   );
-}
+};

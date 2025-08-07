@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Nav } from "@/components/Nav";
 import { Button } from "@/components/primitives/Button";
 import { useMeQuery } from "@/queries/me";
-import Nav from "./-components/Nav";
 
 export const Route = createFileRoute("/")({
   component: App,
