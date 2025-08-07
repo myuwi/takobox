@@ -23,7 +23,7 @@ function App() {
         <div className="flex flex-row gap-4">
           {user ? (
             <Button asChild>
-              <Link to="/dashboard">Open Dashboard</Link>
+              <Link to="/home">Open Takobox</Link>
             </Button>
           ) : (
             <Button asChild>

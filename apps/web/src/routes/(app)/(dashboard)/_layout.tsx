@@ -6,7 +6,7 @@ import { Button } from "@/components/primitives/Button";
 import Nav from "../../-components/Nav";
 import { Sidebar } from "./-components/Sidebar";
 
-export const Route = createFileRoute("/(app)/dashboard")({
+export const Route = createFileRoute("/(app)/(dashboard)")({
   component: RouteComponent,
 });
 

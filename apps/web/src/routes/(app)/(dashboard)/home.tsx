@@ -9,7 +9,7 @@ import { Progress } from "@/components/primitives/Progress";
 import { useUploads } from "@/hooks/useUploads";
 import { filesOptions, useFilesQuery } from "@/queries/files";
 
-export const Route = createFileRoute("/(app)/dashboard/")({
+export const Route = createFileRoute("/(app)/(dashboard)/home")({
   component: RouteComponent,
   beforeLoad: async ({ context }) => {
     await context.queryClient.prefetchQuery(filesOptions);
@@ -38,7 +38,7 @@ function RouteComponent() {
 
   return (
     <main className="flex w-full flex-col gap-4 [&_>_*]:mx-4">
-      <h1 className="text-base font-medium">Uploads</h1>
+      <h1 className="text-base font-medium">All files</h1>
 
       {/* TODO: replace with a list of rejected files. also show failed uploads there */}
       {fileRejections.length > 0 && (

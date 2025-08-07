@@ -35,7 +35,7 @@ export const Sidebar = () => {
             asChild
           >
             <Link
-              to="/dashboard"
+              to="/home"
               search={(prev) => ({ ...prev, collection: undefined })}
               activeOptions={{ explicitUndefined: true }}
             >

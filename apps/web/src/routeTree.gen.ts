@@ -14,8 +14,8 @@ import { Route as appLayoutRouteImport } from './routes/(app)/_layout'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as authSignupRouteImport } from './routes/(auth)/signup'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
-import { Route as appDashboardLayoutRouteImport } from './routes/(app)/dashboard/_layout'
-import { Route as appDashboardIndexRouteImport } from './routes/(app)/dashboard/index'
+import { Route as appdashboardLayoutRouteImport } from './routes/(app)/(dashboard)/_layout'
+import { Route as appdashboardHomeRouteImport } from './routes/(app)/(dashboard)/home'
 
 const authLayoutRoute = authLayoutRouteImport.update({
   id: '/(auth)',
@@ -40,54 +40,52 @@ const authLoginRoute = authLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => authLayoutRoute,
 } as any)
-const appDashboardLayoutRoute = appDashboardLayoutRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const appdashboardLayoutRoute = appdashboardLayoutRouteImport.update({
+  id: '/(dashboard)',
   getParentRoute: () => appLayoutRoute,
 } as any)
-const appDashboardIndexRoute = appDashboardIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => appDashboardLayoutRoute,
+const appdashboardHomeRoute = appdashboardHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => appdashboardLayoutRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof authLayoutRouteWithChildren
-  '/dashboard': typeof appDashboardLayoutRouteWithChildren
+  '/': typeof appdashboardLayoutRouteWithChildren
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
-  '/dashboard/': typeof appDashboardIndexRoute
+  '/home': typeof appdashboardHomeRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof authLayoutRouteWithChildren
+  '/': typeof appdashboardLayoutRouteWithChildren
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
-  '/dashboard': typeof appDashboardIndexRoute
+  '/home': typeof appdashboardHomeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/(app)': typeof appLayoutRouteWithChildren
   '/(auth)': typeof authLayoutRouteWithChildren
-  '/(app)/dashboard': typeof appDashboardLayoutRouteWithChildren
+  '/(app)/(dashboard)': typeof appdashboardLayoutRouteWithChildren
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/signup': typeof authSignupRoute
-  '/(app)/dashboard/': typeof appDashboardIndexRoute
+  '/(app)/(dashboard)/home': typeof appdashboardHomeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/login' | '/signup' | '/dashboard/'
+  fullPaths: '/' | '/login' | '/signup' | '/home'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/signup' | '/dashboard'
+  to: '/' | '/login' | '/signup' | '/home'
   id:
     | '__root__'
     | '/'
     | '/(app)'
     | '/(auth)'
-    | '/(app)/dashboard'
+    | '/(app)/(dashboard)'
     | '/(auth)/login'
     | '/(auth)/signup'
-    | '/(app)/dashboard/'
+    | '/(app)/(dashboard)/home'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -133,40 +131,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authLoginRouteImport
       parentRoute: typeof authLayoutRoute
     }
-    '/(app)/dashboard': {
-      id: '/(app)/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof appDashboardLayoutRouteImport
+    '/(app)/(dashboard)': {
+      id: '/(app)/(dashboard)'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof appdashboardLayoutRouteImport
       parentRoute: typeof appLayoutRoute
     }
-    '/(app)/dashboard/': {
-      id: '/(app)/dashboard/'
-      path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof appDashboardIndexRouteImport
-      parentRoute: typeof appDashboardLayoutRoute
+    '/(app)/(dashboard)/home': {
+      id: '/(app)/(dashboard)/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof appdashboardHomeRouteImport
+      parentRoute: typeof appdashboardLayoutRoute
     }
   }
 }
 
-interface appDashboardLayoutRouteChildren {
-  appDashboardIndexRoute: typeof appDashboardIndexRoute
+interface appdashboardLayoutRouteChildren {
+  appdashboardHomeRoute: typeof appdashboardHomeRoute
 }
 
-const appDashboardLayoutRouteChildren: appDashboardLayoutRouteChildren = {
-  appDashboardIndexRoute: appDashboardIndexRoute,
+const appdashboardLayoutRouteChildren: appdashboardLayoutRouteChildren = {
+  appdashboardHomeRoute: appdashboardHomeRoute,
 }
 
-const appDashboardLayoutRouteWithChildren =
-  appDashboardLayoutRoute._addFileChildren(appDashboardLayoutRouteChildren)
+const appdashboardLayoutRouteWithChildren =
+  appdashboardLayoutRoute._addFileChildren(appdashboardLayoutRouteChildren)
 
 interface appLayoutRouteChildren {
-  appDashboardLayoutRoute: typeof appDashboardLayoutRouteWithChildren
+  appdashboardLayoutRoute: typeof appdashboardLayoutRouteWithChildren
 }
 
 const appLayoutRouteChildren: appLayoutRouteChildren = {
-  appDashboardLayoutRoute: appDashboardLayoutRouteWithChildren,
+  appdashboardLayoutRoute: appdashboardLayoutRouteWithChildren,
 }
 
 const appLayoutRouteWithChildren = appLayoutRoute._addFileChildren(
