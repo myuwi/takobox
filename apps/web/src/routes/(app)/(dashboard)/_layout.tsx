@@ -5,9 +5,13 @@ import { sidebarOpenMobileAtom } from "@/atoms/sidebar";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/primitives/Button";
 import { Sidebar } from "@/components/Sidebar";
+import { collectionsOptions } from "@/queries/collections";
 
 export const Route = createFileRoute("/(app)/(dashboard)")({
   component: RouteComponent,
+  beforeLoad: async ({ context }) => {
+    await context.queryClient.prefetchQuery(collectionsOptions);
+  },
 });
 
 function RouteComponent() {

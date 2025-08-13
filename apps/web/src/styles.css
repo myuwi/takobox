@@ -23,6 +23,12 @@
 }
 
 @layer base {
+  *,
+  ::before,
+  ::after {
+    @apply border-border;
+  }
+
   body {
     @apply h-dvh bg-background text-sm text-foreground;
   }

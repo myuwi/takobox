@@ -1,12 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { useAtom } from "jotai";
-import { Folder, Plus } from "lucide-react";
+import { Folder, Plus, Tag } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { sidebarOpenMobileAtom } from "@/atoms/sidebar";
 import { Button } from "@/components/primitives/Button";
 import { Sheet, SheetContent } from "@/components/primitives/Sheet";
 import { useUploads } from "@/hooks/useUploads";
+import { useCollectionsQuery } from "@/queries/collections";
 import { twx } from "@/utils/twx";
+import { CreateCollectionDialog } from "./CreateCollectionDialog";
 
 const SidebarContent = twx.div`flex flex-col gap-4`;
 const SidebarGroup = twx.div`flex flex-col gap-1`;
@@ -16,6 +18,7 @@ const SidebarGroupContent = twx.div`flex flex-col gap-1`;
 export const Sidebar = () => {
   const { uploadFiles } = useUploads();
   const [openMobile, setOpenMobile] = useAtom(sidebarOpenMobileAtom);
+  const { data: collections } = useCollectionsQuery();
 
   const { open, getInputProps } = useDropzone({ onDrop: uploadFiles });
 
@@ -48,12 +51,35 @@ export const Sidebar = () => {
         <SidebarGroup>
           <SidebarGroupLabel>
             <span>Collections</span>
-            <Button variant="ghost" size="icon-sm">
-              <Plus className="p-0.5" />
-            </Button>
+            <CreateCollectionDialog
+              trigger={
+                <Button variant="ghost" size="icon-sm">
+                  <Plus className="p-0.5" />
+                </Button>
+              }
+            />
           </SidebarGroupLabel>
 
-          <SidebarGroupContent>{/* TODO */}</SidebarGroupContent>
+          <SidebarGroupContent>
+            {collections?.map((collection) => {
+              return (
+                <Button
+                  key={collection.id}
+                  className="group justify-start data-[status=active]:bg-accent/80 data-[status=active]:hover:bg-accent"
+                  variant="ghost"
+                  asChild
+                >
+                  <Link
+                    to="/home"
+                    search={(prev) => ({ ...prev, collection: collection.id })}
+                  >
+                    <Tag className="p-0.5" />
+                    <span>{collection.name}</span>
+                  </Link>
+                </Button>
+              );
+            })}
+          </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
     </div>
