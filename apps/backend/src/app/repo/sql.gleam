@@ -41,6 +41,47 @@ pub fn get_user_by_id(db, arg_1) {
   |> pog.execute(db)
 }
 
+/// A row you get from running the `create_collection` query
+/// defined in `./src/app/repo/sql/create_collection.sql`.
+///
+/// > 🐿️ This type definition was generated automatically using v4.0.0 of the
+/// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub type CreateCollectionRow {
+  CreateCollectionRow(
+    id: Uuid,
+    user_id: Uuid,
+    name: String,
+    created_at: Timestamp,
+  )
+}
+
+/// Runs the `create_collection` query
+/// defined in `./src/app/repo/sql/create_collection.sql`.
+///
+/// > 🐿️ This function was generated automatically using v4.0.0 of
+/// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub fn create_collection(db, arg_1, arg_2) {
+  let decoder = {
+    use id <- decode.field(0, uuid_decoder())
+    use user_id <- decode.field(1, uuid_decoder())
+    use name <- decode.field(2, decode.string)
+    use created_at <- decode.field(3, pog.timestamp_decoder())
+    decode.success(CreateCollectionRow(id:, user_id:, name:, created_at:))
+  }
+
+  "insert into collections (user_id, name)
+values ($1, $2)
+returning *
+"
+  |> pog.query
+  |> pog.parameter(pog.text(uuid.to_string(arg_1)))
+  |> pog.parameter(pog.text(arg_2))
+  |> pog.returning(decoder)
+  |> pog.execute(db)
+}
+
 /// A row you get from running the `create_file` query
 /// defined in `./src/app/repo/sql/create_file.sql`.
 ///
@@ -142,6 +183,47 @@ order by created_at desc
 "
   |> pog.query
   |> pog.parameter(pog.text(uuid.to_string(arg_1)))
+  |> pog.returning(decoder)
+  |> pog.execute(db)
+}
+
+/// A row you get from running the `delete_collection_by_id` query
+/// defined in `./src/app/repo/sql/delete_collection_by_id.sql`.
+///
+/// > 🐿️ This type definition was generated automatically using v4.0.0 of the
+/// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub type DeleteCollectionByIdRow {
+  DeleteCollectionByIdRow(
+    id: Uuid,
+    user_id: Uuid,
+    name: String,
+    created_at: Timestamp,
+  )
+}
+
+/// Runs the `delete_collection_by_id` query
+/// defined in `./src/app/repo/sql/delete_collection_by_id.sql`.
+///
+/// > 🐿️ This function was generated automatically using v4.0.0 of
+/// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub fn delete_collection_by_id(db, arg_1, arg_2) {
+  let decoder = {
+    use id <- decode.field(0, uuid_decoder())
+    use user_id <- decode.field(1, uuid_decoder())
+    use name <- decode.field(2, decode.string)
+    use created_at <- decode.field(3, pog.timestamp_decoder())
+    decode.success(DeleteCollectionByIdRow(id:, user_id:, name:, created_at:))
+  }
+
+  "delete from collections 
+where id = $1 and user_id = $2
+returning *
+"
+  |> pog.query
+  |> pog.parameter(pog.text(uuid.to_string(arg_1)))
+  |> pog.parameter(pog.text(uuid.to_string(arg_2)))
   |> pog.returning(decoder)
   |> pog.execute(db)
 }
@@ -423,6 +505,46 @@ returning *
   |> pog.query
   |> pog.parameter(pog.text(uuid.to_string(arg_1)))
   |> pog.parameter(pog.text(uuid.to_string(arg_2)))
+  |> pog.returning(decoder)
+  |> pog.execute(db)
+}
+
+/// A row you get from running the `get_collections_by_user_id` query
+/// defined in `./src/app/repo/sql/get_collections_by_user_id.sql`.
+///
+/// > 🐿️ This type definition was generated automatically using v4.0.0 of the
+/// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub type GetCollectionsByUserIdRow {
+  GetCollectionsByUserIdRow(
+    id: Uuid,
+    user_id: Uuid,
+    name: String,
+    created_at: Timestamp,
+  )
+}
+
+/// Runs the `get_collections_by_user_id` query
+/// defined in `./src/app/repo/sql/get_collections_by_user_id.sql`.
+///
+/// > 🐿️ This function was generated automatically using v4.0.0 of
+/// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub fn get_collections_by_user_id(db, arg_1) {
+  let decoder = {
+    use id <- decode.field(0, uuid_decoder())
+    use user_id <- decode.field(1, uuid_decoder())
+    use name <- decode.field(2, decode.string)
+    use created_at <- decode.field(3, pog.timestamp_decoder())
+    decode.success(GetCollectionsByUserIdRow(id:, user_id:, name:, created_at:))
+  }
+
+  "select * from collections
+where user_id = $1
+order by name asc
+"
+  |> pog.query
+  |> pog.parameter(pog.text(uuid.to_string(arg_1)))
   |> pog.returning(decoder)
   |> pog.execute(db)
 }

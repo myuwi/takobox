@@ -3,6 +3,7 @@ import wisp.{type Request, type Response}
 
 import app/context.{type Context, RequestContext}
 import app/handlers/auth
+import app/handlers/collections
 import app/handlers/files
 import app/handlers/me
 import app/handlers/root
@@ -30,6 +31,10 @@ fn protected_routes(req: Request, ctx: Context) -> Response {
 
   case req.method, wisp.path_segments(req) {
     Get, ["me"] -> me.show(req, ctx, req_ctx)
+
+    Get, ["collections"] -> collections.index(req, ctx, req_ctx)
+    Post, ["collections"] -> collections.create(req, ctx, req_ctx)
+    Delete, ["collections", id] -> collections.delete(req, ctx, req_ctx, id)
 
     Get, ["files"] -> files.index(req, ctx, req_ctx)
     Post, ["files"] -> files.create(req, ctx, req_ctx)

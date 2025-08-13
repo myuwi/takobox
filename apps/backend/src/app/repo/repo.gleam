@@ -4,6 +4,7 @@ import pog
 import youid/uuid.{type Uuid}
 
 import app/auth/password
+import app/model/collection.{type Collection, Collection}
 import app/model/file.{type File, File}
 import app/repo/sql
 
@@ -143,6 +144,46 @@ pub fn delete_file_by_id(
   user_id user_id: Uuid,
 ) -> Result(sql.DeleteFileByIdRow, DatabaseError) {
   sql.delete_file_by_id(conn, id, user_id)
+  |> result.map_error(QueryError)
+  |> result.try(get_one)
+}
+
+// Collections
+
+pub fn create_collection(
+  conn conn: pog.Connection,
+  user_id user_id: Uuid,
+  name name: String,
+) -> Result(sql.CreateCollectionRow, DatabaseError) {
+  sql.create_collection(conn, user_id, name)
+  |> result.map_error(QueryError)
+  |> result.try(get_one)
+}
+
+pub fn get_collections_by_user_id(
+  conn: pog.Connection,
+  user_id: Uuid,
+) -> Result(List(Collection), DatabaseError) {
+  sql.get_collections_by_user_id(conn, user_id)
+  |> result.map(fn(res) {
+    list.map(res.rows, fn(row) {
+      Collection(
+        id: row.id,
+        user_id: row.user_id,
+        name: row.name,
+        created_at: row.created_at,
+      )
+    })
+  })
+  |> result.map_error(QueryError)
+}
+
+pub fn delete_collection_by_id(
+  conn conn: pog.Connection,
+  id id: Uuid,
+  user_id user_id: Uuid,
+) -> Result(sql.DeleteCollectionByIdRow, DatabaseError) {
+  sql.delete_collection_by_id(conn, id, user_id)
   |> result.map_error(QueryError)
   |> result.try(get_one)
 }
