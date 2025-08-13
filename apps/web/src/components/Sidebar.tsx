@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useAtom } from "jotai";
-import { Folder, Plus, Tag } from "lucide-react";
+import { Folder, MoreHorizontal, Plus, Tag } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { sidebarOpenMobileAtom } from "@/atoms/sidebar";
 import { Button } from "@/components/primitives/Button";
@@ -8,6 +8,7 @@ import { Sheet, SheetContent } from "@/components/primitives/Sheet";
 import { useUploads } from "@/hooks/useUploads";
 import { useCollectionsQuery } from "@/queries/collections";
 import { twx } from "@/utils/twx";
+import { CollectionDropdownMenu } from "./CollectionDropdownMenu";
 import { CreateCollectionDialog } from "./CreateCollectionDialog";
 
 const SidebarContent = twx.div`flex flex-col gap-4`;
@@ -75,6 +76,19 @@ export const Sidebar = () => {
                   >
                     <Tag className="p-0.5" />
                     <span>{collection.name}</span>
+
+                    <CollectionDropdownMenu
+                      collection={collection}
+                      trigger={
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="invisible ml-auto group-hover:visible data-[state=open]:visible"
+                        >
+                          <MoreHorizontal className="p-0.5" />
+                        </Button>
+                      }
+                    ></CollectionDropdownMenu>
                   </Link>
                 </Button>
               );
