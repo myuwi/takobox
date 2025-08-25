@@ -9,7 +9,7 @@
 
 ## Built with
 
-- Gleam - Backend Language
+- Rust - Backend Language
 - Bun - JavaScript Runtime
 - React - Frontend Framework
 - TanStack - Core Libraries

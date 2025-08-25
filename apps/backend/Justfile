@@ -2,12 +2,8 @@ list:
   @just --list
 
 dev:
-  watchexec --restart --clear --wrap-process=session --watch . --ignore build -- "gleam run"
-
-test:
-  dbmate -e TEST_DATABASE_URL up
-  gleam test
+  cargo watch -x run
 
 migrate:
-  dbmate up
-  gleam run -m squirrel
+  dbmate -e TAKOBOX_DATABASE_URL up
+  cargo sqlx prepare --database-url $TAKOBOX_DATABASE_URL
