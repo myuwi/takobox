@@ -9,7 +9,9 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::http::{
-    auth::session::Session, error::Error, model::collection::Collection, state::AppState,
+    error::{Error, ResultExt},
+    model::{collection::Collection, session::Session},
+    state::AppState,
 };
 
 async fn index(
@@ -24,8 +26,7 @@ async fn index(
         session.user_id,
     )
     .fetch_all(&pool)
-    .await
-    .map_err(|_| Error::Internal)?;
+    .await?;
 
     Ok(Json(collections))
 }
@@ -58,14 +59,9 @@ async fn create(
     )
     .fetch_one(&pool)
     .await
-    .map_err(
-        |err| match err.as_database_error().and_then(|e| e.constraint()) {
-            Some("collections_user_id_name_key") => Error::UnprocessableEntity(
-                "A collection with this name already exists. Please try another name.",
-            ),
-            _ => Error::Internal,
-        },
-    )?;
+    .on_constraint("collections_user_id_name_key", |_| {
+        Error::Conflict("A collection with this name already exists. Please try another name.")
+    })?;
 
     Ok(Json(collection))
 }
@@ -75,15 +71,20 @@ async fn delete_collection(
     session: Session,
     Path(id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    sqlx::query!(
+    let res = sqlx::query!(
         "delete from collections
         where id = $1 and user_id = $2",
         id,
-        session.user_id,
+        session.user_id
     )
     .execute(&pool)
-    .await
-    .map_err(|_| Error::NotFound("Collection doesn't exist or belongs to another user."))?;
+    .await?;
+
+    if res.rows_affected() == 0 {
+        return Err(Error::NotFound(
+            "Collection doesn't exist or belongs to another user.",
+        ));
+    }
 
     Ok(StatusCode::NO_CONTENT)
 }

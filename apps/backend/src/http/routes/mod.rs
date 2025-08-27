@@ -25,19 +25,17 @@ async fn fallback(method: Method, uri: Uri) -> Response {
 }
 
 pub fn routes(state: &AppState) -> Router<AppState> {
+    let protected_routes = Router::new()
+        .route("/me", get(me::show))
+        .nest("/files", files::routes())
+        .nest("/collections", collections::routes())
+        .route_layer(middleware::from_fn(require_auth));
+
     Router::new()
-        .merge(protected_routes())
         .route("/", get(root))
-        .nest("/auth", auth::routes())
         .route("/settings", get(settings::show))
+        .nest("/auth", auth::routes())
+        .merge(protected_routes)
         .layer(middleware::from_fn_with_state(state.clone(), auth))
         .fallback(fallback)
-}
-
-pub fn protected_routes() -> Router<AppState> {
-    Router::new()
-        .route("/me", get(me::show))
-        .nest("/collections", collections::routes())
-        .nest("/files", files::routes())
-        .route_layer(middleware::from_fn(require_auth))
 }

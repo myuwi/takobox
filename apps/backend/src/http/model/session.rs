@@ -9,6 +9,8 @@ const EXPIRATION: PgInterval = PgInterval {
     microseconds: 0,
 };
 
+// TODO: Clear expired sessions?
+
 #[derive(Clone, Copy, Debug, FromRow)]
 pub struct Session {
     pub id: Uuid,

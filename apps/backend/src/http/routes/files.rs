@@ -1,3 +1,6 @@
+use std::ffi::OsStr;
+
+use anyhow::anyhow;
 use axum::{
     Json, Router,
     extract::{DefaultBodyLimit, Multipart, Path, State},
@@ -7,7 +10,6 @@ use axum::{
 };
 use axum_extra::response::FileStream;
 use nanoid::nanoid;
-use std::ffi::OsStr;
 use tokio::io::AsyncWriteExt;
 use tokio_util::io::ReaderStream;
 use tracing::error;
@@ -16,9 +18,8 @@ use uuid::Uuid;
 use crate::{
     THUMBS_PATH, UPLOADS_PATH,
     http::{
-        auth::session::Session,
         error::Error,
-        model::{file::File, settings::Settings},
+        model::{file::File, session::Session, settings::Settings},
         processing::thumbnail::{self, ThumbnailError},
         state::AppState,
     },
@@ -36,8 +37,7 @@ async fn index(
         session.user_id,
     )
     .fetch_all(&pool)
-    .await
-    .map_err(|_| Error::Internal)?;
+    .await?;
 
     Ok(Json(files))
 }
@@ -48,7 +48,11 @@ async fn create(
     session: Session,
     mut multipart: Multipart,
 ) -> Result<impl IntoResponse, Error> {
-    while let Some(field) = multipart.next_field().await.map_err(|_| Error::Internal)? {
+    while let Some(field) = multipart
+        .next_field()
+        .await
+        .map_err(|e| Error::Internal(e.into()))?
+    {
         let Some("file") = field.name() else { continue };
 
         let original_name = field
@@ -68,17 +72,17 @@ async fn create(
         let file_path = format!("{}/{}", UPLOADS_PATH, file_name);
 
         // TODO: Don't read everything into memory
-        let data = field.bytes().await.map_err(|_| Error::Internal)?;
+        let data = field.bytes().await.map_err(|e| Error::Internal(e.into()))?;
         let file_size = data.len() as i64;
 
         let mut file_handle = tokio::fs::File::create_new(&file_path)
             .await
-            .map_err(|_| Error::Internal)?;
+            .map_err(|e| Error::Internal(e.into()))?;
 
         file_handle
             .write_all(&data)
             .await
-            .map_err(|_| Error::Internal)?;
+            .map_err(|e| Error::Internal(e.into()))?;
 
         let file = sqlx::query_as!(
             File,
@@ -91,8 +95,7 @@ async fn create(
             file_size,
         )
         .fetch_one(&pool)
-        .await
-        .map_err(|_| Error::Internal)?;
+        .await?;
 
         match thumbnail::generate_thumbnail(&file_path).await {
             Ok(_) | Err(ThumbnailError::UnsupportedFiletype) => (),
@@ -120,15 +123,15 @@ async fn delete_file(
         id,
         session.user_id,
     )
-    .fetch_one(&pool)
-    .await
-    .map_err(|_| Error::NotFound("File doesn't exist or belongs to another user."))?;
+    .fetch_optional(&pool)
+    .await?
+    .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 
     let file_id = file
         .name
         .rsplit_once('.')
         .map(|s| s.0)
-        .ok_or(Error::Internal)?;
+        .unwrap_or(&file.name);
 
     let file_path = format!("{}/{}", UPLOADS_PATH, file.name);
     let thumb_path = format!("{}/{}.webp", THUMBS_PATH, file_id);
@@ -155,9 +158,9 @@ async fn download(
         id,
         session.user_id,
     )
-    .fetch_one(&pool)
-    .await
-    .map_err(|_| Error::NotFound("File doesn't exist or belongs to another user."))?;
+    .fetch_optional(&pool)
+    .await?
+    .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 
     let file_path = format!("{}/{}", UPLOADS_PATH, file.name);
     let file_stream = FileStream::<ReaderStream<tokio::fs::File>>::from_path(file_path)
@@ -180,25 +183,29 @@ async fn regenerate_thumbnail(
         id,
         session.user_id,
     )
-    .fetch_one(&pool)
-    .await
-    .map_err(|_| Error::NotFound("File doesn't exist or belongs to another user."))?;
+    .fetch_optional(&pool)
+    .await?
+    .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 
     let file_path = format!("{}/{}", UPLOADS_PATH, file.name);
 
-    match thumbnail::generate_thumbnail(&file_path).await {
-        Ok(file_name) => Ok((
-            StatusCode::CREATED,
-            [("Location", format!("/thumbs/{}", file_name))],
-        )),
-        Err(ThumbnailError::UnsupportedFiletype) => {
-            Err(Error::BadRequest("Filetype doesn't support thumbnails."))
-        }
-        Err(ThumbnailError::ShellError(err)) => {
-            error!("Error creating thumbnail for \"{}\": {}", file_path, err);
-            Err(Error::Internal)
-        }
-    }
+    let file_name = thumbnail::generate_thumbnail(&file_path)
+        .await
+        .map_err(|err| match err {
+            ThumbnailError::UnsupportedFiletype => {
+                Error::BadRequest("Filetype doesn't support thumbnails.")
+            }
+            ThumbnailError::ShellError(err) => Error::Internal(anyhow!(
+                "Error creating thumbnail for \"{}\": {}",
+                file_path,
+                err
+            )),
+        })?;
+
+    Ok((
+        StatusCode::CREATED,
+        [("Location", format!("/thumbs/{}", file_name))],
+    ))
 }
 
 pub fn routes() -> Router<AppState> {
