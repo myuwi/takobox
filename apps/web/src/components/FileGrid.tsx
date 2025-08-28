@@ -249,7 +249,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
           return (
             <div
               key={file.id}
-              className="group flex h-min w-40 flex-col items-center rounded-md p-2 select-none hover:bg-accent/50 aria-selected:bg-accent"
+              className="group flex h-min w-40 cursor-pointer flex-col items-center rounded-md p-2 select-none hover:bg-accent/50 aria-selected:bg-accent"
               role="gridcell"
               tabIndex={0}
               aria-selected={selected}
