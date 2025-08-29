@@ -12,7 +12,7 @@ import { useAtom, useSetAtom } from "jotai";
 import {
   Check,
   Download,
-  Ellipsis,
+  EllipsisVertical,
   File,
   LinkIcon,
   RefreshCcw,
@@ -161,7 +161,7 @@ const FileThumbnail = ({ file }: FileThumbnailProps) => {
   }, [canHaveThumbnail]);
 
   return (
-    <div className="group flex aspect-4/3 w-full items-center justify-center overflow-hidden p-2">
+    <div className="group flex aspect-4/3 w-full items-center justify-center overflow-hidden px-4 py-1">
       <File style={{ display: loaded ? "none" : undefined }} />
       <img
         alt=""
@@ -260,7 +260,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
               <div className="relative w-full">
                 <FileThumbnail file={file} />
                 <span
-                  className="invisible absolute top-0 left-0 rounded-sm bg-accent p-0.5 inset-ring inset-ring-primary-foreground group-hover:visible group-aria-selected:visible group-aria-selected:bg-primary-foreground group-aria-selected:text-white group-data-[selecting=true]/grid:visible"
+                  className="invisible absolute top-0.5 left-0.5 rounded-sm bg-accent p-0.5 inset-ring inset-ring-primary-foreground group-hover:visible group-aria-selected:visible group-aria-selected:bg-primary-foreground group-aria-selected:text-white group-data-[selecting=true]/grid:visible"
                   onClick={handleCheckboxClick}
                   onDoubleClick={stopPropagation}
                 >
@@ -268,17 +268,17 @@ export const FileGrid = ({ files }: FileGridProps) => {
                 </span>
                 <ContextMenuDropdown file={file} onOpen={handleMenuOpen}>
                   <Button
-                    variant="accent"
+                    variant="ghost"
                     size="icon-sm"
-                    className="invisible absolute right-0 bottom-0 group-hover:visible group-aria-selected:visible"
+                    className="invisible absolute right-0 bottom-0 group-hover:visible group-aria-selected:visible hover:bg-muted data-[state=open]:bg-muted"
                     onClick={stopPropagation}
                     onDoubleClick={stopPropagation}
                   >
-                    <Ellipsis />
+                    <EllipsisVertical className="size-4" />
                   </Button>
                 </ContextMenuDropdown>
               </div>
-              <span className="line-clamp-1 px-2 text-center break-all">
+              <span className="line-clamp-1 px-1 text-center break-all">
                 {file.original}
               </span>
             </div>

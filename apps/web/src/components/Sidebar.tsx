@@ -54,7 +54,7 @@ export const Sidebar = () => {
             <span>Collections</span>
             <CreateCollectionDialog
               trigger={
-                <Button variant="ghost" size="icon-sm">
+                <Button variant="ghost" size="icon-sm" className="mr-1">
                   <Plus className="p-0.5" />
                 </Button>
               }
@@ -66,24 +66,27 @@ export const Sidebar = () => {
               return (
                 <Button
                   key={collection.id}
-                  className="group justify-start data-[status=active]:bg-accent/80 data-[status=active]:hover:bg-accent"
+                  className="group justify-start pr-1 has-data-[state=open]:bg-accent data-[status=active]:bg-accent/80 data-[status=active]:hover:bg-accent"
                   variant="ghost"
                   asChild
                 >
                   <Link
                     to="/home"
-                    search={(prev) => ({ ...prev, collection: collection.id })}
+                    search={(prev) => ({
+                      ...prev,
+                      collection: collection.id,
+                    })}
                   >
                     <Tag className="p-0.5" />
                     <span>{collection.name}</span>
-
                     <CollectionDropdownMenu
                       collection={collection}
                       trigger={
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          className="invisible ml-auto group-hover:visible data-[state=open]:visible"
+                          className="invisible ml-auto group-hover:visible hover:bg-muted data-[state=open]:visible data-[state=open]:bg-muted"
+                          onClick={(e) => e.preventDefault()}
                         >
                           <MoreHorizontal className="p-0.5" />
                         </Button>

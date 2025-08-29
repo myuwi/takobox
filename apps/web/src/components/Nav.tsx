@@ -62,7 +62,7 @@ export const Nav = ({ menuButton }: NavProps) => {
       <div className="flex items-center justify-end gap-4">
         {user ? (
           <AccountDropdown>
-            <Button variant="ghost">
+            <Button variant="ghost" className="data-[state=open]:bg-accent">
               <span>Logged in as {user.username}</span>
               <User />
             </Button>
