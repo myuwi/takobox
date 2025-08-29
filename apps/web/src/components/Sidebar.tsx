@@ -4,11 +4,11 @@ import { Folder, MoreHorizontal, Plus, Tag } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { sidebarOpenMobileAtom } from "@/atoms/sidebar";
 import { Button } from "@/components/primitives/Button";
-import { Sheet, SheetContent } from "@/components/primitives/Sheet";
+import * as Sheet from "@/components/primitives/Sheet";
 import { useUploads } from "@/hooks/useUploads";
 import { useCollectionsQuery } from "@/queries/collections";
 import { twx } from "@/utils/twx";
-import { CollectionDropdownMenu } from "./CollectionDropdownMenu";
+import { CollectionMenu } from "./CollectionMenu";
 import { CreateCollectionDialog } from "./CreateCollectionDialog";
 
 const SidebarContent = twx.div`flex flex-col gap-4`;
@@ -36,16 +36,16 @@ export const Sidebar = () => {
           <Button
             className="justify-start data-[status=active]:bg-accent/80 data-[status=active]:hover:bg-accent"
             variant="ghost"
-            asChild
+            render={
+              <Link
+                to="/home"
+                search={(prev) => ({ ...prev, collection: undefined })}
+                activeOptions={{ explicitUndefined: true }}
+              />
+            }
           >
-            <Link
-              to="/home"
-              search={(prev) => ({ ...prev, collection: undefined })}
-              activeOptions={{ explicitUndefined: true }}
-            >
-              <Folder className="p-0.5" />
-              <span>All files</span>
-            </Link>
+            <Folder className="p-0.5" />
+            <span>All files</span>
           </Button>
         </SidebarGroupContent>
 
@@ -66,33 +66,33 @@ export const Sidebar = () => {
               return (
                 <Button
                   key={collection.id}
-                  className="group justify-start pr-1 has-data-[state=open]:bg-accent data-[status=active]:bg-accent/80 data-[status=active]:hover:bg-accent"
+                  className="group justify-start pr-1 has-data-popup-open:bg-accent data-[status=active]:bg-accent/80 data-[status=active]:hover:bg-accent"
                   variant="ghost"
-                  asChild
+                  render={
+                    <Link
+                      to="/home"
+                      search={(prev) => ({
+                        ...prev,
+                        collection: collection.id,
+                      })}
+                    />
+                  }
                 >
-                  <Link
-                    to="/home"
-                    search={(prev) => ({
-                      ...prev,
-                      collection: collection.id,
-                    })}
-                  >
-                    <Tag className="p-0.5" />
-                    <span>{collection.name}</span>
-                    <CollectionDropdownMenu
-                      collection={collection}
-                      trigger={
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="invisible ml-auto group-hover:visible hover:bg-muted data-[state=open]:visible data-[state=open]:bg-muted"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <MoreHorizontal className="p-0.5" />
-                        </Button>
-                      }
-                    ></CollectionDropdownMenu>
-                  </Link>
+                  <Tag className="p-0.5" />
+                  <span>{collection.name}</span>
+                  <CollectionMenu
+                    collection={collection}
+                    trigger={
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="invisible ml-auto group-hover:visible hover:bg-muted data-popup-open:visible data-popup-open:bg-muted"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <MoreHorizontal className="p-0.5" />
+                      </Button>
+                    }
+                  />
                 </Button>
               );
             })}
@@ -108,11 +108,11 @@ export const Sidebar = () => {
       <div className="contents max-md:hidden">{sidebar}</div>
 
       {/* Mobile Sidebar */}
-      <Sheet open={openMobile} onOpenChange={setOpenMobile}>
-        <SheetContent side="left" className="w-auto px-4 py-8 md:hidden">
+      <Sheet.Root open={openMobile} onOpenChange={setOpenMobile}>
+        <Sheet.Content side="left" className="w-auto px-4 py-8 md:hidden">
           {sidebar}
-        </SheetContent>
-      </Sheet>
+        </Sheet.Content>
+      </Sheet.Root>
     </>
   );
 };

@@ -1,33 +1,32 @@
 import React from "react";
+import { Dialog as SheetPrimitive } from "@base-ui-components/react/dialog";
 import { cva } from "class-variance-authority";
-import { Dialog as SheetPrimitive } from "radix-ui";
 import { cn } from "@/utils/cn";
 import { twx } from "@/utils/twx";
 
-export const Sheet = SheetPrimitive.Root;
+export const Root = SheetPrimitive.Root;
 
-export const SheetTrigger = SheetPrimitive.Trigger;
+export const Trigger = SheetPrimitive.Trigger;
 
-export const SheetClose = SheetPrimitive.Close;
+export const Portal = SheetPrimitive.Portal;
 
-export const SheetPortal = SheetPrimitive.Portal;
+export const Close = SheetPrimitive.Close;
 
-export const SheetOverlay = twx(
-  SheetPrimitive.Overlay,
-)`fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0`;
-SheetOverlay.displayName = SheetPrimitive.DialogOverlay.displayName;
+export const Backdrop = twx(
+  SheetPrimitive.Backdrop,
+)`fixed inset-0 z-50 bg-black/50 transition-all duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0`;
 
 const sheetVariants = cva(
-  "fixed z-50 flex flex-col gap-4 bg-background shadow-md transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:animate-in data-[state=open]:duration-200",
+  "fixed z-50 flex flex-col gap-4 bg-background shadow-sm transition duration-200 ease-in-out",
   {
     variants: {
       side: {
-        top: "inset-x-0 top-0 h-auto data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
-        left: "inset-y-0 left-0 h-full w-3/4 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
+        top: "inset-x-0 top-0 h-auto origin-top data-ending-style:-translate-y-full data-starting-style:-translate-y-full",
+        left: "inset-y-0 left-0 h-full w-3/4 origin-left data-ending-style:-translate-x-full data-starting-style:-translate-x-full sm:max-w-sm",
         right:
-          "inset-y-0 right-0 h-full w-3/4 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
+          "inset-y-0 right-0 h-full w-3/4 origin-right data-ending-style:translate-x-full data-starting-style:translate-x-full sm:max-w-sm",
         bottom:
-          "inset-x-0 bottom-0 h-auto data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+          "inset-x-0 bottom-0 h-auto origin-bottom data-ending-style:translate-y-full data-starting-style:translate-y-full",
       },
     },
     defaultVariants: {
@@ -36,35 +35,33 @@ const sheetVariants = cva(
   },
 );
 
-export function SheetContent({
+export function Content({
   className,
   children,
   side = "left",
   ...props
-}: React.ComponentProps<typeof SheetPrimitive.Content> & {
+}: React.ComponentProps<typeof SheetPrimitive.Popup> & {
   side?: "top" | "right" | "bottom" | "left";
 }) {
   return (
-    <SheetPortal>
-      <SheetOverlay />
-      <SheetPrimitive.Content
+    <Portal>
+      <Backdrop />
+      <SheetPrimitive.Popup
         className={cn(sheetVariants({ side }), className)}
         {...props}
       >
         {children}
-      </SheetPrimitive.Content>
-    </SheetPortal>
+      </SheetPrimitive.Popup>
+    </Portal>
   );
 }
 
-export const SheetHeader = twx.div`flex flex-col gap-1.5 p-4`;
+export const Header = twx.div`flex flex-col gap-1.5 p-4`;
 
-export const SheetFooter = twx.div`mt-auto flex flex-col gap-2 p-4`;
+export const Footer = twx.div`mt-auto flex flex-col gap-2 p-4`;
 
-export const SheetTitle = twx(
-  SheetPrimitive.Title,
-)`font-semibold text-foreground`;
+export const Title = twx(SheetPrimitive.Title)`font-semibold text-foreground`;
 
-export const SheetDescription = twx(
+export const Description = twx(
   SheetPrimitive.Description,
 )`text-muted-foreground text-sm`;

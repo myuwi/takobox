@@ -1,3 +1,3 @@
-import { Label as LabelPrimitive } from "radix-ui";
+import { twx } from "@/utils/twx";
 
-export const Label = LabelPrimitive.Root;
+export const Label = twx.label``;

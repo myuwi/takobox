@@ -1,14 +1,3 @@
-import type React from "react";
-import { cn } from "@/utils/cn";
+import { twx } from "@/utils/twx";
 
-export const Skeleton = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => {
-  return (
-    <div
-      className={cn("animate-pulse rounded-md bg-accent", className)}
-      {...props}
-    />
-  );
-};
+export const Skeleton = twx.div`animate-pulse rounded-md bg-accent`;

@@ -4,20 +4,12 @@ import { useCreateCollectionMutation } from "@/queries/collections";
 import { formatError } from "@/utils/error";
 import { Alert } from "./primitives/Alert";
 import { Button } from "./primitives/Button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./primitives/Dialog";
+import * as Dialog from "./primitives/Dialog";
 import { Input } from "./primitives/Input";
 import { Label } from "./primitives/Label";
 
 interface CreateCollectionDialogProps {
-  trigger: React.ReactNode;
+  trigger: React.ComponentProps<typeof Dialog.Trigger>["render"];
 }
 
 export const CreateCollectionDialog = ({
@@ -45,17 +37,17 @@ export const CreateCollectionDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Trigger render={trigger} />
+      <Dialog.Content>
         <form
           className="contents"
           onSubmit={handleSubmit(onSubmit)}
           onReset={() => setShowError(false)}
         >
-          <DialogHeader>
-            <DialogTitle>Create new collection</DialogTitle>
-          </DialogHeader>
+          <Dialog.Header>
+            <Dialog.Title>Create new collection</Dialog.Title>
+          </Dialog.Header>
 
           <div>
             <Label className="flex flex-col gap-2">
@@ -74,14 +66,14 @@ export const CreateCollectionDialog = ({
             </Label>
           </div>
 
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
+          <Dialog.Footer>
+            <Dialog.Close render={<Button variant="outline" />}>
+              Cancel
+            </Dialog.Close>
             <Button type="submit">Save changes</Button>
-          </DialogFooter>
+          </Dialog.Footer>
         </form>
-      </DialogContent>
-    </Dialog>
+      </Dialog.Content>
+    </Dialog.Root>
   );
 };

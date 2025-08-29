@@ -1,20 +1,15 @@
-import type { PropsWithChildren } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { LogOut, User } from "lucide-react";
 import { logout } from "@/api/auth";
 import { Button } from "@/components/primitives/Button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/primitives/DropdownMenu";
+import * as Menu from "@/components/primitives/Menu";
 import { useMeQuery } from "@/queries/me";
 
-const AccountDropdown = ({ children }: PropsWithChildren) => {
+interface AccountMenuProps {
+  trigger: React.ComponentProps<typeof Menu.Trigger>["render"];
+}
+
+const AccountMenu = ({ trigger }: AccountMenuProps) => {
   const navigate = useNavigate();
   const handleLogout = async () => {
     await logout();
@@ -25,22 +20,21 @@ const AccountDropdown = ({ children }: PropsWithChildren) => {
   };
 
   return (
-    <DropdownMenu modal={false}>
-      <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent className="w-48" align="end">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={() => handleLogout()}
-          >
+    <Menu.Root modal={false}>
+      <Menu.Trigger render={trigger} />
+      <Menu.Content className="w-48" align="end">
+        <Menu.Group>
+          <Menu.GroupLabel>My Account</Menu.GroupLabel>
+        </Menu.Group>
+        <Menu.Separator />
+        <Menu.Group>
+          <Menu.Item variant="destructive" onClick={() => handleLogout()}>
             <LogOut />
             <span>Log out</span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </Menu.Item>
+        </Menu.Group>
+      </Menu.Content>
+    </Menu.Root>
   );
 };
 
@@ -61,20 +55,20 @@ export const Nav = ({ menuButton }: NavProps) => {
       </div>
       <div className="flex items-center justify-end gap-4">
         {user ? (
-          <AccountDropdown>
-            <Button variant="ghost" className="data-[state=open]:bg-accent">
-              <span>Logged in as {user.username}</span>
-              <User />
-            </Button>
-          </AccountDropdown>
+          <AccountMenu
+            trigger={
+              <Button variant="ghost" className="data-popup-open:bg-accent">
+                <span>Logged in as {user.username}</span>
+                <User />
+              </Button>
+            }
+          />
         ) : (
           <>
-            <Button variant="ghost" asChild>
-              <Link to="/login">Log in</Link>
+            <Button variant="ghost" render={<Link to="/login" />}>
+              Log in
             </Button>
-            <Button asChild>
-              <Link to="/signup">Sign up</Link>
-            </Button>
+            <Button render={<Link to="/signup" />}>Sign up</Button>
           </>
         )}
       </div>

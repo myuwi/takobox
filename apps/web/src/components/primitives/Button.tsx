@@ -1,6 +1,6 @@
 import React from "react";
+import { mergeProps, useRender } from "@base-ui-components/react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Slot } from "radix-ui";
 import { cn } from "@/utils/cn";
 
 const buttonVariants = cva(
@@ -31,22 +31,26 @@ const buttonVariants = cva(
   },
 );
 
+export interface ButtonProps
+  extends React.ComponentProps<"button">,
+    VariantProps<typeof buttonVariants>,
+    useRender.ComponentProps<"button"> {}
+
 export const Button = ({
   className,
   variant,
   size,
-  asChild = false,
+  render = <button />,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) => {
-  const Comp = asChild ? Slot.Root : "button";
+}: ButtonProps) => {
+  const defaultProps = {
+    className: cn(buttonVariants({ variant, size, className })),
+  } as const;
 
-  return (
-    <Comp
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
-  );
+  const element = useRender({
+    render,
+    props: mergeProps<"button">(defaultProps, props),
+  });
+
+  return element;
 };

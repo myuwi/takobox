@@ -22,10 +22,8 @@ export default function Layout() {
   return (
     <main className="relative mx-auto flex max-w-screen-xl items-center justify-center px-6 py-48">
       <nav className="absolute top-8 left-8">
-        <Button variant="ghost" size="icon" asChild>
-          <Link to="/">
-            <ArrowLeft />
-          </Link>
+        <Button variant="ghost" size="icon" render={<Link to="/" />}>
+          <ArrowLeft />
         </Button>
       </nav>
       <Outlet />

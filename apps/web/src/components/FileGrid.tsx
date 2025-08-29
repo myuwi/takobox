@@ -5,8 +5,6 @@ import {
   useState,
   type KeyboardEvent,
   type MouseEvent,
-  type PropsWithChildren,
-  type SyntheticEvent,
 } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import {
@@ -24,28 +22,18 @@ import { thumbnailExtensions } from "@/constants/extensions";
 import { useDeleteFileMutation } from "@/queries/files";
 import type { FileDto } from "@/types/FileDto";
 import { copyToClipboard } from "@/utils/clipboard";
+import { stopPropagation } from "@/utils/event";
 import { formatBytes } from "@/utils/files";
 import { Button } from "./primitives/Button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./primitives/DropdownMenu";
+import * as Menu from "./primitives/Menu";
 
-const stopPropagation = (e: SyntheticEvent) => e.stopPropagation();
-
-interface ContextMenuDropdownProps extends PropsWithChildren {
+interface FileContextMenu {
   file: FileDto;
   onOpen: () => void;
+  trigger: React.ComponentProps<typeof Menu.Trigger>["render"];
 }
 
-const ContextMenuDropdown = ({
-  children,
-  file,
-  onOpen,
-}: ContextMenuDropdownProps) => {
+const FileContextMenu = ({ file, onOpen, trigger }: FileContextMenu) => {
   const setSelectedFiles = useSetAtom(selectedFilesAtom);
   const { mutateAsync: deleteFile } = useDeleteFileMutation();
 
@@ -66,6 +54,10 @@ const ContextMenuDropdown = ({
     }
   };
 
+  const canHaveThumbnail = thumbnailExtensions.some((ext) =>
+    file.name.endsWith(`.${ext}`),
+  );
+
   const handleRegenerateThumbnail = async () => {
     const src = `/thumbs/${file.name.replace(/\.\w*$/, ".webp")}`;
     await regenerateThumbnail(file.id);
@@ -85,35 +77,32 @@ const ContextMenuDropdown = ({
   };
 
   return (
-    <DropdownMenu onOpenChange={handleOpenChange} modal={false}>
-      <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        onClick={stopPropagation}
-        onDoubleClick={stopPropagation}
-      >
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <a href={downloadUrl}>
-              <Download />
-              <span>Download</span>
-            </a>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleCopyToClipboard}>
+    <Menu.Root onOpenChange={handleOpenChange} modal={false}>
+      <Menu.Trigger render={trigger} />
+      <Menu.Content align="end">
+        <Menu.Group>
+          <Menu.Item render={<a href={downloadUrl} />}>
+            <Download />
+            <span>Download</span>
+          </Menu.Item>
+          <Menu.Item onClick={handleCopyToClipboard}>
             <LinkIcon />
             <span>Copy link</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleRegenerateThumbnail}>
+          </Menu.Item>
+          <Menu.Item
+            onClick={handleRegenerateThumbnail}
+            disabled={!canHaveThumbnail}
+          >
             <RefreshCcw />
             <span>Regenerate thumbnail</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem variant="destructive" onClick={handleDelete}>
+          </Menu.Item>
+          <Menu.Item variant="destructive" onClick={handleDelete}>
             <Trash />
             <span>Delete</span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </Menu.Item>
+        </Menu.Group>
+      </Menu.Content>
+    </Menu.Root>
   );
 };
 
@@ -266,17 +255,21 @@ export const FileGrid = ({ files }: FileGridProps) => {
                 >
                   <Check className="size-4 group-not-aria-selected:invisible" />
                 </span>
-                <ContextMenuDropdown file={file} onOpen={handleMenuOpen}>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="invisible absolute right-0 bottom-0 group-hover:visible group-aria-selected:visible hover:bg-muted data-[state=open]:bg-muted"
-                    onClick={stopPropagation}
-                    onDoubleClick={stopPropagation}
-                  >
-                    <EllipsisVertical className="size-4" />
-                  </Button>
-                </ContextMenuDropdown>
+                <FileContextMenu
+                  file={file}
+                  onOpen={handleMenuOpen}
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="invisible absolute right-0 bottom-0 group-hover:visible group-aria-selected:visible hover:bg-muted data-popup-open:bg-muted"
+                      onClick={stopPropagation}
+                      onDoubleClick={stopPropagation}
+                    >
+                      <EllipsisVertical className="size-4" />
+                    </Button>
+                  }
+                />
               </div>
               <span className="line-clamp-1 px-1 text-center break-all">
                 {file.original}
