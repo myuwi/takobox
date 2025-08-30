@@ -2,7 +2,7 @@ import React from "react";
 import { Dialog as DialogPrimitive } from "@base-ui-components/react/dialog";
 import { cn } from "@/utils/cn";
 import { stopPropagation } from "@/utils/event";
-import { twx } from "@/utils/twx";
+import { tw } from "@/utils/tw";
 
 export const Root = DialogPrimitive.Root;
 
@@ -12,7 +12,7 @@ export const Portal = DialogPrimitive.Portal;
 
 export const Close = DialogPrimitive.Close;
 
-export const Backdrop = twx(
+export const Backdrop = tw(
   DialogPrimitive.Backdrop,
 )`fixed inset-0 z-50 bg-black/50 transition-all duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0`;
 
@@ -40,14 +40,14 @@ export function Content({
   );
 }
 
-export const Header = twx.div`flex flex-col gap-2 text-center sm:text-left`;
+export const Header = tw.div`flex flex-col gap-2 text-center sm:text-left`;
 
-export const Footer = twx.div`flex flex-col-reverse gap-2 sm:flex-row sm:justify-end`;
+export const Footer = tw.div`flex flex-col-reverse gap-2 sm:flex-row sm:justify-end`;
 
-export const Title = twx(
+export const Title = tw(
   DialogPrimitive.Title,
 )`text-lg leading-none font-semibold`;
 
-export const Description = twx(
+export const Description = tw(
   DialogPrimitive.Description,
 )`text-muted-foreground text-sm`;

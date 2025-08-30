@@ -3,7 +3,7 @@ import { Menu as MenuPrimitive } from "@base-ui-components/react";
 import { Check, Circle } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { stopPropagation } from "@/utils/event";
-import { twx } from "@/utils/twx";
+import { tw } from "@/utils/tw";
 
 export const Root = MenuPrimitive.Root;
 
@@ -130,6 +130,6 @@ export const GroupLabel = ({
   />
 );
 
-export const Separator = twx(MenuPrimitive.Separator)`-mx-1 my-1 h-px bg-muted`;
+export const Separator = tw(MenuPrimitive.Separator)`-mx-1 my-1 h-px bg-muted`;
 
-export const Shortcut = twx.span`ml-auto text-xs tracking-widest opacity-60`;
+export const Shortcut = tw.span`ml-auto text-xs tracking-widest opacity-60`;

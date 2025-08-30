@@ -2,7 +2,7 @@ import React from "react";
 import { Dialog as SheetPrimitive } from "@base-ui-components/react/dialog";
 import { cva } from "class-variance-authority";
 import { cn } from "@/utils/cn";
-import { twx } from "@/utils/twx";
+import { tw } from "@/utils/tw";
 
 export const Root = SheetPrimitive.Root;
 
@@ -12,7 +12,7 @@ export const Portal = SheetPrimitive.Portal;
 
 export const Close = SheetPrimitive.Close;
 
-export const Backdrop = twx(
+export const Backdrop = tw(
   SheetPrimitive.Backdrop,
 )`fixed inset-0 z-50 bg-black/50 transition-all duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0`;
 
@@ -56,12 +56,12 @@ export function Content({
   );
 }
 
-export const Header = twx.div`flex flex-col gap-1.5 p-4`;
+export const Header = tw.div`flex flex-col gap-1.5 p-4`;
 
-export const Footer = twx.div`mt-auto flex flex-col gap-2 p-4`;
+export const Footer = tw.div`mt-auto flex flex-col gap-2 p-4`;
 
-export const Title = twx(SheetPrimitive.Title)`font-semibold text-foreground`;
+export const Title = tw(SheetPrimitive.Title)`font-semibold text-foreground`;
 
-export const Description = twx(
+export const Description = tw(
   SheetPrimitive.Description,
 )`text-muted-foreground text-sm`;

@@ -1,3 +1,3 @@
-import { twx } from "@/utils/twx";
+import { tw } from "@/utils/tw";
 
-export const Label = twx.label``;
+export const Label = tw.label``;

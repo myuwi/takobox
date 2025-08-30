@@ -7,14 +7,14 @@ import { Button } from "@/components/primitives/Button";
 import * as Sheet from "@/components/primitives/Sheet";
 import { useUploads } from "@/hooks/useUploads";
 import { useCollectionsQuery } from "@/queries/collections";
-import { twx } from "@/utils/twx";
+import { tw } from "@/utils/tw";
 import { CollectionMenu } from "./CollectionMenu";
 import { CreateCollectionDialog } from "./CreateCollectionDialog";
 
-const SidebarContent = twx.div`flex flex-col gap-4`;
-const SidebarGroup = twx.div`flex flex-col gap-1`;
-const SidebarGroupLabel = twx.div`flex h-8 items-center justify-between gap-1 pl-3`;
-const SidebarGroupContent = twx.div`flex flex-col gap-1`;
+const SidebarContent = tw.div`flex flex-col gap-4`;
+const SidebarGroup = tw.div`flex flex-col gap-1`;
+const SidebarGroupLabel = tw.div`flex h-8 items-center justify-between gap-1 pl-3`;
+const SidebarGroupContent = tw.div`flex flex-col gap-1`;
 
 export const Sidebar = () => {
   const { uploadFiles } = useUploads();

@@ -1,3 +1,3 @@
-import { twx } from "@/utils/twx";
+import { tw } from "@/utils/tw";
 
-export const Skeleton = twx.div`animate-pulse rounded-md bg-accent`;
+export const Skeleton = tw.div`animate-pulse rounded-md bg-accent`;
