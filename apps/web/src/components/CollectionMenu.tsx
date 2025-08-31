@@ -1,61 +1,66 @@
-import { useState } from "react";
-import { Trash } from "lucide-react";
-import { useDeleteCollectionMutation } from "@/queries/collections";
+import { useRef, useState } from "react";
+import { MoreHorizontal, Pen, Trash } from "lucide-react";
 import type { CollectionDto } from "@/types/CollectionDto";
+import { DeleteCollectionDialog } from "./DeleteCollectionDialog";
 import { Button } from "./primitives/Button";
-import * as Dialog from "./primitives/Dialog";
 import * as Menu from "./primitives/Menu";
+import { RenameCollectionDialog } from "./RenameCollectionDialog";
 
-interface DeleteCollectionDialogProps {
+interface CollectionMenuProps {
   collection: CollectionDto;
-  trigger: React.ComponentProps<typeof Menu.Trigger>["render"];
 }
 
-export const CollectionMenu = ({
-  collection,
-  trigger,
-}: DeleteCollectionDialogProps) => {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const { mutateAsync: deleteCollection } = useDeleteCollectionMutation();
+export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const handleDelete = async () => {
-    try {
-      await deleteCollection(collection.id);
-    } catch (_) {}
-  };
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
     <>
       <Menu.Root modal={false}>
-        <Menu.Trigger render={trigger} />
+        <Menu.Trigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="invisible ml-auto group-hover:visible hover:bg-muted data-popup-open:visible data-popup-open:bg-muted"
+              onClick={(e) => e.preventDefault()}
+            >
+              <MoreHorizontal className="p-0.5" />
+            </Button>
+          }
+          ref={menuTriggerRef}
+        />
+        {/* FIXME: Fix focus issue when new version of base-ui is out */}
         <Menu.Content className="w-48" align="start">
-          <Menu.Item variant="destructive" onClick={() => setDialogOpen(true)}>
+          <Menu.Item onClick={() => setRenameDialogOpen(true)}>
+            <Pen />
+            <span>Rename collection</span>
+          </Menu.Item>
+          <Menu.Item
+            variant="destructive"
+            onClick={() => setDeleteDialogOpen(true)}
+          >
             <Trash />
             <span>Delete collection</span>
           </Menu.Item>
         </Menu.Content>
       </Menu.Root>
 
-      <Dialog.Root open={dialogOpen} onOpenChange={setDialogOpen}>
-        <Dialog.Content>
-          <Dialog.Header>
-            <Dialog.Title>Delete collection</Dialog.Title>
-            <Dialog.Description>
-              Are you sure you want to delete the collection "{collection.name}
-              "?
-            </Dialog.Description>
-          </Dialog.Header>
+      <RenameCollectionDialog
+        collection={collection}
+        open={renameDialogOpen}
+        setOpen={setRenameDialogOpen}
+        focusRef={menuTriggerRef}
+      />
 
-          <Dialog.Footer>
-            <Dialog.Close render={<Button variant="outline" />}>
-              Cancel
-            </Dialog.Close>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
-            </Button>
-          </Dialog.Footer>
-        </Dialog.Content>
-      </Dialog.Root>
+      <DeleteCollectionDialog
+        collection={collection}
+        open={deleteDialogOpen}
+        setOpen={setDeleteDialogOpen}
+        focusRef={menuTriggerRef}
+      />
     </>
   );
 };

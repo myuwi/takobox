@@ -1,15 +1,16 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LogOut, User } from "lucide-react";
+import { LogOut, UserIcon } from "lucide-react";
 import { logout } from "@/api/auth";
 import { Button } from "@/components/primitives/Button";
 import * as Menu from "@/components/primitives/Menu";
 import { useMeQuery } from "@/queries/me";
+import type { User } from "@/types/User";
 
 interface AccountMenuProps {
-  trigger: React.ComponentProps<typeof Menu.Trigger>["render"];
+  user: User;
 }
 
-const AccountMenu = ({ trigger }: AccountMenuProps) => {
+const AccountMenu = ({ user }: AccountMenuProps) => {
   const navigate = useNavigate();
   const handleLogout = async () => {
     await logout();
@@ -21,7 +22,14 @@ const AccountMenu = ({ trigger }: AccountMenuProps) => {
 
   return (
     <Menu.Root modal={false}>
-      <Menu.Trigger render={trigger} />
+      <Menu.Trigger
+        render={
+          <Button variant="ghost" className="data-popup-open:bg-accent">
+            <span>Logged in as {user.username}</span>
+            <UserIcon />
+          </Button>
+        }
+      />
       <Menu.Content className="w-48" align="end">
         <Menu.Group>
           <Menu.GroupLabel>My Account</Menu.GroupLabel>
@@ -55,14 +63,7 @@ export const Nav = ({ menuButton }: NavProps) => {
       </div>
       <div className="flex items-center justify-end gap-4">
         {user ? (
-          <AccountMenu
-            trigger={
-              <Button variant="ghost" className="data-popup-open:bg-accent">
-                <span>Logged in as {user.username}</span>
-                <User />
-              </Button>
-            }
-          />
+          <AccountMenu user={user} />
         ) : (
           <>
             <Button variant="ghost" render={<Link to="/login" />}>

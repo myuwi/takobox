@@ -8,6 +8,7 @@ import {
   createCollection,
   deleteCollection,
   getCollections,
+  renameCollection,
 } from "@/api/collections";
 
 export const collectionsOptions = queryOptions({
@@ -24,6 +25,20 @@ export function useCreateCollectionMutation() {
 
   return useMutation({
     mutationFn: createCollection,
+    onSuccess: async (_) => {
+      await queryClient.refetchQueries({
+        queryKey: collectionsOptions.queryKey,
+      });
+    },
+  });
+}
+
+export function useRenameCollectionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      renameCollection(id, name),
     onSuccess: async (_) => {
       await queryClient.refetchQueries({
         queryKey: collectionsOptions.queryKey,

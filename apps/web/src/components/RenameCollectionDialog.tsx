@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { useCreateCollectionMutation } from "@/queries/collections";
+import { useRenameCollectionMutation } from "@/queries/collections";
+import type { CollectionDto } from "@/types/CollectionDto";
 import { formatError } from "@/utils/error";
 import { Alert } from "./primitives/Alert";
 import { Button } from "./primitives/Button";
@@ -9,18 +9,34 @@ import * as Dialog from "./primitives/Dialog";
 import { Input } from "./primitives/Input";
 import { Label } from "./primitives/Label";
 
-export const CreateCollectionDialog = () => {
-  const { register, handleSubmit, reset } = useForm<{ name: string }>();
+interface RenameCollectionDialogProps {
+  collection: CollectionDto;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  focusRef: React.RefObject<HTMLElement | null>;
+}
+
+export const RenameCollectionDialog = ({
+  collection,
+  open,
+  setOpen,
+  focusRef,
+}: RenameCollectionDialogProps) => {
+  const { register, handleSubmit, reset, watch } = useForm<{
+    name: string;
+  }>({
+    values: {
+      name: collection.name,
+    },
+  });
 
   const {
-    mutateAsync: createCollection,
+    mutateAsync: renameCollection,
     isError,
     error,
-  } = useCreateCollectionMutation();
+  } = useRenameCollectionMutation();
 
   const [showError, setShowError] = useState(false);
-
-  const [open, setOpen] = useState(false);
 
   const handleCleanup = (open: boolean) => {
     if (!open) {
@@ -31,14 +47,16 @@ export const CreateCollectionDialog = () => {
 
   const onSubmit = async (values: { name: string }) => {
     try {
-      await createCollection(values.name);
+      await renameCollection({ id: collection.id, name: values.name });
       setOpen(false);
     } catch (_) {
       setShowError(true);
     }
   };
 
-  const disabled = isError && showError;
+  const name = watch("name", collection.name);
+  const disabled =
+    (isError && showError) || name === collection.name || name === "";
 
   return (
     <Dialog.Root
@@ -46,21 +64,14 @@ export const CreateCollectionDialog = () => {
       onOpenChange={setOpen}
       onOpenChangeComplete={handleCleanup}
     >
-      <Dialog.Trigger
-        render={
-          <Button variant="ghost" size="icon-sm" className="mr-1">
-            <Plus className="p-0.5" />
-          </Button>
-        }
-      />
-      <Dialog.Content>
+      <Dialog.Content finalFocus={focusRef}>
         <form
           className="contents"
           onSubmit={handleSubmit(onSubmit)}
           onChange={() => setShowError(false)}
         >
           <Dialog.Header>
-            <Dialog.Title>Create new collection</Dialog.Title>
+            <Dialog.Title>Rename collection</Dialog.Title>
           </Dialog.Header>
 
           <div>
@@ -82,7 +93,7 @@ export const CreateCollectionDialog = () => {
               Cancel
             </Dialog.Close>
             <Button type="submit" disabled={disabled}>
-              Create
+              Rename
             </Button>
           </Dialog.Footer>
         </form>

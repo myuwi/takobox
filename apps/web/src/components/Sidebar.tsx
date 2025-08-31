@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useAtom } from "jotai";
-import { Folder, MoreHorizontal, Plus, Tag } from "lucide-react";
+import { Folder, Plus, Tag } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { sidebarOpenMobileAtom } from "@/atoms/sidebar";
 import { Button } from "@/components/primitives/Button";
@@ -52,13 +52,7 @@ export const Sidebar = () => {
         <SidebarGroup>
           <SidebarGroupLabel>
             <span>Collections</span>
-            <CreateCollectionDialog
-              trigger={
-                <Button variant="ghost" size="icon-sm" className="mr-1">
-                  <Plus className="p-0.5" />
-                </Button>
-              }
-            />
+            <CreateCollectionDialog />
           </SidebarGroupLabel>
 
           <SidebarGroupContent>
@@ -80,19 +74,7 @@ export const Sidebar = () => {
                 >
                   <Tag className="p-0.5" />
                   <span>{collection.name}</span>
-                  <CollectionMenu
-                    collection={collection}
-                    trigger={
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        className="invisible ml-auto group-hover:visible hover:bg-muted data-popup-open:visible data-popup-open:bg-muted"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        <MoreHorizontal className="p-0.5" />
-                      </Button>
-                    }
-                  />
+                  <CollectionMenu collection={collection} />
                 </Button>
               );
             })}

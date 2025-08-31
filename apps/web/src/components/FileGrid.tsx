@@ -30,10 +30,9 @@ import * as Menu from "./primitives/Menu";
 interface FileContextMenu {
   file: FileDto;
   onOpen: () => void;
-  trigger: React.ComponentProps<typeof Menu.Trigger>["render"];
 }
 
-const FileContextMenu = ({ file, onOpen, trigger }: FileContextMenu) => {
+const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
   const setSelectedFiles = useSetAtom(selectedFilesAtom);
   const { mutateAsync: deleteFile } = useDeleteFileMutation();
 
@@ -78,7 +77,19 @@ const FileContextMenu = ({ file, onOpen, trigger }: FileContextMenu) => {
 
   return (
     <Menu.Root onOpenChange={handleOpenChange} modal={false}>
-      <Menu.Trigger render={trigger} />
+      <Menu.Trigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="invisible absolute right-0 bottom-0 group-hover:visible group-aria-selected:visible hover:bg-muted data-popup-open:bg-muted"
+            onClick={stopPropagation}
+            onDoubleClick={stopPropagation}
+          >
+            <EllipsisVertical className="size-4" />
+          </Button>
+        }
+      />
       <Menu.Content align="end">
         <Menu.Group>
           <Menu.Item render={<a href={downloadUrl} />}>
@@ -255,21 +266,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
                 >
                   <Check className="size-4 group-not-aria-selected:invisible" />
                 </span>
-                <FileContextMenu
-                  file={file}
-                  onOpen={handleMenuOpen}
-                  trigger={
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="invisible absolute right-0 bottom-0 group-hover:visible group-aria-selected:visible hover:bg-muted data-popup-open:bg-muted"
-                      onClick={stopPropagation}
-                      onDoubleClick={stopPropagation}
-                    >
-                      <EllipsisVertical className="size-4" />
-                    </Button>
-                  }
-                />
+                <FileContextMenu file={file} onOpen={handleMenuOpen} />
               </div>
               <span className="line-clamp-1 px-1 text-center break-all">
                 {file.original}

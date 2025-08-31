@@ -11,6 +11,11 @@ export const createCollection = async (name: string) => {
   return data;
 };
 
+export const renameCollection = async (id: string, name: string) => {
+  const { data } = await client.patch(`collections/${id}`, { name });
+  return data;
+};
+
 export const deleteCollection = async (id: string) => {
   const { data } = await client.delete(`collections/${id}`);
   return data;

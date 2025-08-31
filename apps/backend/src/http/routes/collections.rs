@@ -3,7 +3,7 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
-    routing::{delete, get, post},
+    routing::{delete, get, patch, post},
 };
 use serde::Deserialize;
 use uuid::Uuid;
@@ -66,6 +66,45 @@ async fn create(
     Ok(Json(collection))
 }
 
+#[derive(Debug, Deserialize)]
+pub struct RenameCollectionPayload {
+    pub name: String,
+}
+
+async fn rename(
+    State(AppState { pool, .. }): State<AppState>,
+    session: Session,
+    Path(id): Path<Uuid>,
+    Json(body): Json<RenameCollectionPayload>,
+) -> Result<impl IntoResponse, Error> {
+    let name = body.name.trim();
+
+    if name.is_empty() {
+        return Err(Error::UnprocessableEntity(
+            "Collection name must not be empty",
+        ));
+    }
+
+    let collection = sqlx::query_as!(
+        Collection,
+        "update collections
+        set name = $1
+        where id = $2 and user_id = $3
+        returning *",
+        name,
+        id,
+        session.user_id,
+    )
+    .fetch_optional(&pool)
+    .await
+    .on_constraint("collections_user_id_name_key", |_| {
+        Error::Conflict("A collection with this name already exists. Please try another name.")
+    })?
+    .ok_or_else(|| Error::NotFound("Collection doesn't exist or belongs to another user."))?;
+
+    Ok(Json(collection))
+}
+
 async fn delete_collection(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
@@ -93,5 +132,6 @@ pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/", get(index))
         .route("/", post(create))
+        .route("/{id}", patch(rename))
         .route("/{id}", delete(delete_collection))
 }
