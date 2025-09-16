@@ -60,7 +60,7 @@ export const Sidebar = () => {
               return (
                 <Button
                   key={collection.id}
-                  className="group justify-start pr-1 has-data-popup-open:bg-accent data-[status=active]:bg-accent/80 data-[status=active]:hover:bg-accent"
+                  className="group justify-start pr-1 focus-within:bg-accent/80 has-data-popup-open:bg-accent data-[status=active]:bg-accent/80 data-[status=active]:hover:bg-accent"
                   variant="ghost"
                   render={
                     <Link

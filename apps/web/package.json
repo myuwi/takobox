@@ -13,7 +13,7 @@
     "lint:tsc": "tsc --noEmit"
   },
   "dependencies": {
-    "@base-ui-components/react": "^1.0.0-beta.2",
+    "@base-ui-components/react": "^1.0.0-beta.3",
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-query": "^5.82.0",
     "@tanstack/react-query-devtools": "^5.82.0",

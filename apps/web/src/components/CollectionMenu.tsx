@@ -24,7 +24,7 @@ export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
             <Button
               variant="ghost"
               size="icon-sm"
-              className="invisible ml-auto group-hover:visible hover:bg-muted data-popup-open:visible data-popup-open:bg-muted"
+              className="ml-auto opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-muted data-popup-open:bg-muted data-popup-open:opacity-100"
               onClick={(e) => e.preventDefault()}
             >
               <MoreHorizontal className="p-0.5" />
@@ -32,15 +32,18 @@ export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
           }
           ref={menuTriggerRef}
         />
-        {/* FIXME: Fix focus issue when new version of base-ui is out */}
-        <Menu.Content className="w-48" align="start">
-          <Menu.Item onClick={() => setRenameDialogOpen(true)}>
+        {/* FIXME: Even with finalFocus set to false, the Menu.Popup element is focused on close for some reason */}
+        <Menu.Content className="w-48" align="start" finalFocus={false}>
+          <Menu.Item
+            // Use a timeout to get around focus fuckery
+            onClick={() => setTimeout(() => setRenameDialogOpen(true), 0)}
+          >
             <Pen />
             <span>Rename collection</span>
           </Menu.Item>
           <Menu.Item
             variant="destructive"
-            onClick={() => setDeleteDialogOpen(true)}
+            onClick={() => setTimeout(() => setDeleteDialogOpen(true), 0)}
           >
             <Trash />
             <span>Delete collection</span>
