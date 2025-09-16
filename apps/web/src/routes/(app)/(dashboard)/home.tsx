@@ -8,6 +8,8 @@ import { Button } from "@/components/primitives/Button";
 import { Progress } from "@/components/primitives/Progress";
 import { useUploads } from "@/hooks/useUploads";
 import { filesOptions, useFilesQuery } from "@/queries/files";
+import { useSettingsQuery } from "@/queries/settings";
+import { formatBytes } from "@/utils/files";
 
 export const Route = createFileRoute("/(app)/(dashboard)/home")({
   component: RouteComponent,
@@ -17,6 +19,7 @@ export const Route = createFileRoute("/(app)/(dashboard)/home")({
 });
 
 function RouteComponent() {
+  const { data: settings } = useSettingsQuery();
   const { data: files } = useFilesQuery();
   const {
     uploads,
@@ -43,7 +46,8 @@ function RouteComponent() {
       {/* TODO: replace with a list of rejected files. also show failed uploads there */}
       {fileRejections.length > 0 && (
         <Alert onDismiss={() => resetFileRejections()}>
-          Some of the selected files exceed the maximum file size limit.
+          Some of the selected files exceed the maximum file size limit of{" "}
+          {formatBytes(settings!.maxFileSize)}.
         </Alert>
       )}
 
