@@ -134,7 +134,7 @@ async fn delete_file(
         .unwrap_or(&file.name);
 
     let file_path = format!("{}/{}", UPLOADS_PATH, file.name);
-    let thumb_path = format!("{}/{}.webp", THUMBS_PATH, file_id);
+    let thumb_path = format!("{}/{}.avif", THUMBS_PATH, file_id);
 
     let _ = tokio::fs::remove_file(&file_path)
         .await

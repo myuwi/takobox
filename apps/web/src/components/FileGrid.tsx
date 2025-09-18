@@ -32,6 +32,16 @@ interface FileContextMenu {
   onOpen: () => void;
 }
 
+const getThumbnailPath = (fileName: string) => {
+  const supportsThumbnail = thumbnailExtensions.some((ext) =>
+    fileName.endsWith(`.${ext}`),
+  );
+
+  if (!supportsThumbnail) return undefined;
+
+  return `/thumbs/${fileName.replace(/\.\w*$/, ".avif")}`;
+};
+
 const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
   const setSelectedFiles = useSetAtom(selectedFilesAtom);
   const { mutateAsync: deleteFile } = useDeleteFileMutation();
@@ -43,6 +53,7 @@ const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
   };
 
   const downloadUrl = `/api/files/${file.id}/download`;
+  const thumbnailPath = getThumbnailPath(file.name);
 
   const handleCopyToClipboard = async () => {
     try {
@@ -53,18 +64,14 @@ const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
     }
   };
 
-  const canHaveThumbnail = thumbnailExtensions.some((ext) =>
-    file.name.endsWith(`.${ext}`),
-  );
-
   const handleRegenerateThumbnail = async () => {
-    const src = `/thumbs/${file.name.replace(/\.\w*$/, ".webp")}`;
+    if (!thumbnailPath) return;
     await regenerateThumbnail(file.id);
-    await fetch(src, { cache: "reload" });
+    await fetch(thumbnailPath, { cache: "reload" });
     document.body
-      .querySelectorAll<HTMLImageElement>(`img[src="${src}"]`)
+      .querySelectorAll<HTMLImageElement>(`img[src="${thumbnailPath}"]`)
       .forEach((img) => {
-        img.src = src;
+        img.src = thumbnailPath;
       });
   };
 
@@ -102,7 +109,7 @@ const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
           </Menu.Item>
           <Menu.Item
             onClick={handleRegenerateThumbnail}
-            disabled={!canHaveThumbnail}
+            disabled={!thumbnailPath}
           >
             <RefreshCcw />
             <span>Regenerate thumbnail</span>
@@ -142,23 +149,19 @@ interface FileThumbnailProps {
 }
 
 const FileThumbnail = ({ file }: FileThumbnailProps) => {
-  const src = `/thumbs/${file.name.replace(/\.\w*$/, ".webp")}`;
-  const canHaveThumbnail = thumbnailExtensions.some((ext) =>
-    file.name.endsWith(`.${ext}`),
-  );
-
-  const [loaded, setLoaded] = useState(canHaveThumbnail);
+  const src = getThumbnailPath(file.name);
+  const [loaded, setLoaded] = useState(!!src);
 
   const imgRef = useRef<HTMLImageElement>(null);
 
   useLayoutEffect(() => {
     const img = imgRef.current;
 
-    if (canHaveThumbnail && img?.complete) {
+    if (src && img?.complete) {
       const loaded = img.naturalWidth > 0;
       setLoaded(loaded);
     }
-  }, [canHaveThumbnail]);
+  }, [src]);
 
   return (
     <div className="group flex aspect-4/3 w-full items-center justify-center overflow-hidden px-4 py-1">
@@ -166,7 +169,7 @@ const FileThumbnail = ({ file }: FileThumbnailProps) => {
       <img
         alt=""
         ref={imgRef}
-        src={canHaveThumbnail ? src : undefined}
+        src={src}
         className="pointer-events-none max-h-full max-w-full rounded-sm object-contain"
         style={{ display: loaded ? undefined : "none" }}
         onLoad={() => setLoaded(true)}

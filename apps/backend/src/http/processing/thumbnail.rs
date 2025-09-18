@@ -9,7 +9,7 @@ pub enum ThumbnailError {
     ShellError(tokio::io::Error),
 }
 
-const IMAGE_EXTENSIONS: [&str; 6] = ["png", "jpg", "jpeg", "gif", "webp", "svg"];
+const IMAGE_EXTENSIONS: [&str; 7] = ["avif", "png", "jpg", "jpeg", "gif", "webp", "svg"];
 const VIDEO_EXTENSIONS: [&str; 3] = ["mp4", "webm", "mkv"];
 
 pub async fn generate_thumbnail(file_path: &str) -> Result<String, ThumbnailError> {
@@ -23,7 +23,7 @@ pub async fn generate_thumbnail(file_path: &str) -> Result<String, ThumbnailErro
         return Err(ThumbnailError::UnsupportedFiletype);
     }
 
-    let thumb_file_name = file_id.to_owned() + ".webp";
+    let thumb_file_name = file_id.to_owned() + ".avif";
     let thumb_path = format!("{}/{}", THUMBS_PATH, &thumb_file_name);
 
     Command::new("ffmpeg")
@@ -33,7 +33,7 @@ pub async fn generate_thumbnail(file_path: &str) -> Result<String, ThumbnailErro
             "-vf",
             "scale=256:-1",
             "-c:v",
-            "libwebp",
+            "libaom-av1",
             "-frames:v",
             "1",
             &thumb_path,
