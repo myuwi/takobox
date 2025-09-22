@@ -4,7 +4,7 @@ import axios, { type AxiosError } from "axios";
 import { isServer } from "@/utils/env";
 
 export const client = axios.create({
-  baseURL: isServer ? "http://localhost:8000" : "/api",
+  baseURL: isServer ? process.env.INTERNAL_API_URL : "/api",
 });
 
 const getServerHeaders = serverOnly(getHeaders);
