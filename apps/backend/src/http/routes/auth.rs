@@ -7,6 +7,7 @@ use regex::Regex;
 use serde::Deserialize;
 
 use crate::http::error::ResultExt;
+use crate::http::middleware::rate_limit::rate_limit;
 use crate::http::{
     auth::password::{hash_password, verify_password},
     error::Error,
@@ -108,7 +109,7 @@ async fn logout(
 
 pub fn routes() -> Router<AppState> {
     Router::new()
-        .route("/login", post(login))
+        .route("/login", post(login).layer(rate_limit(10_000, 10)))
         .route("/register", post(register))
         .route("/logout", post(logout))
 }

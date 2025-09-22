@@ -1,3 +1,4 @@
+use middleware::rate_limit::rate_limit;
 use sqlx::PgPool;
 use state::AppState;
 use tokio::net::TcpListener;
@@ -32,6 +33,7 @@ pub async fn serve(config: Config, pool: PgPool) -> anyhow::Result<()> {
     let app_state = AppState { config, pool };
     let app = routes(&app_state)
         .with_state(app_state)
+        .layer(rate_limit(500, 120))
         .layer(TraceLayer::new_for_http());
 
     let listener = TcpListener::bind("0.0.0.0:8000").await?;

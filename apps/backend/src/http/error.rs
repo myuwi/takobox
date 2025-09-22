@@ -1,6 +1,6 @@
 use axum::{
     Json,
-    http::StatusCode,
+    http::{HeaderMap, StatusCode},
     response::{IntoResponse, Response},
 };
 use serde::Serialize;
@@ -23,6 +23,9 @@ pub enum Error {
     #[error("{0}")]
     UnprocessableEntity(&'static str),
 
+    #[error("You're being rate limited. Try again in {0}s.")]
+    TooManyRequests(usize),
+
     #[error("Internal Server Error")]
     Sqlx(#[from] sqlx::Error),
 
@@ -35,17 +38,34 @@ struct ErrorResponse {
     message: String,
 }
 
-impl IntoResponse for Error {
-    fn into_response(self) -> Response {
-        let status_code = match self {
+impl Error {
+    fn status_code(&self) -> StatusCode {
+        match self {
             Self::BadRequest(_) => StatusCode::BAD_REQUEST,
             Self::Unauthorized(_) => StatusCode::UNAUTHORIZED,
             Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::Conflict(_) => StatusCode::CONFLICT,
             Self::UnprocessableEntity(_) => StatusCode::UNPROCESSABLE_ENTITY,
+            Self::TooManyRequests(_) => StatusCode::TOO_MANY_REQUESTS,
             Self::Sqlx(_) | Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
-        };
+        }
+    }
 
+    fn headers(&self) -> Option<HeaderMap> {
+        if let Self::TooManyRequests(wait_time) = self {
+            let mut headers = HeaderMap::new();
+            headers.insert("retry-after", wait_time.to_owned().into());
+            headers.insert("x-ratelimit-after", wait_time.to_owned().into());
+
+            Some(headers)
+        } else {
+            None
+        }
+    }
+}
+
+impl IntoResponse for Error {
+    fn into_response(self) -> Response {
         match self {
             Self::Sqlx(ref e) => error!("{:?}", e),
             Self::Internal(ref e) => error!("{:?}", e),
@@ -53,7 +73,8 @@ impl IntoResponse for Error {
         }
 
         (
-            status_code,
+            self.status_code(),
+            self.headers(),
             Json(ErrorResponse {
                 message: self.to_string(),
             }),

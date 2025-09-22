@@ -1,3 +1,9 @@
+{
+  servers {
+    trusted_proxies static private_ranges
+  }
+}
+
 {$BASE_URL} {
   route {
     handle_path /api/* {
