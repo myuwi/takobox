@@ -14,11 +14,13 @@ import {
   File,
   LinkIcon,
   RefreshCcw,
+  Tag,
   Trash,
 } from "lucide-react";
 import { regenerateThumbnail } from "@/api/files";
 import { selectedFilesAtom } from "@/atoms/selected-files";
 import { thumbnailExtensions } from "@/constants/extensions";
+import { useCollectionsQuery } from "@/queries/collections";
 import { useDeleteFileMutation } from "@/queries/files";
 import type { FileDto } from "@/types/FileDto";
 import { copyToClipboard } from "@/utils/clipboard";
@@ -43,6 +45,7 @@ const getThumbnailPath = (fileName: string) => {
 };
 
 const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
+  const { data: collections } = useCollectionsQuery();
   const setSelectedFiles = useSetAtom(selectedFilesAtom);
   const { mutateAsync: deleteFile } = useDeleteFileMutation();
 
@@ -107,6 +110,25 @@ const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
             <LinkIcon />
             <span>Copy link</span>
           </Menu.Item>
+          <Menu.Sub>
+            <Menu.SubTrigger>
+              <Tag />
+              <span>Add to Collection</span>
+            </Menu.SubTrigger>
+            <Menu.SubContent>
+              <Menu.Group>
+                <Menu.GroupLabel>Collections</Menu.GroupLabel>
+                {collections?.map((collection) => {
+                  // TODO: Actually implement managing the collections
+                  return (
+                    <Menu.CheckboxItem key={collection.id}>
+                      {collection.name}
+                    </Menu.CheckboxItem>
+                  );
+                })}
+              </Menu.Group>
+            </Menu.SubContent>
+          </Menu.Sub>
           <Menu.Item
             onClick={handleRegenerateThumbnail}
             disabled={!thumbnailPath}

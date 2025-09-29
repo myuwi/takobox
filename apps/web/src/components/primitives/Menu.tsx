@@ -1,6 +1,6 @@
 import React from "react";
 import { Menu as MenuPrimitive } from "@base-ui-components/react";
-import { Check, Circle } from "lucide-react";
+import { Check, ChevronRightIcon, Circle } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { stopPropagation } from "@/utils/event";
 import { tw } from "@/utils/tw";
@@ -125,7 +125,10 @@ export const GroupLabel = ({
 }) => (
   <MenuPrimitive.GroupLabel
     data-inset={inset}
-    className={cn("px-2 py-1.5 text-sm data-[inset]:pl-8", className)}
+    className={cn(
+      "px-2 py-1.5 text-sm font-medium data-[inset]:pl-8",
+      className,
+    )}
     {...props}
   />
 );
@@ -133,3 +136,60 @@ export const GroupLabel = ({
 export const Separator = tw(MenuPrimitive.Separator)`-mx-1 my-1 h-px bg-muted`;
 
 export const Shortcut = tw.span`ml-auto text-xs tracking-widest opacity-60`;
+
+export const Sub = ({
+  ...props
+}: React.ComponentProps<typeof MenuPrimitive.SubmenuRoot>) => {
+  return <MenuPrimitive.SubmenuRoot closeDelay={0} delay={0} {...props} />;
+};
+
+export const SubTrigger = ({
+  className,
+  inset,
+  children,
+  ...props
+}: React.ComponentProps<typeof MenuPrimitive.SubmenuTrigger> & {
+  inset?: boolean;
+}) => {
+  return (
+    <MenuPrimitive.SubmenuTrigger
+      data-inset={inset}
+      className={cn(
+        "flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-popup-open:bg-accent data-popup-open:text-accent-foreground data-[inset]:pl-8 [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+      <ChevronRightIcon className="ml-auto size-4" />
+    </MenuPrimitive.SubmenuTrigger>
+  );
+};
+
+export const SubContent = ({
+  className,
+  sideOffset = 4,
+  align = "start",
+  ...props
+}: React.ComponentProps<typeof MenuPrimitive.Popup> & {
+  align?: MenuPrimitive.Positioner.Props["align"];
+  sideOffset?: MenuPrimitive.Positioner.Props["sideOffset"];
+}) => {
+  return (
+    <MenuPrimitive.Portal>
+      <MenuPrimitive.Positioner
+        className="z-50 max-h-[var(--available-height)]"
+        sideOffset={sideOffset}
+        align={align}
+      >
+        <MenuPrimitive.Popup
+          className={cn(
+            "z-50 min-w-[12rem] origin-[var(--transform-origin)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+            className,
+          )}
+          {...props}
+        />
+      </MenuPrimitive.Positioner>
+    </MenuPrimitive.Portal>
+  );
+};
