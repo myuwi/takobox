@@ -19,7 +19,12 @@ use crate::{
     THUMBS_PATH, UPLOADS_PATH,
     http::{
         error::Error,
-        model::{file::File, session::Session, settings::Settings},
+        model::{
+            collection::FileCollection,
+            file::{File, FileWithCollections},
+            session::Session,
+            settings::Settings,
+        },
         processing::thumbnail::{self, ThumbnailError},
         state::AppState,
     },
@@ -40,6 +45,35 @@ async fn index(
     .await?;
 
     Ok(Json(files))
+}
+
+async fn show(
+    State(AppState { pool, .. }): State<AppState>,
+    session: Session,
+    Path(file_id): Path<Uuid>,
+) -> Result<impl IntoResponse, Error> {
+    let file = sqlx::query_as!(
+        FileWithCollections,
+        r#"select 
+            f.id, f.user_id, f.name, f.original, f.size, f.created_at,
+            coalesce(
+                json_agg(
+                    json_build_object('id', c.id, 'name', c.name)
+                ) filter (where c.id is not null),
+                '[]'
+            ) as "collections!: sqlx::types::Json<Vec<FileCollection>>"
+        from files f
+        left join collection_files cf on f.id = cf.file_id
+        left join collections c on cf.collection_id = c.id
+        where f.id = $1 and f.user_id = $2
+        group by f.id, f.user_id, f.name, f.original, f.size, f.created_at"#,
+        file_id,
+        session.user_id,
+    )
+    .fetch_one(&pool)
+    .await?;
+
+    Ok(Json(file))
 }
 
 // TODO: Is this safe if some operation fails? Use transactions?
@@ -213,6 +247,7 @@ pub fn routes() -> Router<AppState> {
 
     Router::new()
         .route("/", get(index))
+        .route("/{id}", get(show))
         .route(
             "/",
             post(create).layer(DefaultBodyLimit::max(max_file_size)),

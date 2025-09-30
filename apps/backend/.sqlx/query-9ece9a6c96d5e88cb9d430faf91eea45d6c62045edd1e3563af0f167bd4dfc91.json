@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "delete from collection_files\n        where collection_id = $1\n          and file_id = $2\n          and exists (\n            select 1\n            from collections c\n            where c.id = $1\n              and c.user_id = $3\n        )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9ece9a6c96d5e88cb9d430faf91eea45d6c62045edd1e3563af0f167bd4dfc91"
+}

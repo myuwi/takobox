@@ -20,3 +20,15 @@ export const deleteCollection = async (id: string) => {
   const { data } = await client.delete(`collections/${id}`);
   return data;
 };
+
+export const addFileToCollection = async (id: string, fileId: string) => {
+  const { data } = await client.post(`collections/${id}/files`, { id: fileId });
+  return data;
+};
+
+export const removeFileFromCollection = async (id: string, fileId: string) => {
+  const { data } = await client.delete(`collections/${id}/files`, {
+    data: { id: fileId },
+  });
+  return data;
+};

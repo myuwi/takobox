@@ -5,11 +5,14 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import {
+  addFileToCollection,
   createCollection,
   deleteCollection,
   getCollections,
+  removeFileFromCollection,
   renameCollection,
 } from "@/api/collections";
+import { fileOptions } from "./files";
 
 export const collectionsOptions = queryOptions({
   queryKey: ["collections"],
@@ -55,6 +58,34 @@ export function useDeleteCollectionMutation() {
     onSuccess: async (_) => {
       await queryClient.refetchQueries({
         queryKey: collectionsOptions.queryKey,
+      });
+    },
+  });
+}
+
+export function useAddFileToCollectionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, fileId }: { id: string; fileId: string }) =>
+      addFileToCollection(id, fileId),
+    onSuccess: async (_, variables) => {
+      await queryClient.refetchQueries({
+        queryKey: fileOptions(variables.fileId).queryKey,
+      });
+    },
+  });
+}
+
+export function useRemoveFileFromCollectionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, fileId }: { id: string; fileId: string }) =>
+      removeFileFromCollection(id, fileId),
+    onSuccess: async (_, variables) => {
+      await queryClient.refetchQueries({
+        queryKey: fileOptions(variables.fileId).queryKey,
       });
     },
   });

@@ -7,6 +7,7 @@ use axum::{
 
 mod auth;
 mod collections;
+mod collection_files;
 mod files;
 mod me;
 mod settings;

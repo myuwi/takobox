@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import {
   deleteFile,
+  getFile,
   getFiles,
   uploadFile,
   type ProgressCallback,
@@ -19,6 +20,12 @@ export const filesOptions = queryOptions({
 export function useFilesQuery() {
   return useQuery(filesOptions);
 }
+
+export const fileOptions = (id: string) =>
+  queryOptions({
+    queryKey: ["files", id],
+    queryFn: () => getFile(id),
+  });
 
 interface UploadFileMutationArgs {
   file: File;

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into collection_files (collection_id, file_id)\n        select $1, $2\n        where exists (\n            select 1\n            from collections c\n            where c.id = $1\n              and c.user_id = $3\n        )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "605698eed4229324ea00e6fb587bc86be25ac750bbd34ee3066df46da5a5ad02"
+}

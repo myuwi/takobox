@@ -14,6 +14,8 @@ use crate::http::{
     state::AppState,
 };
 
+use super::collection_files;
+
 async fn index(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
@@ -134,4 +136,5 @@ pub fn routes() -> Router<AppState> {
         .route("/", post(create))
         .route("/{id}", patch(rename))
         .route("/{id}", delete(delete_collection))
+        .nest("/{id}/files", collection_files::routes())
 }

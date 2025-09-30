@@ -6,6 +6,7 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAtom, useSetAtom } from "jotai";
 import {
   Check,
@@ -20,8 +21,12 @@ import {
 import { regenerateThumbnail } from "@/api/files";
 import { selectedFilesAtom } from "@/atoms/selected-files";
 import { thumbnailExtensions } from "@/constants/extensions";
-import { useCollectionsQuery } from "@/queries/collections";
-import { useDeleteFileMutation } from "@/queries/files";
+import {
+  useAddFileToCollectionMutation,
+  useCollectionsQuery,
+  useRemoveFileFromCollectionMutation,
+} from "@/queries/collections";
+import { fileOptions, useDeleteFileMutation } from "@/queries/files";
 import type { FileDto } from "@/types/FileDto";
 import { copyToClipboard } from "@/utils/clipboard";
 import { stopPropagation } from "@/utils/event";
@@ -45,14 +50,28 @@ const getThumbnailPath = (fileName: string) => {
 };
 
 const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
+  const [open, setOpen] = useState(false);
   const { data: collections } = useCollectionsQuery();
   const setSelectedFiles = useSetAtom(selectedFilesAtom);
   const { mutateAsync: deleteFile } = useDeleteFileMutation();
+
+  const { data: fileCollections = [] } = useQuery({
+    ...fileOptions(file.id),
+    select: (file) => file.collections,
+    enabled: open,
+  });
+
+  // TODO: Could this be tracked separately for each item?
+  const { mutateAsync: addToCollection, isPending: isAddPending } =
+    useAddFileToCollectionMutation();
+  const { mutateAsync: removeFromCollection, isPending: isRemovePending } =
+    useRemoveFileFromCollectionMutation();
 
   const handleOpenChange = (open: boolean) => {
     if (open) {
       onOpen();
     }
+    setOpen(open);
   };
 
   const downloadUrl = `/api/files/${file.id}/download`;
@@ -86,7 +105,7 @@ const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
   };
 
   return (
-    <Menu.Root onOpenChange={handleOpenChange} modal={false}>
+    <Menu.Root open={open} onOpenChange={handleOpenChange} modal={false}>
       <Menu.Trigger
         render={
           <Button
@@ -119,9 +138,34 @@ const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
               <Menu.Group>
                 <Menu.GroupLabel>Collections</Menu.GroupLabel>
                 {collections?.map((collection) => {
-                  // TODO: Actually implement managing the collections
+                  const pending = isAddPending || isRemovePending;
+                  const checked = fileCollections.some(
+                    (c) => c.id === collection.id,
+                  );
+
+                  const handleCheckedChange = async (checked: boolean) => {
+                    if (pending) return;
+
+                    if (checked) {
+                      await addToCollection({
+                        id: collection.id,
+                        fileId: file.id,
+                      });
+                    } else {
+                      await removeFromCollection({
+                        id: collection.id,
+                        fileId: file.id,
+                      });
+                    }
+                  };
+
                   return (
-                    <Menu.CheckboxItem key={collection.id}>
+                    <Menu.CheckboxItem
+                      key={collection.id}
+                      checked={checked}
+                      onCheckedChange={handleCheckedChange}
+                      disabled={pending}
+                    >
                       {collection.name}
                     </Menu.CheckboxItem>
                   );

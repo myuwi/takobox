@@ -15,6 +15,16 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: collection_files; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.collection_files (
+    collection_id uuid NOT NULL,
+    file_id uuid NOT NULL
+);
+
+
+--
 -- Name: collections; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -75,6 +85,14 @@ CREATE TABLE public.users (
 
 
 --
+-- Name: collection_files collection_files_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_files
+    ADD CONSTRAINT collection_files_pkey PRIMARY KEY (collection_id, file_id);
+
+
+--
 -- Name: collections collections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -131,6 +149,22 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: collection_files collection_files_collection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_files
+    ADD CONSTRAINT collection_files_collection_id_fkey FOREIGN KEY (collection_id) REFERENCES public.collections(id) ON DELETE CASCADE;
+
+
+--
+-- Name: collection_files collection_files_file_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.collection_files
+    ADD CONSTRAINT collection_files_file_id_fkey FOREIGN KEY (file_id) REFERENCES public.files(id) ON DELETE CASCADE;
+
+
+--
 -- Name: collections collections_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -168,4 +202,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20250702083057'),
     ('20250707145013'),
     ('20250801090641'),
-    ('20250813094720');
+    ('20250813094720'),
+    ('20250930115427');
