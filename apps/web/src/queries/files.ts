@@ -10,6 +10,7 @@ import {
   uploadFile,
   type ProgressCallback,
 } from "@/api/files";
+import { collectionFilesOptions } from "./collections";
 
 export const filesOptions = queryOptions({
   queryKey: ["files"],
@@ -24,6 +25,7 @@ export const fileOptions = (id: string) =>
 
 interface UploadFileMutationArgs {
   file: File;
+  collectionId?: string;
   signal?: AbortSignal;
   onUploadProgress?: ProgressCallback;
 }
@@ -34,13 +36,23 @@ export function useUploadFileMutation() {
   return useMutation({
     mutationFn: ({
       file,
+      collectionId,
       signal,
       onUploadProgress,
     }: UploadFileMutationArgs) => {
-      return uploadFile(file, onUploadProgress, signal);
+      return uploadFile(file, collectionId, onUploadProgress, signal);
     },
-    onSuccess: async (_) => {
-      await queryClient.refetchQueries({ queryKey: filesOptions.queryKey });
+    onSuccess: async (_, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: filesOptions.queryKey,
+          exact: true,
+        }),
+        variables.collectionId &&
+          queryClient.invalidateQueries({
+            queryKey: collectionFilesOptions(variables.collectionId).queryKey,
+          }),
+      ]);
     },
   });
 }
@@ -50,8 +62,20 @@ export function useDeleteFileMutation() {
 
   return useMutation({
     mutationFn: deleteFile,
-    onSuccess: async (_) => {
-      await queryClient.refetchQueries({ queryKey: filesOptions.queryKey });
+    onSuccess: async (_, fileId) => {
+      queryClient.removeQueries(fileOptions(fileId));
+
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: filesOptions.queryKey,
+          exact: true,
+        }),
+        queryClient.invalidateQueries({
+          predicate: (query) =>
+            query.queryKey[0] === "collections" &&
+            query.queryKey[2] === "files",
+        }),
+      ]);
     },
   });
 }

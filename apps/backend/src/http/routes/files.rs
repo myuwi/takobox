@@ -3,6 +3,7 @@ use std::ffi::OsStr;
 use anyhow::anyhow;
 use axum::{
     Json, Router,
+    body::Bytes,
     extract::{DefaultBodyLimit, Multipart, Path, State},
     http::StatusCode,
     response::IntoResponse,
@@ -82,66 +83,116 @@ async fn create(
     session: Session,
     mut multipart: Multipart,
 ) -> Result<impl IntoResponse, Error> {
+    let mut collection_id: Option<Uuid> = None;
+    let mut file: Option<(String, Bytes)> = None;
+
     while let Some(field) = multipart
         .next_field()
         .await
         .map_err(|e| Error::Internal(e.into()))?
     {
-        let Some("file") = field.name() else { continue };
-
-        let original_name = field
-            .file_name()
-            .map(|s| s.to_owned())
-            .ok_or(Error::UnprocessableEntity("Missing file name"))?;
-
-        // TODO: retry on db collision
-        let file_id = nanoid!(12);
-        let ext = std::path::Path::new(&original_name)
-            .extension()
-            .and_then(OsStr::to_str)
-            .map(|p| ".".to_string() + p)
-            .unwrap_or("".to_string());
-
-        let file_name = file_id + &ext;
-        let file_path = format!("{}/{}", UPLOADS_PATH, file_name);
-
-        // TODO: Don't read everything into memory
-        let data = field.bytes().await.map_err(|e| Error::Internal(e.into()))?;
-        let file_size = data.len() as i64;
-
-        let mut file_handle = tokio::fs::File::create_new(&file_path)
-            .await
-            .map_err(|e| Error::Internal(e.into()))?;
-
-        file_handle
-            .write_all(&data)
-            .await
-            .map_err(|e| Error::Internal(e.into()))?;
-
-        let file = sqlx::query_as!(
-            File,
-            "insert into files (user_id, name, original, size)
-            values ($1, $2, $3, $4)
-            returning * ",
-            session.user_id,
-            file_name,
-            original_name,
-            file_size,
-        )
-        .fetch_one(&pool)
-        .await?;
-
-        match thumbnail::generate_thumbnail(&file_path).await {
-            Ok(_) | Err(ThumbnailError::UnsupportedFiletype) => (),
-            Err(ThumbnailError::ShellError(err)) => {
-                error!("Error creating thumbnail for \"{}\": {}", file_path, err)
+        match field.name() {
+            Some("collection") => {
+                collection_id = Some(
+                    field
+                        .bytes()
+                        .await
+                        .map_err(|_| Error::BadRequest("Bad request"))
+                        .and_then(|bytes| {
+                            Uuid::try_parse_ascii(&bytes)
+                                .map_err(|_| Error::BadRequest("Bad request"))
+                        })?,
+                );
             }
-        }
+            Some("file") => {
+                let file_name = field
+                    .file_name()
+                    .map(|s| s.to_owned())
+                    .ok_or(Error::UnprocessableEntity("Missing file name"))?;
 
-        return Ok(Json(file));
+                // TODO: Don't read everything into memory?
+                let file_bytes = field.bytes().await.map_err(|e| Error::Internal(e.into()))?;
+
+                file = Some((file_name, file_bytes));
+            }
+            _ => (),
+        }
     }
 
-    Err(Error::UnprocessableEntity("Expected a file."))
+    let Some((original_name, file_bytes)) = file else {
+        return Err(Error::UnprocessableEntity("Expected a file."));
+    };
+
+    // TODO: retry on db collision
+    let file_id = nanoid!(12);
+    let ext = std::path::Path::new(&original_name)
+        .extension()
+        .and_then(OsStr::to_str)
+        .map(|p| ".".to_string() + p)
+        .unwrap_or("".to_string());
+
+    let file_name = file_id + &ext;
+    let file_path = format!("{}/{}", UPLOADS_PATH, file_name);
+    let file_size = file_bytes.len() as i64;
+
+    let mut transaction = pool.begin().await?;
+
+    let file = sqlx::query_as!(
+        File,
+        "insert into files (user_id, name, original, size)
+        values ($1, $2, $3, $4)
+        returning *",
+        session.user_id,
+        file_name,
+        original_name,
+        file_size,
+    )
+    .fetch_one(&mut *transaction)
+    .await?;
+
+    if let Some(collection_id) = collection_id {
+        let res = sqlx::query!(
+            "insert into collection_files (collection_id, file_id)
+            select $1, $2
+            where exists (
+                select 1
+                from collections c
+                where c.id = $1
+                  and c.user_id = $3
+            )",
+            collection_id,
+            file.id,
+            session.user_id,
+        )
+        .execute(&mut *transaction)
+        .await?;
+
+        if res.rows_affected() == 0 {
+            return Err(Error::NotFound(
+                "Collection or file doesn't exist or belongs to another user.",
+            ));
+        }
+    }
+
+    let mut file_handle = tokio::fs::File::create_new(&file_path)
+        .await
+        .map_err(|e| Error::Internal(e.into()))?;
+
+    file_handle
+        .write_all(&file_bytes)
+        .await
+        .map_err(|e| Error::Internal(e.into()))?;
+
+    match thumbnail::generate_thumbnail(&file_path).await {
+        Ok(_) | Err(ThumbnailError::UnsupportedFiletype) => (),
+        Err(ThumbnailError::ShellError(err)) => {
+            error!("Error creating thumbnail for \"{}\": {}", file_path, err)
+        }
+    }
+
+    transaction.commit().await?;
+
+    Ok(Json(file))
 }
 
 async fn delete_file(

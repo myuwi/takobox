@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "insert into files (user_id, name, original, size)\n            values ($1, $2, $3, $4)\n            returning * ",
+  "query": "insert into files (user_id, name, original, size)\n        values ($1, $2, $3, $4)\n        returning *",
   "describe": {
     "columns": [
       {
@@ -51,5 +51,5 @@
       false
     ]
   },
-  "hash": "4abc9572332cbd53b2f6f5038b3e259264e06372677d568c59467b4c797703fd"
+  "hash": "198f1f26ef696d926e21a1fb80945bd014dc5ce7e058e56926197c0392f82150"
 }

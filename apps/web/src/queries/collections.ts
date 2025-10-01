@@ -25,7 +25,7 @@ export function useCreateCollectionMutation() {
   return useMutation({
     mutationFn: createCollection,
     onSuccess: async (_) => {
-      await queryClient.refetchQueries({
+      await queryClient.invalidateQueries({
         queryKey: collectionsOptions.queryKey,
       });
     },
@@ -39,7 +39,7 @@ export function useRenameCollectionMutation() {
     mutationFn: ({ id, name }: { id: string; name: string }) =>
       renameCollection(id, name),
     onSuccess: async (_) => {
-      await queryClient.refetchQueries({
+      await queryClient.invalidateQueries({
         queryKey: collectionsOptions.queryKey,
       });
     },
@@ -52,7 +52,7 @@ export function useDeleteCollectionMutation() {
   return useMutation({
     mutationFn: deleteCollection,
     onSuccess: async (_) => {
-      await queryClient.refetchQueries({
+      await queryClient.invalidateQueries({
         queryKey: collectionsOptions.queryKey,
       });
     },
@@ -73,10 +73,10 @@ export function useAddFileToCollectionMutation() {
       addFileToCollection(id, fileId),
     onSuccess: async (_, variables) => {
       await Promise.all([
-        queryClient.refetchQueries({
+        queryClient.invalidateQueries({
           queryKey: fileOptions(variables.fileId).queryKey,
         }),
-        queryClient.refetchQueries({
+        queryClient.invalidateQueries({
           queryKey: collectionFilesOptions(variables.id).queryKey,
         }),
       ]);
@@ -92,10 +92,10 @@ export function useRemoveFileFromCollectionMutation() {
       removeFileFromCollection(id, fileId),
     onSuccess: async (_, variables) => {
       await Promise.all([
-        queryClient.refetchQueries({
+        queryClient.invalidateQueries({
           queryKey: fileOptions(variables.fileId).queryKey,
         }),
-        queryClient.refetchQueries({
+        queryClient.invalidateQueries({
           queryKey: collectionFilesOptions(variables.id).queryKey,
         }),
       ]);

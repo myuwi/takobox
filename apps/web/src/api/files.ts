@@ -21,10 +21,14 @@ export const getFile = async (id: string) => {
 
 export const uploadFile = async (
   file: File,
+  collectionId?: string,
   progressCallback?: ProgressCallback,
   signal?: AbortSignal,
 ) => {
   const form = new FormData();
+  if (collectionId) {
+    form.append("collection", collectionId);
+  }
   form.append("file", file);
 
   const { data } = await client.post("files", form, {

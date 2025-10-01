@@ -22,7 +22,9 @@ export const Sidebar = () => {
   const [openMobile, setOpenMobile] = useAtom(sidebarOpenMobileAtom);
   const { data: collections } = useQuery(collectionsOptions);
 
-  const { open, getInputProps } = useDropzone({ onDrop: uploadFiles });
+  const { open, getInputProps } = useDropzone({
+    onDrop: (files) => uploadFiles(files),
+  });
 
   const sidebar = (
     <div className="flex w-54 shrink-0 flex-col gap-4">

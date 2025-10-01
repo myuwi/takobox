@@ -66,7 +66,7 @@ function RouteComponent() {
   }, [collectionId, resetFileRejections, setSelectedFiles]);
 
   const { open, getInputProps, getRootProps, isDragActive } = useDropzone({
-    onDrop: uploadFiles,
+    onDrop: (files) => uploadFiles(files, collectionId),
     noClick: true,
     noKeyboard: true,
   });

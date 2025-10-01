@@ -23,7 +23,7 @@ export const useUploads = () => {
 
   const { mutateAsync: uploadFileMutation } = useUploadFileMutation();
 
-  const handleUpload = async (file: File) => {
+  const handleUpload = async (file: File, collectionId?: string) => {
     const url = file.type.startsWith("image/")
       ? URL.createObjectURL(file)
       : undefined;
@@ -45,6 +45,7 @@ export const useUploads = () => {
 
     await uploadFileMutation({
       file,
+      collectionId,
       signal: abortController.signal,
       onUploadProgress: ({ file, event }) => {
         const progress = event.progress ? Math.round(event.progress * 100) : 0;
@@ -64,7 +65,7 @@ export const useUploads = () => {
     }
   };
 
-  const uploadFiles = async (files: File[]) => {
+  const uploadFiles = async (files: File[], collectionId?: string) => {
     const rejectedFiles = files.filter(
       (file) => file.size > settings!.maxFileSize,
     );
@@ -76,7 +77,7 @@ export const useUploads = () => {
     // TODO: check quota before upload
 
     for (const file of files) {
-      handleUpload(file);
+      handleUpload(file, collectionId);
     }
   };
 
