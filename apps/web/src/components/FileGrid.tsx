@@ -331,7 +331,10 @@ export const FileGrid = ({ files }: FileGridProps) => {
                 </span>
                 <FileContextMenu file={file} onOpen={handleMenuOpen} />
               </div>
-              <span className="line-clamp-1 px-1 text-center break-all">
+              <span
+                className="line-clamp-1 px-1 text-center break-all"
+                title={file.original}
+              >
                 {file.original}
               </span>
             </div>
