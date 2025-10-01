@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { CloudUpload, X } from "lucide-react";
 import { useDropzone } from "react-dropzone";
@@ -7,20 +8,42 @@ import { Alert } from "@/components/primitives/Alert";
 import { Button } from "@/components/primitives/Button";
 import { Progress } from "@/components/primitives/Progress";
 import { useUploads } from "@/hooks/useUploads";
-import { filesOptions, useFilesQuery } from "@/queries/files";
+import {
+  collectionFilesOptions,
+  collectionsOptions,
+} from "@/queries/collections";
+import { filesOptions } from "@/queries/files";
 import { useSettingsQuery } from "@/queries/settings";
 import { formatBytes } from "@/utils/files";
 
 export const Route = createFileRoute("/(app)/(dashboard)/home")({
   component: RouteComponent,
-  beforeLoad: async ({ context }) => {
-    await context.queryClient.prefetchQuery(filesOptions);
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      collection: search.collection as string | undefined,
+    };
+  },
+  beforeLoad: async ({ context, search: { collection } }) => {
+    await context.queryClient.prefetchQuery(
+      !collection ? filesOptions : collectionFilesOptions(collection),
+    );
   },
 });
 
 function RouteComponent() {
+  const { collection: collectionId } = Route.useSearch();
   const { data: settings } = useSettingsQuery();
-  const { data: files } = useFilesQuery();
+
+  const { data: files } = useQuery(
+    !collectionId ? filesOptions : collectionFilesOptions(collectionId),
+  );
+
+  const { data: collection } = useQuery({
+    ...collectionsOptions,
+    select: (collections) => collections.find((c) => c.id === collectionId),
+    enabled: !!collectionId,
+  });
+
   const {
     uploads,
     uploadFiles,
@@ -39,9 +62,11 @@ function RouteComponent() {
     noKeyboard: true,
   });
 
+  const headerText = (collectionId && collection?.name) || "All files";
+
   return (
     <main className="flex w-full flex-col gap-4 [&_>_*]:mx-4">
-      <h1 className="text-base font-medium">All files</h1>
+      <h1 className="text-base font-medium">{headerText}</h1>
 
       {/* TODO: replace with a list of rejected files. also show failed uploads there */}
       {fileRejections.length > 0 && (

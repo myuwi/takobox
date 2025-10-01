@@ -8,6 +8,7 @@ import {
   addFileToCollection,
   createCollection,
   deleteCollection,
+  getCollectionFiles,
   getCollections,
   removeFileFromCollection,
   renameCollection,
@@ -63,6 +64,12 @@ export function useDeleteCollectionMutation() {
   });
 }
 
+export const collectionFilesOptions = (id: string) =>
+  queryOptions({
+    queryKey: ["collections", id, "files"],
+    queryFn: () => getCollectionFiles(id),
+  });
+
 export function useAddFileToCollectionMutation() {
   const queryClient = useQueryClient();
 
@@ -70,9 +77,14 @@ export function useAddFileToCollectionMutation() {
     mutationFn: ({ id, fileId }: { id: string; fileId: string }) =>
       addFileToCollection(id, fileId),
     onSuccess: async (_, variables) => {
-      await queryClient.refetchQueries({
-        queryKey: fileOptions(variables.fileId).queryKey,
-      });
+      await Promise.all([
+        queryClient.refetchQueries({
+          queryKey: fileOptions(variables.fileId).queryKey,
+        }),
+        queryClient.refetchQueries({
+          queryKey: collectionFilesOptions(variables.id).queryKey,
+        }),
+      ]);
     },
   });
 }
@@ -84,9 +96,14 @@ export function useRemoveFileFromCollectionMutation() {
     mutationFn: ({ id, fileId }: { id: string; fileId: string }) =>
       removeFileFromCollection(id, fileId),
     onSuccess: async (_, variables) => {
-      await queryClient.refetchQueries({
-        queryKey: fileOptions(variables.fileId).queryKey,
-      });
+      await Promise.all([
+        queryClient.refetchQueries({
+          queryKey: fileOptions(variables.fileId).queryKey,
+        }),
+        queryClient.refetchQueries({
+          queryKey: collectionFilesOptions(variables.id).queryKey,
+        }),
+      ]);
     },
   });
 }

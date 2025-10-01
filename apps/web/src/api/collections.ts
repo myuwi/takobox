@@ -1,4 +1,5 @@
 import type { CollectionDto } from "@/types/CollectionDto";
+import type { FileDto } from "@/types/FileDto";
 import { client } from "./client";
 
 export const getCollections = async () => {
@@ -18,6 +19,11 @@ export const renameCollection = async (id: string, name: string) => {
 
 export const deleteCollection = async (id: string) => {
   const { data } = await client.delete(`collections/${id}`);
+  return data;
+};
+
+export const getCollectionFiles = async (id: string) => {
+  const { data } = await client.get<FileDto[]>(`collections/${id}/files`);
   return data;
 };
 
