@@ -1,5 +1,4 @@
 import {
-  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -257,11 +256,6 @@ export const FileGrid = ({ files }: FileGridProps) => {
       setSelectedFiles([]);
     }
   };
-
-  // Clean up selected files when file grid unmounts
-  useEffect(() => {
-    return () => setSelectedFiles([]);
-  }, [setSelectedFiles]);
 
   return (
     <div className="relative h-full w-full" onClick={handleGridClick}>

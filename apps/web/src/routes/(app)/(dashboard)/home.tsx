@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useSetAtom } from "jotai";
 import { CloudUpload, X } from "lucide-react";
 import { useDropzone } from "react-dropzone";
+import { selectedFilesAtom } from "@/atoms/selected-files";
 import { FileGrid } from "@/components/FileGrid";
 import { Alert } from "@/components/primitives/Alert";
 import { Button } from "@/components/primitives/Button";
@@ -54,9 +56,14 @@ function RouteComponent() {
     resetFileRejections,
   } = useUploads();
 
+  const setSelectedFiles = useSetAtom(selectedFilesAtom);
+
   useEffect(() => {
-    return () => resetFileRejections();
-  }, [resetFileRejections]);
+    return () => {
+      setSelectedFiles([]);
+      resetFileRejections();
+    };
+  }, [collectionId, resetFileRejections, setSelectedFiles]);
 
   const { open, getInputProps, getRootProps, isDragActive } = useDropzone({
     onDrop: uploadFiles,
