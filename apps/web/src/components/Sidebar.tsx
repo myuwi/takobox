@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useAtom } from "jotai";
 import { Folder, Plus, Tag } from "lucide-react";
@@ -6,7 +7,7 @@ import { sidebarOpenMobileAtom } from "@/atoms/sidebar";
 import { Button } from "@/components/primitives/Button";
 import * as Sheet from "@/components/primitives/Sheet";
 import { useUploads } from "@/hooks/useUploads";
-import { useCollectionsQuery } from "@/queries/collections";
+import { collectionsOptions } from "@/queries/collections";
 import { tw } from "@/utils/tw";
 import { CollectionMenu } from "./CollectionMenu";
 import { CreateCollectionDialog } from "./CreateCollectionDialog";
@@ -19,7 +20,7 @@ const SidebarGroupContent = tw.div`flex flex-col gap-1`;
 export const Sidebar = () => {
   const { uploadFiles } = useUploads();
   const [openMobile, setOpenMobile] = useAtom(sidebarOpenMobileAtom);
-  const { data: collections } = useCollectionsQuery();
+  const { data: collections } = useQuery(collectionsOptions);
 
   const { open, getInputProps } = useDropzone({ onDrop: uploadFiles });
 

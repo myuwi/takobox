@@ -1,7 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import { atom, useAtom } from "jotai";
 import { atomWithReset, useResetAtom } from "jotai/utils";
 import { useUploadFileMutation } from "@/queries/files";
-import { useSettingsQuery } from "@/queries/settings";
+import { settingsOptions } from "@/queries/settings";
 
 export interface UploadProgress {
   id: string;
@@ -15,7 +16,7 @@ export const uploadsAtom = atom<UploadProgress[]>([]);
 export const fileRejectionsAtom = atomWithReset<File[]>([]);
 
 export const useUploads = () => {
-  const { data: settings } = useSettingsQuery();
+  const { data: settings } = useQuery(settingsOptions);
   const [uploads, setUploads] = useAtom(uploadsAtom);
   const [fileRejections, setFileRejections] = useAtom(fileRejectionsAtom);
   const resetFileRejections = useResetAtom(fileRejectionsAtom);

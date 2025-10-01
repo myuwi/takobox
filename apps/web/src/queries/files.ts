@@ -1,7 +1,6 @@
 import {
   queryOptions,
   useMutation,
-  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import {
@@ -16,10 +15,6 @@ export const filesOptions = queryOptions({
   queryKey: ["files"],
   queryFn: getFiles,
 });
-
-export function useFilesQuery() {
-  return useQuery(filesOptions);
-}
 
 export const fileOptions = (id: string) =>
   queryOptions({

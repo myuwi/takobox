@@ -22,8 +22,8 @@ import { regenerateThumbnail } from "@/api/files";
 import { selectedFilesAtom } from "@/atoms/selected-files";
 import { thumbnailExtensions } from "@/constants/extensions";
 import {
+  collectionsOptions,
   useAddFileToCollectionMutation,
-  useCollectionsQuery,
   useRemoveFileFromCollectionMutation,
 } from "@/queries/collections";
 import { fileOptions, useDeleteFileMutation } from "@/queries/files";
@@ -51,7 +51,7 @@ const getThumbnailPath = (fileName: string) => {
 
 const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
   const [open, setOpen] = useState(false);
-  const { data: collections } = useCollectionsQuery();
+  const { data: collections } = useQuery(collectionsOptions);
   const setSelectedFiles = useSetAtom(selectedFilesAtom);
   const { mutateAsync: deleteFile } = useDeleteFileMutation();
 

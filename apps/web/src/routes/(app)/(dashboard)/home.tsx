@@ -13,12 +13,16 @@ import {
   collectionsOptions,
 } from "@/queries/collections";
 import { filesOptions } from "@/queries/files";
-import { useSettingsQuery } from "@/queries/settings";
+import { settingsOptions } from "@/queries/settings";
 import { formatBytes } from "@/utils/files";
+
+interface HomeSearchParams {
+  collection?: string;
+}
 
 export const Route = createFileRoute("/(app)/(dashboard)/home")({
   component: RouteComponent,
-  validateSearch: (search: Record<string, unknown>) => {
+  validateSearch: (search: Record<string, unknown>): HomeSearchParams => {
     return {
       collection: search.collection as string | undefined,
     };
@@ -32,12 +36,10 @@ export const Route = createFileRoute("/(app)/(dashboard)/home")({
 
 function RouteComponent() {
   const { collection: collectionId } = Route.useSearch();
-  const { data: settings } = useSettingsQuery();
-
+  const { data: settings } = useQuery(settingsOptions);
   const { data: files } = useQuery(
     !collectionId ? filesOptions : collectionFilesOptions(collectionId),
   );
-
   const { data: collection } = useQuery({
     ...collectionsOptions,
     select: (collections) => collections.find((c) => c.id === collectionId),

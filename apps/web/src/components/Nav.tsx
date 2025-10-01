@@ -1,9 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { LogOut, UserIcon } from "lucide-react";
 import { logout } from "@/api/auth";
 import { Button } from "@/components/primitives/Button";
 import * as Menu from "@/components/primitives/Menu";
-import { useMeQuery } from "@/queries/me";
+import { meOptions } from "@/queries/me";
 import type { User } from "@/types/User";
 
 interface AccountMenuProps {
@@ -51,7 +52,7 @@ interface NavProps {
 }
 
 export const Nav = ({ menuButton }: NavProps) => {
-  const { data: user } = useMeQuery();
+  const { data: user } = useQuery(meOptions);
 
   return (
     <nav className="mx-auto flex w-full max-w-screen-xl items-center justify-between gap-4 p-4">

@@ -1,14 +1,15 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/primitives/Button";
-import { useMeQuery } from "@/queries/me";
+import { meOptions } from "@/queries/me";
 
 export const Route = createFileRoute("/")({
   component: App,
 });
 
 function App() {
-  const { data: user } = useMeQuery();
+  const { data: user } = useQuery(meOptions);
 
   return (
     <>

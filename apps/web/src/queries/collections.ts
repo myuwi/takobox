@@ -1,7 +1,6 @@
 import {
   queryOptions,
   useMutation,
-  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import {
@@ -19,10 +18,6 @@ export const collectionsOptions = queryOptions({
   queryKey: ["collections"],
   queryFn: getCollections,
 });
-
-export function useCollectionsQuery() {
-  return useQuery(collectionsOptions);
-}
 
 export function useCreateCollectionMutation() {
   const queryClient = useQueryClient();
