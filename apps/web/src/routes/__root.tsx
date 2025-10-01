@@ -1,13 +1,14 @@
 import { StrictMode } from "react";
+import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import {
   createRootRouteWithContext,
   HeadContent,
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { meOptions } from "@/queries/me";
 import { settingsOptions } from "@/queries/settings";
 import css from "../styles.css?url";
@@ -48,9 +49,19 @@ function Root() {
       <body>
         <StrictMode>
           <Outlet />
-          <ReactQueryDevtools />
-          <TanStackRouterDevtools />
           <Scripts />
+          <TanStackDevtools
+            plugins={[
+              {
+                name: "TanStack Query",
+                render: <ReactQueryDevtoolsPanel />,
+              },
+              {
+                name: "TanStack Router",
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+            ]}
+          />
         </StrictMode>
       </body>
     </html>
