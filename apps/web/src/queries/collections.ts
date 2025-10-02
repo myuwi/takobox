@@ -1,8 +1,4 @@
-import {
-  queryOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { queryOptions, useMutation } from "@tanstack/react-query";
 import {
   addFileToCollection,
   createCollection,
@@ -20,12 +16,10 @@ export const collectionsOptions = queryOptions({
 });
 
 export function useCreateCollectionMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: createCollection,
-    onSuccess: async (_) => {
-      await queryClient.invalidateQueries({
+    onSuccess: async (_, _variables, _mutateResult, context) => {
+      await context.client.invalidateQueries({
         queryKey: collectionsOptions.queryKey,
       });
     },
@@ -33,13 +27,11 @@ export function useCreateCollectionMutation() {
 }
 
 export function useRenameCollectionMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) =>
       renameCollection(id, name),
-    onSuccess: async (_) => {
-      await queryClient.invalidateQueries({
+    onSuccess: async (_, _variables, _mutateResult, context) => {
+      await context.client.invalidateQueries({
         queryKey: collectionsOptions.queryKey,
       });
     },
@@ -47,12 +39,10 @@ export function useRenameCollectionMutation() {
 }
 
 export function useDeleteCollectionMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: deleteCollection,
-    onSuccess: async (_) => {
-      await queryClient.invalidateQueries({
+    onSuccess: async (_, _variables, _mutateResult, context) => {
+      await context.client.invalidateQueries({
         queryKey: collectionsOptions.queryKey,
       });
     },
@@ -66,17 +56,15 @@ export const collectionFilesOptions = (id: string) =>
   });
 
 export function useAddFileToCollectionMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ id, fileId }: { id: string; fileId: string }) =>
       addFileToCollection(id, fileId),
-    onSuccess: async (_, variables) => {
+    onSuccess: async (_, variables, _mutateResult, context) => {
       await Promise.all([
-        queryClient.invalidateQueries({
+        context.client.invalidateQueries({
           queryKey: fileOptions(variables.fileId).queryKey,
         }),
-        queryClient.invalidateQueries({
+        context.client.invalidateQueries({
           queryKey: collectionFilesOptions(variables.id).queryKey,
         }),
       ]);
@@ -85,17 +73,15 @@ export function useAddFileToCollectionMutation() {
 }
 
 export function useRemoveFileFromCollectionMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ id, fileId }: { id: string; fileId: string }) =>
       removeFileFromCollection(id, fileId),
-    onSuccess: async (_, variables) => {
+    onSuccess: async (_, variables, _mutateResult, context) => {
       await Promise.all([
-        queryClient.invalidateQueries({
+        context.client.invalidateQueries({
           queryKey: fileOptions(variables.fileId).queryKey,
         }),
-        queryClient.invalidateQueries({
+        context.client.invalidateQueries({
           queryKey: collectionFilesOptions(variables.id).queryKey,
         }),
       ]);

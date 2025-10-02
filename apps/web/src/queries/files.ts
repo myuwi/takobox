@@ -1,8 +1,4 @@
-import {
-  queryOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { queryOptions, useMutation } from "@tanstack/react-query";
 import {
   deleteFile,
   getFile,
@@ -31,8 +27,6 @@ interface UploadFileMutationArgs {
 }
 
 export function useUploadFileMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       file,
@@ -42,14 +36,14 @@ export function useUploadFileMutation() {
     }: UploadFileMutationArgs) => {
       return uploadFile(file, collectionId, onUploadProgress, signal);
     },
-    onSuccess: async (_, variables) => {
+    onSuccess: async (_, variables, _mutateResult, context) => {
       await Promise.all([
-        queryClient.invalidateQueries({
+        context.client.invalidateQueries({
           queryKey: filesOptions.queryKey,
           exact: true,
         }),
         variables.collectionId &&
-          queryClient.invalidateQueries({
+          context.client.invalidateQueries({
             queryKey: collectionFilesOptions(variables.collectionId).queryKey,
           }),
       ]);
@@ -58,19 +52,17 @@ export function useUploadFileMutation() {
 }
 
 export function useDeleteFileMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: deleteFile,
-    onSuccess: async (_, fileId) => {
-      queryClient.removeQueries(fileOptions(fileId));
+    onSuccess: async (_, fileId, _mutateResult, context) => {
+      context.client.removeQueries(fileOptions(fileId));
 
       await Promise.all([
-        queryClient.invalidateQueries({
+        context.client.invalidateQueries({
           queryKey: filesOptions.queryKey,
           exact: true,
         }),
-        queryClient.invalidateQueries({
+        context.client.invalidateQueries({
           predicate: (query) =>
             query.queryKey[0] === "collections" &&
             query.queryKey[2] === "files",
