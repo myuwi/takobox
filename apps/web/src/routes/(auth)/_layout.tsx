@@ -18,7 +18,7 @@ export const Route = createFileRoute("/(auth)")({
   },
 });
 
-export default function Layout() {
+function Layout() {
   return (
     <main className="relative mx-auto flex max-w-screen-xl items-center justify-center px-6 py-48">
       <nav className="absolute top-8 left-8">

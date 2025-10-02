@@ -40,7 +40,7 @@ export const Button = ({
   className,
   variant,
   size,
-  render = <button />,
+  render,
   ...props
 }: ButtonProps) => {
   const defaultProps = {
@@ -48,6 +48,7 @@ export const Button = ({
   } as const;
 
   const element = useRender({
+    defaultTagName: "button",
     render,
     props: mergeProps<"button">(defaultProps, props),
   });

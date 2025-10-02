@@ -1,5 +1,5 @@
-import { serverOnly } from "@tanstack/react-start";
-import { getHeaders } from "@tanstack/react-start/server";
+import { createServerOnlyFn } from "@tanstack/react-start";
+import { getRequestHeaders } from "@tanstack/react-start/server";
 import axios, { type AxiosError } from "axios";
 import { isServer } from "@/utils/env";
 
@@ -7,11 +7,11 @@ export const client = axios.create({
   baseURL: isServer ? process.env.INTERNAL_API_URL : "/api",
 });
 
-const getServerHeaders = serverOnly(getHeaders);
+const getServerHeaders = createServerOnlyFn(getRequestHeaders);
 
 if (isServer) {
   client.interceptors.request.use((config) => {
-    config.headers.set(getServerHeaders() as Record<string, string>);
+    config.headers.set(getServerHeaders().toJSON());
     return config;
   });
 }
