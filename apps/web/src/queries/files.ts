@@ -1,4 +1,4 @@
-import { queryOptions, useMutation } from "@tanstack/react-query";
+import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import {
   deleteFile,
   getFile,
@@ -26,48 +26,43 @@ interface UploadFileMutationArgs {
   onUploadProgress?: ProgressCallback;
 }
 
-export function useUploadFileMutation() {
-  return useMutation({
-    mutationFn: ({
-      file,
-      collectionId,
-      signal,
-      onUploadProgress,
-    }: UploadFileMutationArgs) => {
-      return uploadFile(file, collectionId, onUploadProgress, signal);
-    },
-    onSuccess: async (_, variables, _mutateResult, context) => {
-      await Promise.all([
+export const uploadFileOptions = mutationOptions({
+  mutationFn: ({
+    file,
+    collectionId,
+    signal,
+    onUploadProgress,
+  }: UploadFileMutationArgs) => {
+    return uploadFile(file, collectionId, onUploadProgress, signal);
+  },
+  onSuccess: async (_, variables, _mutateResult, context) => {
+    await Promise.all([
+      context.client.invalidateQueries({
+        queryKey: filesOptions.queryKey,
+        exact: true,
+      }),
+      variables.collectionId &&
         context.client.invalidateQueries({
-          queryKey: filesOptions.queryKey,
-          exact: true,
+          queryKey: collectionFilesOptions(variables.collectionId).queryKey,
         }),
-        variables.collectionId &&
-          context.client.invalidateQueries({
-            queryKey: collectionFilesOptions(variables.collectionId).queryKey,
-          }),
-      ]);
-    },
-  });
-}
+    ]);
+  },
+});
 
-export function useDeleteFileMutation() {
-  return useMutation({
-    mutationFn: deleteFile,
-    onSuccess: async (_, fileId, _mutateResult, context) => {
-      context.client.removeQueries(fileOptions(fileId));
+export const deleteFileOptions = mutationOptions({
+  mutationFn: deleteFile,
+  onSuccess: async (_, fileId, _mutateResult, context) => {
+    context.client.removeQueries(fileOptions(fileId));
 
-      await Promise.all([
-        context.client.invalidateQueries({
-          queryKey: filesOptions.queryKey,
-          exact: true,
-        }),
-        context.client.invalidateQueries({
-          predicate: (query) =>
-            query.queryKey[0] === "collections" &&
-            query.queryKey[2] === "files",
-        }),
-      ]);
-    },
-  });
-}
+    await Promise.all([
+      context.client.invalidateQueries({
+        queryKey: filesOptions.queryKey,
+        exact: true,
+      }),
+      context.client.invalidateQueries({
+        predicate: (query) =>
+          query.queryKey[0] === "collections" && query.queryKey[2] === "files",
+      }),
+    ]);
+  },
+});

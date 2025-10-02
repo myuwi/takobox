@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { useCreateCollectionMutation } from "@/queries/collections";
+import { createCollectionOptions } from "@/queries/collections";
 import { formatError } from "@/utils/error";
 import { Alert } from "./primitives/Alert";
 import { Button } from "./primitives/Button";
@@ -16,7 +17,7 @@ export const CreateCollectionDialog = () => {
     mutateAsync: createCollection,
     isError,
     error,
-  } = useCreateCollectionMutation();
+  } = useMutation(createCollectionOptions);
 
   const [showError, setShowError] = useState(false);
 

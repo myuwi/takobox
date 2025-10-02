@@ -1,10 +1,11 @@
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { Alert } from "@/components/primitives/Alert";
 import { Button } from "@/components/primitives/Button";
 import { Input } from "@/components/primitives/Input";
 import { Label } from "@/components/primitives/Label";
-import { useRegisterMutation } from "@/queries/register";
+import { registerOptions } from "@/queries/register";
 import type { AuthPayload } from "@/types/AuthPayload";
 import { formatError } from "@/utils/error";
 
@@ -15,7 +16,7 @@ export const Route = createFileRoute("/(auth)/signup")({
 function SignUp() {
   const { register, handleSubmit } = useForm<AuthPayload>();
   const navigate = useNavigate();
-  const { mutateAsync: registerMutation, error } = useRegisterMutation();
+  const { mutateAsync: registerMutation, error } = useMutation(registerOptions);
 
   const onSubmit = async (values: AuthPayload) => {
     await registerMutation(values);

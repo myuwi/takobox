@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { useRenameCollectionMutation } from "@/queries/collections";
+import { renameCollectionOptions } from "@/queries/collections";
 import type { CollectionDto } from "@/types/CollectionDto";
 import { formatError } from "@/utils/error";
 import { Alert } from "./primitives/Alert";
@@ -34,7 +35,7 @@ export const RenameCollectionDialog = ({
     mutateAsync: renameCollection,
     isError,
     error,
-  } = useRenameCollectionMutation();
+  } = useMutation(renameCollectionOptions);
 
   const [showError, setShowError] = useState(false);
 

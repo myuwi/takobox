@@ -1,4 +1,5 @@
-import { useDeleteCollectionMutation } from "@/queries/collections";
+import { useMutation } from "@tanstack/react-query";
+import { deleteCollectionOptions } from "@/queries/collections";
 import type { CollectionDto } from "@/types/CollectionDto";
 import { Button } from "./primitives/Button";
 import * as Dialog from "./primitives/Dialog";
@@ -16,7 +17,9 @@ export const DeleteCollectionDialog = ({
   setOpen,
   focusRef,
 }: DeleteCollectionDialogProps) => {
-  const { mutateAsync: deleteCollection } = useDeleteCollectionMutation();
+  const { mutateAsync: deleteCollection } = useMutation(
+    deleteCollectionOptions,
+  );
 
   const handleDelete = async () => {
     try {

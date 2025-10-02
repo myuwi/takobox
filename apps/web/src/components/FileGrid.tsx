@@ -5,7 +5,7 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAtom, useSetAtom } from "jotai";
 import {
   Check,
@@ -21,11 +21,11 @@ import { regenerateThumbnail } from "@/api/files";
 import { selectedFilesAtom } from "@/atoms/selected-files";
 import { thumbnailExtensions } from "@/constants/extensions";
 import {
+  addFileToCollectionOptions,
   collectionsOptions,
-  useAddFileToCollectionMutation,
-  useRemoveFileFromCollectionMutation,
+  removeFileFromCollectionOptions,
 } from "@/queries/collections";
-import { fileOptions, useDeleteFileMutation } from "@/queries/files";
+import { deleteFileOptions, fileOptions } from "@/queries/files";
 import type { FileDto } from "@/types/FileDto";
 import { copyToClipboard } from "@/utils/clipboard";
 import { stopPropagation } from "@/utils/event";
@@ -52,7 +52,7 @@ const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
   const [open, setOpen] = useState(false);
   const { data: collections } = useQuery(collectionsOptions);
   const setSelectedFiles = useSetAtom(selectedFilesAtom);
-  const { mutateAsync: deleteFile } = useDeleteFileMutation();
+  const { mutateAsync: deleteFile } = useMutation(deleteFileOptions);
 
   const { data: fileCollections = [] } = useQuery({
     ...fileOptions(file.id),
@@ -61,10 +61,11 @@ const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
   });
 
   // TODO: Could this be tracked separately for each item?
-  const { mutateAsync: addToCollection, isPending: isAddPending } =
-    useAddFileToCollectionMutation();
+  const { mutateAsync: addToCollection, isPending: isAddPending } = useMutation(
+    addFileToCollectionOptions,
+  );
   const { mutateAsync: removeFromCollection, isPending: isRemovePending } =
-    useRemoveFileFromCollectionMutation();
+    useMutation(removeFileFromCollectionOptions);
 
   const handleOpenChange = (open: boolean) => {
     if (open) {

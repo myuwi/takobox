@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { atom, useAtom } from "jotai";
 import { atomWithReset, useResetAtom } from "jotai/utils";
-import { useUploadFileMutation } from "@/queries/files";
+import { uploadFileOptions } from "@/queries/files";
 import { settingsOptions } from "@/queries/settings";
 
 export interface UploadProgress {
@@ -21,7 +21,7 @@ export const useUploads = () => {
   const [fileRejections, setFileRejections] = useAtom(fileRejectionsAtom);
   const resetFileRejections = useResetAtom(fileRejectionsAtom);
 
-  const { mutateAsync: uploadFileMutation } = useUploadFileMutation();
+  const { mutateAsync: uploadFileMutation } = useMutation(uploadFileOptions);
 
   const handleUpload = async (file: File, collectionId?: string) => {
     const url = file.type.startsWith("image/")

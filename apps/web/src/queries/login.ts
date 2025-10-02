@@ -1,12 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
+import { mutationOptions } from "@tanstack/react-query";
 import { login } from "@/api/auth";
 import { meOptions } from "./me";
 
-export function useLoginMutation() {
-  return useMutation({
-    mutationFn: login,
-    onSuccess: async (_, _variables, _mutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: meOptions.queryKey });
-    },
-  });
-}
+export const loginOptions = mutationOptions({
+  mutationFn: login,
+  onSuccess: async (_, _variables, _mutateResult, context) => {
+    await context.client.invalidateQueries({ queryKey: meOptions.queryKey });
+  },
+});
