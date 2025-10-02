@@ -5,7 +5,7 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useMutationState, useQuery } from "@tanstack/react-query";
 import { useAtom, useSetAtom } from "jotai";
 import {
   Check,
@@ -33,7 +33,7 @@ import { formatBytes } from "@/utils/files";
 import { Button } from "./primitives/Button";
 import * as Menu from "./primitives/Menu";
 
-interface FileContextMenu {
+interface FileContextMenuProps {
   file: FileDto;
   onOpen: () => void;
 }
@@ -48,7 +48,7 @@ const getThumbnailPath = (fileName: string) => {
   return `/thumbs/${fileName.replace(/\.\w*$/, ".avif")}`;
 };
 
-const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
+const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
   const [open, setOpen] = useState(false);
   const { data: collections } = useQuery(collectionsOptions);
   const setSelectedFiles = useSetAtom(selectedFilesAtom);
@@ -60,12 +60,29 @@ const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
     enabled: open,
   });
 
-  // TODO: Could this be tracked separately for each item?
-  const { mutateAsync: addToCollection, isPending: isAddPending } = useMutation(
+  const { mutateAsync: addToCollection } = useMutation(
     addFileToCollectionOptions,
   );
-  const { mutateAsync: removeFromCollection, isPending: isRemovePending } =
-    useMutation(removeFileFromCollectionOptions);
+  const { mutateAsync: removeFromCollection } = useMutation(
+    removeFileFromCollectionOptions,
+  );
+
+  const pendingMutations = useMutationState<{ id: string; fileId: string }>({
+    filters: {
+      predicate: (mutation) => {
+        const status = mutation.state.status;
+        const mutationKey = mutation.options.mutationKey;
+
+        return (
+          status === "pending" &&
+          mutationKey?.[0] === "collections" &&
+          mutationKey[1] === "files" &&
+          (mutationKey[2] === "add" || mutationKey[2] === "remove")
+        );
+      },
+    },
+    select: (data) => data.state.variables as any,
+  });
 
   const handleOpenChange = (open: boolean) => {
     if (open) {
@@ -138,7 +155,9 @@ const FileContextMenu = ({ file, onOpen }: FileContextMenu) => {
               <Menu.Group>
                 <Menu.GroupLabel>Collections</Menu.GroupLabel>
                 {collections?.map((collection) => {
-                  const pending = isAddPending || isRemovePending;
+                  const pending = pendingMutations.some(
+                    (m) => m.fileId === file.id && m.id === collection.id,
+                  );
                   const checked = fileCollections.some(
                     (c) => c.id === collection.id,
                   );

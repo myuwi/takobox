@@ -50,6 +50,7 @@ export const collectionFilesOptions = (id: string) =>
   });
 
 export const addFileToCollectionOptions = mutationOptions({
+  mutationKey: ["collections", "files", "add"],
   mutationFn: ({ id, fileId }: { id: string; fileId: string }) =>
     addFileToCollection(id, fileId),
   onSuccess: async (_, variables, _mutateResult, context) => {
@@ -65,6 +66,7 @@ export const addFileToCollectionOptions = mutationOptions({
 });
 
 export const removeFileFromCollectionOptions = mutationOptions({
+  mutationKey: ["collections", "files", "remove"],
   mutationFn: ({ id, fileId }: { id: string; fileId: string }) =>
     removeFileFromCollection(id, fileId),
   onSuccess: async (_, variables, _mutateResult, context) => {
