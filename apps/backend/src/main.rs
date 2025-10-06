@@ -1,13 +1,26 @@
+use std::env;
+
+use tokio::net::TcpListener;
+use tokio::signal::unix::SignalKind;
+use tokio::signal::unix::signal;
+use tracing::debug;
 use tracing_subscriber::EnvFilter;
 
-mod config;
+use takobox::app;
+
 mod db;
-mod http;
 
-use crate::config::Config;
+async fn shutdown_signal() {
+    let mut term = signal(SignalKind::terminate()).expect("Failed to register SIGTERM handler");
+    let mut interrupt = signal(SignalKind::interrupt()).expect("Failed to register SIGINT handler");
 
-pub const UPLOADS_PATH: &str = "../../uploads";
-pub const THUMBS_PATH: &str = "../../uploads/thumbs";
+    tokio::select! {
+        _ = term.recv() => {},
+        _ = interrupt.recv() => {},
+    };
+
+    debug!("Shutting down gracefully...");
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -21,8 +34,15 @@ async fn main() -> anyhow::Result<()> {
         }))
         .init();
 
-    let config = Config::from_env()?;
-    let pool = db::init_pool(&config.database_url).await?;
+    let database_url = env::var("DATABASE_URL")?;
+    let session_secret = env::var("SESSION_SECRET")?;
 
-    http::serve(config, pool).await
+    let pool = db::init_pool(&database_url).await?;
+
+    let listener = TcpListener::bind("0.0.0.0:8000").await?;
+    debug!("Listening on {}", listener.local_addr().unwrap());
+    axum::serve(listener, app(session_secret, pool))
+        .with_graceful_shutdown(shutdown_signal())
+        .await?;
+    Ok(())
 }

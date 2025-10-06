@@ -7,6 +7,7 @@ use tower_governor::{
 
 use crate::http::error::Error;
 
+// TODO: Implement a custom key extractor with only "x-forwarded-for"
 pub fn rate_limit(
     replenish_ms: u64,
     burst_size: u32,

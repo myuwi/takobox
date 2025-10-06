@@ -4,6 +4,5 @@ list:
 dev:
   cargo watch -x run
 
-migrate:
-  dbmate -e TAKOBOX_DATABASE_URL up
-  cargo sqlx prepare --database-url $TAKOBOX_DATABASE_URL
+prepare:
+  cargo sqlx prepare
