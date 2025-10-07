@@ -9,6 +9,7 @@ import { FileGrid } from "@/components/FileGrid";
 import { Alert } from "@/components/primitives/Alert";
 import { Button } from "@/components/primitives/Button";
 import { Progress } from "@/components/primitives/Progress";
+import { Spinner } from "@/components/primitives/Spinner";
 import { useUploads } from "@/hooks/useUploads";
 import {
   collectionFilesOptions,
@@ -29,17 +30,12 @@ export const Route = createFileRoute("/(app)/(dashboard)/home")({
       collection: search.collection as string | undefined,
     };
   },
-  beforeLoad: async ({ context, search: { collection } }) => {
-    await context.queryClient.prefetchQuery(
-      !collection ? filesOptions : collectionFilesOptions(collection),
-    );
-  },
 });
 
 function RouteComponent() {
   const { collection: collectionId } = Route.useSearch();
   const { data: settings } = useQuery(settingsOptions);
-  const { data: files } = useQuery(
+  const { data: files, isFetching } = useQuery(
     !collectionId ? filesOptions : collectionFilesOptions(collectionId),
   );
   const { data: collection } = useQuery({
@@ -115,24 +111,30 @@ function RouteComponent() {
         );
       })}
 
-      <div
-        className="mx-0! -mt-2 flex w-full grow flex-col items-center justify-center gap-3 overflow-hidden rounded-md inset-ring inset-ring-transparent data-[dragging=true]:bg-accent data-[dragging=true]:inset-ring-border"
-        data-dragging={isDragActive}
-        {...getRootProps()}
-      >
-        <input {...getInputProps()} />
-        {files && files.length > 0 ? (
-          <FileGrid files={files} />
-        ) : (
-          <div className="mt-24 flex w-full grow flex-col items-center gap-3 rounded-md p-4">
-            <CloudUpload />
-            <p>Drag and drop or browse files to upload</p>
-            <Button variant="outline" onClick={open}>
-              Browse files
-            </Button>
-          </div>
-        )}
-      </div>
+      {isFetching ? (
+        <div className="p-8">
+          <Spinner />
+        </div>
+      ) : (
+        <div
+          className="mx-0! -mt-2 flex w-full grow flex-col items-center justify-center gap-3 overflow-hidden rounded-md inset-ring inset-ring-transparent data-[dragging=true]:bg-accent data-[dragging=true]:inset-ring-border"
+          data-dragging={isDragActive}
+          {...getRootProps()}
+        >
+          <input {...getInputProps()} />
+          {files && files.length > 0 ? (
+            <FileGrid files={files} />
+          ) : (
+            <div className="mt-24 flex w-full grow flex-col items-center gap-3 rounded-md p-4">
+              <CloudUpload />
+              <p>Drag and drop or browse files to upload</p>
+              <Button variant="outline" onClick={open}>
+                Browse files
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </main>
   );
 }
