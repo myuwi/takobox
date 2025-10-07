@@ -1,5 +1,6 @@
 use axum::Router;
 use middleware::rate_limit::rate_limit;
+use model::settings::Settings;
 use sqlx::PgPool;
 use state::AppState;
 use tower_http::trace::TraceLayer;
@@ -7,14 +8,14 @@ use tower_http::trace::TraceLayer;
 mod auth;
 mod error;
 mod middleware;
-mod model;
+pub mod model;
 mod processing;
 mod routes;
 mod state;
 
 use crate::http::routes::routes;
 
-pub fn app(session_secret: String, pool: PgPool) -> Router {
+pub fn app(session_secret: String, pool: PgPool, settings: Settings) -> Router {
     assert!(
         session_secret.len() >= 64,
         "session_secret must be at least 64 bytes"
@@ -22,6 +23,7 @@ pub fn app(session_secret: String, pool: PgPool) -> Router {
     let app_state = AppState {
         session_secret,
         pool,
+        settings,
     };
 
     routes(&app_state)

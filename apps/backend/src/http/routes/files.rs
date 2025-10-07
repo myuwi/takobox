@@ -24,7 +24,6 @@ use crate::{
             collection::FileCollection,
             file::{File, FileWithCollections},
             session::Session,
-            settings::Settings,
         },
         processing::thumbnail::{self, ThumbnailError},
         state::AppState,
@@ -293,15 +292,15 @@ async fn regenerate_thumbnail(
     ))
 }
 
-pub fn routes() -> Router<AppState> {
-    let max_file_size = Settings::default().max_file_size;
+pub fn routes(state: &AppState) -> Router<AppState> {
+    let AppState { settings, .. } = state;
 
     Router::new()
         .route("/", get(index))
         .route("/{id}", get(show))
         .route(
             "/",
-            post(create).layer(DefaultBodyLimit::max(max_file_size)),
+            post(create).layer(DefaultBodyLimit::max(settings.max_file_size)),
         )
         .route("/{id}", delete(delete_file))
         .route("/{id}/download", get(download))

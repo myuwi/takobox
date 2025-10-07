@@ -69,10 +69,16 @@ fn validate_register_body(body: &AuthPayload) -> Result<(), &'static str> {
 }
 
 async fn register(
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool, settings, .. }): State<AppState>,
     jar: PrivateCookieJar,
     Json(body): Json<AuthPayload>,
 ) -> Result<impl IntoResponse, Error> {
+    if !settings.enable_account_creation {
+        return Err(Error::Unauthorized(
+            "Creation of new user accounts is currently disabled for this instance.",
+        ));
+    }
+
     validate_register_body(&body).map_err(Error::UnprocessableEntity)?;
 
     let password_hash = hash_password(&body.password).map_err(|e| Error::Internal(e.into()))?;

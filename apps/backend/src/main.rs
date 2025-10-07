@@ -7,6 +7,7 @@ use tracing::debug;
 use tracing_subscriber::EnvFilter;
 
 use takobox::app;
+use takobox::model::settings::Settings;
 
 mod db;
 
@@ -34,14 +35,16 @@ async fn main() -> anyhow::Result<()> {
         }))
         .init();
 
-    let database_url = env::var("TAKOBOX_DATABASE_URL")?;
     let session_secret = env::var("TAKOBOX_SESSION_SECRET")?;
-
+    let database_url = env::var("TAKOBOX_DATABASE_URL")?;
     let pool = db::init_pool(&database_url).await?;
+    let settings = Settings::from_env()?;
+
+    let app = app(session_secret, pool, settings);
 
     let listener = TcpListener::bind("0.0.0.0:8000").await?;
     debug!("Listening on {}", listener.local_addr().unwrap());
-    axum::serve(listener, app(session_secret, pool))
+    axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await?;
     Ok(())

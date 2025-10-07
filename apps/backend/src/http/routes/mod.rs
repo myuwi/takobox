@@ -6,8 +6,8 @@ use axum::{
 };
 
 mod auth;
-mod collections;
 mod collection_files;
+mod collections;
 mod files;
 mod me;
 mod settings;
@@ -28,7 +28,7 @@ async fn fallback(method: Method, uri: Uri) -> Response {
 pub fn routes(state: &AppState) -> Router<AppState> {
     let protected_routes = Router::new()
         .route("/me", get(me::show))
-        .nest("/files", files::routes())
+        .nest("/files", files::routes(state))
         .nest("/collections", collections::routes())
         .route_layer(middleware::from_fn(require_auth));
 
