@@ -34,8 +34,8 @@ async fn main() -> anyhow::Result<()> {
         }))
         .init();
 
-    let database_url = env::var("DATABASE_URL")?;
-    let session_secret = env::var("SESSION_SECRET")?;
+    let database_url = env::var("TAKOBOX_DATABASE_URL")?;
+    let session_secret = env::var("TAKOBOX_SESSION_SECRET")?;
 
     let pool = db::init_pool(&database_url).await?;
 
