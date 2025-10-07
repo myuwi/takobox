@@ -2,7 +2,7 @@ list:
   @just --list
 
 dev:
-  cargo watch -x run
+  watchexec -r -w Cargo.toml -w src 'cargo run'
 
 prepare:
   cargo sqlx prepare
