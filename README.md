@@ -30,6 +30,7 @@ Takobox can be configured using the following environment variables.
 
 ### Web
 
-| Variable                   | Description                                            | Default |
-| -------------------------- | ------------------------------------------------------ | ------- |
-| `TAKOBOX_INTERNAL_API_URL` | The internal URL of the backend service. Used for SSR. | unset   |
+| Variable                       | Description                                            | Default |
+| ------------------------------ | ------------------------------------------------------ | ------- |
+| `TAKOBOX_INTERNAL_API_URL`     | The internal URL of the backend service. Used for SSR. | unset   |
+| `TAKOBOX_DISABLE_LANDING_PAGE` | Can be used to disable the landing page.               | `false` |

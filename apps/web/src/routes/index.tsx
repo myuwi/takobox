@@ -1,11 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/primitives/Button";
 import { meOptions } from "@/queries/me";
 
 export const Route = createFileRoute("/")({
   component: App,
+  beforeLoad: async ({ context }) => {
+    if (import.meta.env.TAKOBOX_DISABLE_LANDING_PAGE) {
+      const user = await context.queryClient.fetchQuery(meOptions);
+      throw redirect({ to: user ? "/home" : "/login" });
+    }
+  },
 });
 
 function App() {
