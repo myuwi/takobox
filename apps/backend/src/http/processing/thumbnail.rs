@@ -1,4 +1,4 @@
-use std::{ffi::OsStr, path::Path};
+use std::{ffi::OsStr, path::Path, process::Stdio};
 
 use tokio::process::Command;
 
@@ -28,6 +28,8 @@ pub async fn generate_thumbnail(file_path: &str) -> Result<String, ThumbnailErro
 
     Command::new("ffmpeg")
         .args([
+            "-nostdin",
+            "-hide_banner",
             "-i",
             file_path,
             "-vf",
@@ -38,6 +40,7 @@ pub async fn generate_thumbnail(file_path: &str) -> Result<String, ThumbnailErro
             "1",
             &thumb_path,
         ])
+        .stdin(Stdio::null())
         .output()
         .await
         .map_err(ThumbnailError::ShellError)?;
