@@ -7,6 +7,8 @@
 > [!WARNING]
 > Still in an experimental state. Use at your own risk!
 
+![Demo Screenshot](./.github/demo.png)
+
 ## Built with
 
 - Rust - Backend Language
