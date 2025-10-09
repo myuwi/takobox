@@ -7,9 +7,13 @@ import { meOptions } from "@/queries/me";
 export const Route = createFileRoute("/")({
   component: App,
   beforeLoad: async ({ context }) => {
+    const user = await context.queryClient.fetchQuery(meOptions);
+    if (user) {
+      throw redirect({ to: "/home" });
+    }
+
     if (import.meta.env.TAKOBOX_DISABLE_LANDING_PAGE) {
-      const user = await context.queryClient.fetchQuery(meOptions);
-      throw redirect({ to: user ? "/home" : "/login" });
+      throw redirect({ to: "/login" });
     }
   },
 });
