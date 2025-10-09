@@ -4,6 +4,8 @@ import axios, { type AxiosError } from "axios";
 import { isServer } from "@/utils/env";
 
 export const client = axios.create({
+  // Firefox doesn't support upload progress on fetch; hence xhr.
+  adapter: isServer ? "fetch" : "xhr",
   baseURL: isServer ? process.env.TAKOBOX_INTERNAL_API_URL : "/api",
 });
 
