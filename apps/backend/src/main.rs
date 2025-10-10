@@ -6,6 +6,7 @@ use tokio::signal::unix::signal;
 use tracing::debug;
 use tracing_subscriber::EnvFilter;
 
+use takobox::Directories;
 use takobox::app;
 use takobox::model::settings::Settings;
 
@@ -40,7 +41,11 @@ async fn main() -> anyhow::Result<()> {
     let pool = db::init_pool(&database_url).await?;
     let settings = Settings::from_env()?;
 
-    let app = app(session_secret, pool, settings);
+    let data_dir = env::var("TAKOBOX_DATA_DIR").unwrap_or("takobox_data".to_string());
+    let dirs = Directories::new(data_dir);
+    dirs.create_all().await?;
+
+    let app = app(session_secret, pool, dirs, settings);
 
     let listener = TcpListener::bind("0.0.0.0:8000").await?;
     debug!("Listening on {}", listener.local_addr().unwrap());

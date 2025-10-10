@@ -13,8 +13,14 @@
       }
     }
     file_server {
-      root /app/uploads
+      root /data/uploads
       pass_thru
+    }
+    handle_path /thumbs/* {
+      file_server {
+        root /data/thumbs
+        pass_thru
+      }
     }
     reverse_proxy http://web:3000
   }

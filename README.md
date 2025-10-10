@@ -5,7 +5,7 @@
 </div>
 
 > [!WARNING]
-> Still in an experimental state. Use at your own risk!
+> Takobox is still in an experimental state, so breaking changes are to be expected. Use at your own risk!
 
 ![Demo Screenshot](./.github/demo.png)
 
@@ -27,6 +27,7 @@ Takobox can be configured using the following environment variables.
 | --------------------------------- | ---------------------------------------------------------------------- | -------------------- |
 | `TAKOBOX_DATABASE_URL`            | URL of the Postgres database.                                          | unset                |
 | `TAKOBOX_SESSION_SECRET`          | A secret key used sign session tokens. Must be at least 64 bytes long. | unset                |
+| `TAKOBOX_DATA_DIR`                | Directory to store data, such as uploads and thumbnails.               | `takobox_data`       |
 | `TAKOBOX_ENABLE_ACCOUNT_CREATION` | Whether to allow new user accounts to be created.                      | `false`              |
 | `TAKOBOX_MAX_FILE_SIZE`           | Maximum file size in bytes.                                            | `32_000_000` (32 MB) |
 

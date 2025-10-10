@@ -16,24 +16,22 @@ use tokio_util::io::ReaderStream;
 use tracing::error;
 use uuid::Uuid;
 
-use crate::{
-    THUMBS_PATH, UPLOADS_PATH,
-    http::{
-        error::Error,
-        model::{
-            collection::FileCollection,
-            file::{File, FileWithCollections},
-            session::Session,
-        },
-        processing::thumbnail::{self, ThumbnailError},
-        state::AppState,
+use crate::http::{
+    error::Error,
+    model::{
+        collection::FileCollection,
+        file::{File, FileWithCollections},
+        session::Session,
     },
+    processing::thumbnail::{self, ThumbnailError},
+    state::AppState,
 };
 
 async fn index(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
 ) -> Result<impl IntoResponse, Error> {
+    // TODO: Move db queries out of route handlers
     let files = sqlx::query_as!(
         File,
         "select * from files
@@ -76,9 +74,9 @@ async fn show(
     Ok(Json(file))
 }
 
-// TODO: Is this safe if some operation fails? Use transactions?
+// TODO: Upload quota per user
 async fn create(
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
     mut multipart: Multipart,
 ) -> Result<impl IntoResponse, Error> {
@@ -131,7 +129,7 @@ async fn create(
         .unwrap_or("".to_string());
 
     let file_name = file_id + &ext;
-    let file_path = format!("{}/{}", UPLOADS_PATH, file_name);
+    let file_path = dirs.uploads_dir().join(&file_name);
     let file_size = file_bytes.len() as i64;
 
     let mut transaction = pool.begin().await?;
@@ -182,10 +180,10 @@ async fn create(
         .await
         .map_err(|e| Error::Internal(e.into()))?;
 
-    match thumbnail::generate_thumbnail(&file_path).await {
+    match thumbnail::generate_thumbnail(&file_path, dirs.thumbs_dir()).await {
         Ok(_) | Err(ThumbnailError::UnsupportedFiletype) => (),
         Err(ThumbnailError::ShellError(err)) => {
-            error!("Error creating thumbnail for \"{}\": {}", file_path, err)
+            error!("Error creating thumbnail for \"{:?}\": {}", file_path, err)
         }
     }
 
@@ -195,7 +193,7 @@ async fn create(
 }
 
 async fn delete_file(
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
     Path(id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
@@ -217,21 +215,21 @@ async fn delete_file(
         .map(|s| s.0)
         .unwrap_or(&file.name);
 
-    let file_path = format!("{}/{}", UPLOADS_PATH, file.name);
-    let thumb_path = format!("{}/{}.avif", THUMBS_PATH, file_id);
+    let file_path = dirs.uploads_dir().join(&file.name);
+    let thumb_path = dirs.thumbs_dir().join(file_id);
 
     let _ = tokio::fs::remove_file(&file_path)
         .await
-        .inspect_err(|err| error!("Error deleting file \"{}\": {}", file_path, err));
+        .inspect_err(|err| error!("Error deleting file \"{:?}\": {}", file_path, err));
     let _ = tokio::fs::remove_file(&thumb_path)
         .await
-        .inspect_err(|err| error!("Error deleting file \"{}\": {}", thumb_path, err));
+        .inspect_err(|err| error!("Error deleting file \"{:?}\": {}", thumb_path, err));
 
     Ok(StatusCode::NO_CONTENT)
 }
 
 async fn download(
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
     Path(id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
@@ -246,7 +244,7 @@ async fn download(
     .await?
     .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 
-    let file_path = format!("{}/{}", UPLOADS_PATH, file.name);
+    let file_path = dirs.uploads_dir().join(&file.name);
     let file_stream = FileStream::<ReaderStream<tokio::fs::File>>::from_path(file_path)
         .await
         .map_err(|_| Error::NotFound("File doesn't exist or belongs to another user."))?
@@ -256,7 +254,7 @@ async fn download(
 }
 
 async fn regenerate_thumbnail(
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
     Path(id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
@@ -271,16 +269,16 @@ async fn regenerate_thumbnail(
     .await?
     .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 
-    let file_path = format!("{}/{}", UPLOADS_PATH, file.name);
+    let file_path = dirs.uploads_dir().join(file.name);
 
-    let file_name = thumbnail::generate_thumbnail(&file_path)
+    let file_name = thumbnail::generate_thumbnail(&file_path, dirs.thumbs_dir())
         .await
         .map_err(|err| match err {
             ThumbnailError::UnsupportedFiletype => {
                 Error::BadRequest("Filetype doesn't support thumbnails.")
             }
             ThumbnailError::ShellError(err) => Error::Internal(anyhow!(
-                "Error creating thumbnail for \"{}\": {}",
+                "Error creating thumbnail for \"{:?}\": {}",
                 file_path,
                 err
             )),

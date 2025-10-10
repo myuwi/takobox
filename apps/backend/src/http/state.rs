@@ -2,12 +2,15 @@ use axum::extract::FromRef;
 use axum_extra::extract::cookie::Key;
 use sqlx::PgPool;
 
+use crate::directories::Directories;
+
 use super::model::settings::Settings;
 
 #[derive(Clone)]
 pub struct AppState {
     pub session_secret: String,
     pub pool: PgPool,
+    pub dirs: Directories,
     pub settings: Settings,
 }
 

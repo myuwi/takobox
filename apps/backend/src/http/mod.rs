@@ -1,8 +1,5 @@
 use axum::Router;
-use middleware::rate_limit::rate_limit;
-use model::settings::Settings;
 use sqlx::PgPool;
-use state::AppState;
 use tower_http::trace::TraceLayer;
 
 mod auth;
@@ -13,9 +10,13 @@ mod processing;
 mod routes;
 mod state;
 
-use crate::http::routes::routes;
+use crate::directories::Directories;
+use middleware::rate_limit::rate_limit;
+use model::settings::Settings;
+use routes::routes;
+use state::AppState;
 
-pub fn app(session_secret: String, pool: PgPool, settings: Settings) -> Router {
+pub fn app(session_secret: String, pool: PgPool, dirs: Directories, settings: Settings) -> Router {
     assert!(
         session_secret.len() >= 64,
         "session_secret must be at least 64 bytes"
@@ -23,6 +24,7 @@ pub fn app(session_secret: String, pool: PgPool, settings: Settings) -> Router {
     let app_state = AppState {
         session_secret,
         pool,
+        dirs,
         settings,
     };
 
