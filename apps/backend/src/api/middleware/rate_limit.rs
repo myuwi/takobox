@@ -6,7 +6,7 @@ use tower_governor::{
     GovernorError, GovernorLayer, governor::GovernorConfigBuilder, key_extractor::KeyExtractor,
 };
 
-use crate::http::error::Error;
+use crate::api::error::Error;
 
 #[derive(Clone, Debug)]
 pub struct IpKeyExtractor;

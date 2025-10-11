@@ -11,10 +11,9 @@ use axum_extra::extract::PrivateCookieJar;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::http::{
-    error::Error,
-    model::session::{Session, get_session},
-    state::AppState,
+use crate::{
+    api::{error::Error, state::AppState},
+    models::session::{Session, get_session},
 };
 
 async fn resolve_session(pool: &PgPool, jar: PrivateCookieJar) -> Option<Session> {

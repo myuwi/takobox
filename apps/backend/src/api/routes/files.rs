@@ -16,15 +16,14 @@ use tokio_util::io::ReaderStream;
 use tracing::error;
 use uuid::Uuid;
 
-use crate::http::{
-    error::Error,
-    model::{
+use crate::{
+    api::{error::Error, state::AppState},
+    models::{
         collection::FileCollection,
         file::{File, FileWithCollections},
         session::Session,
     },
-    processing::thumbnail::{self, ThumbnailError},
-    state::AppState,
+    services::thumbnails::{ThumbnailError, generate_thumbnail},
 };
 
 async fn index(
@@ -180,7 +179,7 @@ async fn create(
         .await
         .map_err(|e| Error::Internal(e.into()))?;
 
-    match thumbnail::generate_thumbnail(&file_path, dirs.thumbs_dir()).await {
+    match generate_thumbnail(&file_path, dirs.thumbs_dir()).await {
         Ok(_) | Err(ThumbnailError::UnsupportedFiletype) => (),
         Err(ThumbnailError::ShellError(err)) => {
             error!("Error creating thumbnail for \"{:?}\": {}", file_path, err)
@@ -271,7 +270,7 @@ async fn regenerate_thumbnail(
 
     let file_path = dirs.uploads_dir().join(file.name);
 
-    let file_name = thumbnail::generate_thumbnail(&file_path, dirs.thumbs_dir())
+    let file_name = generate_thumbnail(&file_path, dirs.thumbs_dir())
         .await
         .map_err(|err| match err {
             ThumbnailError::UnsupportedFiletype => {

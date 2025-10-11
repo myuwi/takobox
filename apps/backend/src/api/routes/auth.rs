@@ -1,21 +1,20 @@
-use axum::{Json, Router, extract::State, routing::post};
-use axum::{http::StatusCode, response::IntoResponse};
-use axum_extra::extract::PrivateCookieJar;
-use axum_extra::extract::cookie::Cookie;
+use axum::{Json, Router, extract::State, http::StatusCode, response::IntoResponse, routing::post};
+use axum_extra::extract::{PrivateCookieJar, cookie::Cookie};
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::Deserialize;
 
-use crate::http::error::ResultExt;
-use crate::http::middleware::rate_limit::rate_limit;
-use crate::http::{
-    auth::password::{hash_password, verify_password},
-    error::Error,
-    model::{
+use crate::{
+    api::{
+        auth::password::{hash_password, verify_password},
+        error::{Error, ResultExt},
+        middleware::rate_limit::rate_limit,
+        state::AppState,
+    },
+    models::{
         session::{Session, create_session, delete_session},
         user::User,
     },
-    state::AppState,
 };
 
 #[derive(Clone, Debug, Deserialize)]

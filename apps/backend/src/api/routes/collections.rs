@@ -8,14 +8,14 @@ use axum::{
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::http::{
-    error::{Error, ResultExt},
-    model::{collection::Collection, session::Session},
-    state::AppState,
-};
-
 use super::collection_files;
-
+use crate::{
+    api::{
+        error::{Error, ResultExt},
+        state::AppState,
+    },
+    models::{collection::Collection, session::Session},
+};
 async fn index(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,

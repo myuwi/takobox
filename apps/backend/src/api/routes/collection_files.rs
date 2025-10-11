@@ -8,10 +8,9 @@ use axum::{
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::http::{
-    error::Error,
-    model::{file::File, session::Session},
-    state::AppState,
+use crate::{
+    api::{error::Error, state::AppState},
+    models::{file::File, session::Session},
 };
 
 async fn index(
