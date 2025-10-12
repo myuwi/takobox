@@ -35,7 +35,7 @@ export const Route = createFileRoute("/(app)/(dashboard)/home")({
 function RouteComponent() {
   const { collection: collectionId } = Route.useSearch();
   const { data: settings } = useQuery(settingsOptions);
-  const { data: files, isFetching } = useQuery(
+  const { data: files, isPending } = useQuery(
     !collectionId ? filesOptions : collectionFilesOptions(collectionId),
   );
   const { data: collection } = useQuery({
@@ -122,7 +122,7 @@ function RouteComponent() {
         );
       })}
 
-      {isFetching ? (
+      {isPending ? (
         <div className="p-8">
           <Spinner />
         </div>
