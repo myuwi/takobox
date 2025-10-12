@@ -24,9 +24,10 @@ export const useUploads = () => {
   const { mutateAsync: uploadFileMutation } = useMutation(uploadFileOptions);
 
   const handleUpload = async (file: File, collectionId?: string) => {
-    const url = file.type.startsWith("image/")
-      ? URL.createObjectURL(file)
-      : undefined;
+    const url =
+      file.type.startsWith("image/") || file.type.startsWith("video/")
+        ? URL.createObjectURL(file)
+        : undefined;
 
     const abortController = new AbortController();
 

@@ -86,13 +86,24 @@ function RouteComponent() {
 
         return (
           <div key={id} className="flex gap-4">
-            {url && (
-              <img
-                src={url}
-                alt="File thumbnail"
-                className="size-9 rounded-md object-cover"
-              />
-            )}
+            {url &&
+              (file.type.startsWith("video/") ? (
+                <video
+                  src={url}
+                  autoPlay={false}
+                  controls={false}
+                  loop
+                  muted
+                  playsInline
+                  className="size-9 rounded-md object-cover"
+                />
+              ) : (
+                <img
+                  src={url}
+                  alt="File thumbnail"
+                  className="size-9 rounded-md object-cover"
+                />
+              ))}
             <div className="flex grow flex-col items-center gap-2 rounded-md">
               <div className="flex w-full items-center justify-between gap-4">
                 <span>{file.name}</span>
