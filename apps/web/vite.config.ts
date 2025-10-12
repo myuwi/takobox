@@ -26,8 +26,8 @@ export default defineConfig(({ mode }) => {
           routeToken: "_layout",
         },
       }),
-      ...(isProd ? [nitro({ config: { preset: "bun" } })] : []),
       react(),
+      isProd && nitro({ config: { preset: "bun" } }),
     ],
   };
 });
