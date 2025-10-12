@@ -1,4 +1,4 @@
-use std::ffi::OsStr;
+use std::{ffi::OsStr, path::PathBuf};
 
 use anyhow::anyhow;
 use axum::{
@@ -208,14 +208,10 @@ async fn delete_file(
     .await?
     .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 
-    let file_id = file
-        .name
-        .rsplit_once('.')
-        .map(|s| s.0)
-        .unwrap_or(&file.name);
+    let thumb_name = PathBuf::from(&file.name).with_extension("avif");
 
     let file_path = dirs.uploads_dir().join(&file.name);
-    let thumb_path = dirs.thumbs_dir().join(file_id);
+    let thumb_path = dirs.thumbs_dir().join(thumb_name);
 
     let _ = tokio::fs::remove_file(&file_path)
         .await
