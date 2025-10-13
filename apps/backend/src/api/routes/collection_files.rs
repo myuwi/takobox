@@ -45,7 +45,7 @@ async fn add(
     Path(collection_id): Path<Uuid>,
     Json(body): Json<CollectionFilesPayload>,
 ) -> Result<impl IntoResponse, Error> {
-    let res = sqlx::query!(
+    sqlx::query!(
         "insert into collection_files (collection_id, file_id)
         select $1, $2
         where exists (
@@ -58,14 +58,11 @@ async fn add(
         body.id,
         session.user_id,
     )
-    .execute(&pool)
-    .await?;
-
-    if res.rows_affected() == 0 {
-        return Err(Error::NotFound(
-            "Collection or file doesn't exist or belongs to another user.",
-        ));
-    }
+    .fetch_optional(&pool)
+    .await?
+    .ok_or_else(|| {
+        Error::NotFound("Collection or file doesn't exist or belongs to another user.")
+    })?;
 
     Ok(StatusCode::CREATED)
 }
@@ -76,7 +73,7 @@ async fn remove(
     Path(collection_id): Path<Uuid>,
     Json(body): Json<CollectionFilesPayload>,
 ) -> Result<impl IntoResponse, Error> {
-    let res = sqlx::query!(
+    sqlx::query!(
         "delete from collection_files
         where collection_id = $1
           and file_id = $2
@@ -90,14 +87,11 @@ async fn remove(
         body.id,
         session.user_id,
     )
-    .execute(&pool)
-    .await?;
-
-    if res.rows_affected() == 0 {
-        return Err(Error::NotFound(
-            "Collection or file doesn't exist or belongs to another user.",
-        ));
-    }
+    .fetch_optional(&pool)
+    .await?
+    .ok_or_else(|| {
+        Error::NotFound("Collection or file doesn't exist or belongs to another user.")
+    })?;
 
     Ok(StatusCode::NO_CONTENT)
 }

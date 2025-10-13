@@ -147,7 +147,7 @@ async fn create(
     .await?;
 
     if let Some(collection_id) = collection_id {
-        let res = sqlx::query!(
+        sqlx::query!(
             "insert into collection_files (collection_id, file_id)
             select $1, $2
             where exists (
@@ -160,14 +160,11 @@ async fn create(
             file.id,
             session.user_id,
         )
-        .execute(&mut *transaction)
-        .await?;
-
-        if res.rows_affected() == 0 {
-            return Err(Error::NotFound(
-                "Collection or file doesn't exist or belongs to another user.",
-            ));
-        }
+        .fetch_optional(&mut *transaction)
+        .await?
+        .ok_or_else(|| {
+            Error::NotFound("Collection or file doesn't exist or belongs to another user.")
+        })?;
     }
 
     let mut file_handle = tokio::fs::File::create_new(&file_path)
@@ -191,7 +188,7 @@ async fn create(
     Ok(Json(file))
 }
 
-async fn delete_file(
+async fn remove(
     State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
     Path(id): Path<Uuid>,
@@ -295,7 +292,7 @@ pub fn routes(state: &AppState) -> Router<AppState> {
             "/",
             post(create).layer(DefaultBodyLimit::max(settings.max_file_size)),
         )
-        .route("/{id}", delete(delete_file))
+        .route("/{id}", delete(remove))
         .route("/{id}/download", get(download))
         .route("/{id}/regenerate-thumbnail", post(regenerate_thumbnail))
 }

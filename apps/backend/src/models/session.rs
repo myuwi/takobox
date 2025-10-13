@@ -55,8 +55,8 @@ pub async fn get_session(pool: &PgPool, session_id: &Uuid) -> Result<Session, sq
 }
 
 pub async fn delete_session(pool: &PgPool, session_id: &Uuid) -> Result<(), sqlx::Error> {
-    sqlx::query!("delete from sessions where id = $1", session_id)
-        .execute(pool)
+    sqlx::query!("delete from sessions where id = $1 returning *", session_id)
+        .fetch_one(pool)
         .await
         .map(|_| ())
 }

@@ -112,20 +112,15 @@ async fn delete_collection(
     session: Session,
     Path(id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    let res = sqlx::query!(
+    sqlx::query!(
         "delete from collections
         where id = $1 and user_id = $2",
         id,
         session.user_id
     )
-    .execute(&pool)
-    .await?;
-
-    if res.rows_affected() == 0 {
-        return Err(Error::NotFound(
-            "Collection doesn't exist or belongs to another user.",
-        ));
-    }
+    .fetch_optional(&pool)
+    .await?
+    .ok_or_else(|| Error::NotFound("Collection doesn't exist or belongs to another user."))?;
 
     Ok(StatusCode::NO_CONTENT)
 }
