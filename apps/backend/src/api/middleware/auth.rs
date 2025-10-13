@@ -13,7 +13,8 @@ use uuid::Uuid;
 
 use crate::{
     api::{error::Error, state::AppState},
-    models::session::{Session, get_session},
+    db::session,
+    models::session::Session,
 };
 
 async fn resolve_session(pool: &PgPool, jar: PrivateCookieJar) -> Option<Session> {
@@ -21,7 +22,7 @@ async fn resolve_session(pool: &PgPool, jar: PrivateCookieJar) -> Option<Session
         .get("session")
         .and_then(|c| Uuid::from_str(c.value()).ok())?;
 
-    get_session(pool, &session_id).await.ok()
+    session::get_by_id(pool, &session_id).await.ok()
 }
 
 pub async fn auth(

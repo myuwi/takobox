@@ -18,11 +18,8 @@ use uuid::Uuid;
 
 use crate::{
     api::{error::Error, state::AppState},
-    models::{
-        collection::FileCollection,
-        file::{File, FileWithCollections},
-        session::Session,
-    },
+    db::{collection, file},
+    models::session::Session,
     services::thumbnails::{ThumbnailError, generate_thumbnail},
 };
 
@@ -30,16 +27,7 @@ async fn index(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
 ) -> Result<impl IntoResponse, Error> {
-    // TODO: Move db queries out of route handlers
-    let files = sqlx::query_as!(
-        File,
-        "select * from files
-        where user_id = $1
-        order by created_at desc",
-        session.user_id,
-    )
-    .fetch_all(&pool)
-    .await?;
+    let files = file::get_all_for_user(&pool, &session.user_id).await?;
 
     Ok(Json(files))
 }
@@ -49,26 +37,9 @@ async fn show(
     session: Session,
     Path(file_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    let file = sqlx::query_as!(
-        FileWithCollections,
-        r#"select 
-            f.id, f.user_id, f.name, f.original, f.size, f.created_at,
-            coalesce(
-                json_agg(
-                    json_build_object('id', c.id, 'name', c.name)
-                ) filter (where c.id is not null),
-                '[]'
-            ) as "collections!: sqlx::types::Json<Vec<FileCollection>>"
-        from files f
-        left join collection_files cf on f.id = cf.file_id
-        left join collections c on cf.collection_id = c.id
-        where f.id = $1 and f.user_id = $2
-        group by f.id, f.user_id, f.name, f.original, f.size, f.created_at"#,
-        file_id,
-        session.user_id,
-    )
-    .fetch_one(&pool)
-    .await?;
+    let file = file::get_with_collections_by_id(&pool, &file_id, &session.user_id)
+        .await?
+        .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 
     Ok(Json(file))
 }
@@ -129,38 +100,26 @@ async fn create(
 
     let file_name = file_id + &ext;
     let file_path = dirs.uploads_dir().join(&file_name);
-    let file_size = file_bytes.len() as i64;
+    let file_size = file_bytes.len();
 
     let mut transaction = pool.begin().await?;
 
-    let file = sqlx::query_as!(
-        File,
-        "insert into files (user_id, name, original, size)
-        values ($1, $2, $3, $4)
-        returning *",
-        session.user_id,
-        file_name,
-        original_name,
-        file_size,
+    let file = file::create(
+        &mut *transaction,
+        &session.user_id,
+        &file_name,
+        &original_name,
+        &file_size,
     )
-    .fetch_one(&mut *transaction)
     .await?;
 
     if let Some(collection_id) = collection_id {
-        sqlx::query!(
-            "insert into collection_files (collection_id, file_id)
-            select $1, $2
-            where exists (
-                select 1
-                from collections c
-                where c.id = $1
-                  and c.user_id = $3
-            )",
-            collection_id,
-            file.id,
-            session.user_id,
+        collection::add_file(
+            &mut *transaction,
+            &collection_id,
+            &file.id,
+            &session.user_id,
         )
-        .fetch_optional(&mut *transaction)
         .await?
         .ok_or_else(|| {
             Error::NotFound("Collection or file doesn't exist or belongs to another user.")
@@ -191,19 +150,11 @@ async fn create(
 async fn remove(
     State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
-    Path(id): Path<Uuid>,
+    Path(file_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    let file = sqlx::query_as!(
-        File,
-        "delete from files 
-        where id = $1 and user_id = $2
-        returning *",
-        id,
-        session.user_id,
-    )
-    .fetch_optional(&pool)
-    .await?
-    .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
+    let file = file::delete(&pool, &file_id, &session.user_id)
+        .await?
+        .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 
     let thumb_name = PathBuf::from(&file.name).with_extension("avif");
 
@@ -223,18 +174,11 @@ async fn remove(
 async fn download(
     State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
-    Path(id): Path<Uuid>,
+    Path(file_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    let file = sqlx::query_as!(
-        File,
-        "select * from files
-        where id = $1 and user_id = $2",
-        id,
-        session.user_id,
-    )
-    .fetch_optional(&pool)
-    .await?
-    .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
+    let file = file::get_by_id(&pool, &file_id, &session.user_id)
+        .await?
+        .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 
     let file_path = dirs.uploads_dir().join(&file.name);
     let file_stream = FileStream::<ReaderStream<tokio::fs::File>>::from_path(file_path)
@@ -248,18 +192,11 @@ async fn download(
 async fn regenerate_thumbnail(
     State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
-    Path(id): Path<Uuid>,
+    Path(file_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    let file = sqlx::query_as!(
-        File,
-        "select * from files
-        where id = $1 and user_id = $2",
-        id,
-        session.user_id,
-    )
-    .fetch_optional(&pool)
-    .await?
-    .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
+    let file = file::get_by_id(&pool, &file_id, &session.user_id)
+        .await?
+        .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 
     let file_path = dirs.uploads_dir().join(file.name);
 

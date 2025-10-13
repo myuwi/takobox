@@ -14,21 +14,15 @@ use crate::{
         error::{Error, ResultExt},
         state::AppState,
     },
-    models::{collection::Collection, session::Session},
+    db::collection,
+    models::session::Session,
 };
+
 async fn index(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
 ) -> Result<impl IntoResponse, Error> {
-    let collections = sqlx::query_as!(
-        Collection,
-        "select * from collections
-        where user_id = $1
-        order by name asc",
-        session.user_id,
-    )
-    .fetch_all(&pool)
-    .await?;
+    let collections = collection::get_all_for_user(&pool, &session.user_id).await?;
 
     Ok(Json(collections))
 }
@@ -51,19 +45,11 @@ async fn create(
         ));
     }
 
-    let collection = sqlx::query_as!(
-        Collection,
-        "insert into collections (user_id, name)
-        values ($1, $2)
-        returning *",
-        session.user_id,
-        name,
-    )
-    .fetch_one(&pool)
-    .await
-    .on_constraint("collections_user_id_name_key", |_| {
-        Error::Conflict("A collection with this name already exists. Please try another name.")
-    })?;
+    let collection = collection::create(&pool, &session.user_id, name)
+        .await
+        .on_constraint("collections_user_id_name_key", |_| {
+            Error::Conflict("A collection with this name already exists. Please try another name.")
+        })?;
 
     Ok(Json(collection))
 }
@@ -76,7 +62,7 @@ pub struct RenameCollectionPayload {
 async fn rename(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
-    Path(id): Path<Uuid>,
+    Path(collection_id): Path<Uuid>,
     Json(body): Json<RenameCollectionPayload>,
 ) -> Result<impl IntoResponse, Error> {
     let name = body.name.trim();
@@ -87,40 +73,24 @@ async fn rename(
         ));
     }
 
-    let collection = sqlx::query_as!(
-        Collection,
-        "update collections
-        set name = $1
-        where id = $2 and user_id = $3
-        returning *",
-        name,
-        id,
-        session.user_id,
-    )
-    .fetch_optional(&pool)
-    .await
-    .on_constraint("collections_user_id_name_key", |_| {
-        Error::Conflict("A collection with this name already exists. Please try another name.")
-    })?
-    .ok_or_else(|| Error::NotFound("Collection doesn't exist or belongs to another user."))?;
+    let collection = collection::rename(&pool, name, &collection_id, &session.user_id)
+        .await
+        .on_constraint("collections_user_id_name_key", |_| {
+            Error::Conflict("A collection with this name already exists. Please try another name.")
+        })?
+        .ok_or_else(|| Error::NotFound("Collection doesn't exist or belongs to another user."))?;
 
     Ok(Json(collection))
 }
 
-async fn delete_collection(
+async fn remove(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
-    Path(id): Path<Uuid>,
+    Path(collection_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    sqlx::query!(
-        "delete from collections
-        where id = $1 and user_id = $2",
-        id,
-        session.user_id
-    )
-    .fetch_optional(&pool)
-    .await?
-    .ok_or_else(|| Error::NotFound("Collection doesn't exist or belongs to another user."))?;
+    collection::delete(&pool, &collection_id, &session.user_id)
+        .await?
+        .ok_or_else(|| Error::NotFound("Collection doesn't exist or belongs to another user."))?;
 
     Ok(StatusCode::NO_CONTENT)
 }
@@ -130,6 +100,6 @@ pub fn routes() -> Router<AppState> {
         .route("/", get(index))
         .route("/", post(create))
         .route("/{id}", patch(rename))
-        .route("/{id}", delete(delete_collection))
+        .route("/{id}", delete(remove))
         .nest("/{id}/files", collection_files::routes())
 }

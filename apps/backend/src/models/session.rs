@@ -1,15 +1,7 @@
 use axum_extra::extract::cookie::{Cookie, SameSite};
-use sqlx::{FromRow, PgPool, postgres::types::PgInterval};
+use sqlx::FromRow;
 use time::PrimitiveDateTime;
 use uuid::Uuid;
-
-const EXPIRATION: PgInterval = PgInterval {
-    months: 0,
-    days: 30,
-    microseconds: 0,
-};
-
-// TODO: Clear expired sessions?
 
 #[derive(Clone, Copy, Debug, FromRow)]
 pub struct Session {
@@ -29,34 +21,4 @@ impl<'a> Session {
             .same_site(SameSite::Lax)
             .build()
     }
-}
-
-pub async fn create_session(pool: &PgPool, user_id: &Uuid) -> Result<Session, sqlx::Error> {
-    sqlx::query_as!(
-        Session,
-        "insert into sessions (user_id, expires_at)
-        values ($1, now() + $2)
-        returning *",
-        user_id,
-        EXPIRATION,
-    )
-    .fetch_one(pool)
-    .await
-}
-
-pub async fn get_session(pool: &PgPool, session_id: &Uuid) -> Result<Session, sqlx::Error> {
-    sqlx::query_as!(
-        Session,
-        "select * from sessions where id = $1 and expires_at > now()",
-        session_id,
-    )
-    .fetch_one(pool)
-    .await
-}
-
-pub async fn delete_session(pool: &PgPool, session_id: &Uuid) -> Result<(), sqlx::Error> {
-    sqlx::query!("delete from sessions where id = $1 returning *", session_id)
-        .fetch_one(pool)
-        .await
-        .map(|_| ())
 }

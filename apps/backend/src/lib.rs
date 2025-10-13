@@ -1,4 +1,5 @@
 mod api;
+pub mod db;
 mod directories;
 pub mod models;
 mod services;

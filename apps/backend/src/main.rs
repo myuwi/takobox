@@ -5,11 +5,10 @@ use tokio::{
 use tracing::debug;
 use tracing_subscriber::EnvFilter;
 
-mod db;
 mod env;
 
 use env::Env;
-use takobox::{AppState, Directories, models::settings::Settings, router};
+use takobox::{AppState, Directories, db, models::settings::Settings, router};
 
 fn init_tracing() {
     tracing_subscriber::fmt()
