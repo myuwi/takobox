@@ -1,0 +1,29 @@
+# Git
+**/.git
+**/.gitignore
+
+# Docker
+**/Dockerfile
+**/.dockerignore
+
+# Env
+**/.env
+**/.env.*
+
+# Build outputs
+**/.nitro
+**/.output
+**/.tanstack
+**/dist
+**/dist-ssr
+**/takobox_data
+
+# Bun
+**/node_modules
+
+# Rust
+**/target
+**/tests
+
+**/Justfile
+**/rustfmt.toml
