@@ -7,7 +7,7 @@
 {$BASE_URL} {
   route {
     handle_path /api/* {
-      reverse_proxy http://backend:8000 {
+      reverse_proxy http://takobox_server:8000 {
         # Remove Set-Cookie "Secure" flag when running in HTTP
         # header_down Set-Cookie "^(.*); Secure(;.*)?$" "$1$2"
       }
@@ -22,6 +22,6 @@
         pass_thru
       }
     }
-    reverse_proxy http://web:3000
+    reverse_proxy http://takobox_web:3000
   }
 }

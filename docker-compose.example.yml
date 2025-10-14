@@ -1,14 +1,14 @@
 services:
-  web:
+  takobox_web:
     image: takobox-web:dev
     environment:
-      - TAKOBOX_INTERNAL_API_URL=http://backend:8000
+      - TAKOBOX_INTERNAL_API_URL=http://takobox_server:8000
       - TAKOBOX_DISABLE_LANDING_PAGE=true
     depends_on:
-      - backend
+      - takobox_server
     restart: unless-stopped
 
-  backend:
+  takobox_server:
     image: takobox-server:dev
     environment:
       - TAKOBOX_DATABASE_URL="postgres://postgres:password@db:5432/takobox"

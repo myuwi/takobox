@@ -18,6 +18,6 @@ services:
     ports:
       - 80:80
     extra_hosts:
-      - "web backend:host-gateway"
+      - "takobox_web takobox_server:host-gateway"
     environment:
       - BASE_URL=":80"
