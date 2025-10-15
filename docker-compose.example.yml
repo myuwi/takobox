@@ -15,8 +15,6 @@ services:
       - TAKOBOX_DATA_DIR="/takobox_data"
     volumes:
       - ./takobox_data:/takobox_data
-    depends_on:
-      - db
     restart: unless-stopped
 
   caddy:
