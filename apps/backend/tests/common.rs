@@ -1,8 +1,8 @@
 use axum_test::TestServer;
-use sqlx::PgPool;
+use sqlx::SqlitePool;
 use takobox::{AppState, Directories, models::settings::Settings, router};
 
-pub fn create_test_app(pool: PgPool) -> TestServer {
+pub fn create_test_app(pool: SqlitePool) -> TestServer {
     let session_secret =
         "vnRV6MOgCcoSD+/qZw760MQEPW6Weh2U6OpOcZiSAXFLGwyYChDigaecyCYYi5Rz+7us+KYZTcptilG5"
             .to_string();

@@ -14,13 +14,13 @@ use nanoid::nanoid;
 use tokio::io::AsyncWriteExt;
 use tokio_util::io::ReaderStream;
 use tracing::error;
-use uuid::Uuid;
 
 use crate::{
     api::{error::Error, state::AppState},
     db::{collection, file},
     models::session::Session,
     services::thumbnails::{ThumbnailError, generate_thumbnail},
+    types::Uuid,
 };
 
 async fn index(
@@ -62,12 +62,11 @@ async fn create(
             Some("collection") => {
                 collection_id = Some(
                     field
-                        .bytes()
+                        .text()
                         .await
                         .map_err(|_| Error::BadRequest("Bad request"))
-                        .and_then(|bytes| {
-                            Uuid::try_parse_ascii(&bytes)
-                                .map_err(|_| Error::BadRequest("Bad request"))
+                        .and_then(|text| {
+                            Uuid::try_from(text).map_err(|_| Error::BadRequest("Bad request"))
                         })?,
                 );
             }

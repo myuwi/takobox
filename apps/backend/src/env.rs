@@ -15,8 +15,6 @@ fn default_max_file_size() -> usize {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Env {
-    pub database_url: String,
-
     pub session_secret: String,
 
     #[serde(default = "default_data_dir")]

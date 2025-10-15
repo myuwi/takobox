@@ -1,11 +1,10 @@
 use serde::Serialize;
-use sqlx::{FromRow, types::Json};
-use time::PrimitiveDateTime;
-use uuid::Uuid;
+use sqlx::FromRow;
 
 use super::collection::FileCollection;
+use crate::types::Uuid;
 
-#[derive(Clone, Debug, FromRow, Serialize)]
+#[derive(Clone, Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct File {
     pub id: Uuid,
@@ -13,10 +12,10 @@ pub struct File {
     pub name: String,
     pub original: String,
     pub size: i64,
-    pub created_at: PrimitiveDateTime,
+    pub created_at: i64,
 }
 
-#[derive(Clone, Debug, FromRow, Serialize)]
+#[derive(Clone, Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct FileWithCollections {
     pub id: Uuid,
@@ -24,6 +23,7 @@ pub struct FileWithCollections {
     pub name: String,
     pub original: String,
     pub size: i64,
-    pub created_at: PrimitiveDateTime,
-    pub collections: Json<Vec<FileCollection>>,
+    pub created_at: i64,
+    #[sqlx(json)]
+    pub collections: Vec<FileCollection>,
 }

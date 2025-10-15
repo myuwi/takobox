@@ -1,50 +1,41 @@
-use sqlx::{PgExecutor, postgres::types::PgInterval};
-use uuid::Uuid;
+use sqlx::SqliteExecutor;
+use time::{Duration, UtcDateTime};
 
-use crate::models::session::Session;
+use crate::{models::session::Session, types::Uuid};
 
 // TODO: Clear expired sessions?
 
-const EXPIRATION: PgInterval = PgInterval {
-    months: 0,
-    days: 30,
-    microseconds: 0,
-};
+const EXPIRATION: Duration = Duration::days(30);
 
-pub async fn create(
-    conn: impl PgExecutor<'_>,
-    user_id: &Uuid,
-) -> Result<Session, sqlx::Error> {
-    sqlx::query_as!(
-        Session,
-        "insert into sessions (user_id, expires_at)
-        values ($1, now() + $2)
+pub async fn create(conn: impl SqliteExecutor<'_>, user_id: &Uuid) -> Result<Session, sqlx::Error> {
+    let id = Uuid::new();
+    let expires_at = (UtcDateTime::now() + EXPIRATION).unix_timestamp();
+
+    sqlx::query_as(
+        "insert into sessions (id, user_id, expires_at)
+        values ($1, $2, $3)
         returning *",
-        user_id,
-        EXPIRATION,
     )
+    .bind(id)
+    .bind(user_id)
+    .bind(expires_at)
     .fetch_one(conn)
     .await
 }
 
 pub async fn get_by_id(
-    conn: impl PgExecutor<'_>,
+    conn: impl SqliteExecutor<'_>,
     session_id: &Uuid,
 ) -> Result<Session, sqlx::Error> {
-    sqlx::query_as!(
-        Session,
-        "select * from sessions where id = $1 and expires_at > now()",
-        session_id,
-    )
-    .fetch_one(conn)
-    .await
+    sqlx::query_as("select * from sessions where id = $1 and expires_at > unixepoch()")
+        .bind(session_id)
+        .fetch_one(conn)
+        .await
 }
 
-pub async fn delete(
-    conn: impl PgExecutor<'_>,
-    session_id: &Uuid,
-) -> Result<(), sqlx::Error> {
-    sqlx::query!("delete from sessions where id = $1", session_id)
+pub async fn delete(conn: impl SqliteExecutor<'_>, session_id: &Uuid) -> Result<(), sqlx::Error> {
+    sqlx::query("delete from sessions where id = $1")
+        .bind(session_id)
         .execute(conn)
         .await
         .map(|_| ())

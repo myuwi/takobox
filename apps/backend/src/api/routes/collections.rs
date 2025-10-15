@@ -6,7 +6,6 @@ use axum::{
     routing::{delete, get, patch, post},
 };
 use serde::Deserialize;
-use uuid::Uuid;
 
 use super::collection_files;
 use crate::{
@@ -16,6 +15,7 @@ use crate::{
     },
     db::collection,
     models::session::Session,
+    types::Uuid,
 };
 
 async fn index(

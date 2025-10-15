@@ -40,9 +40,11 @@ async fn main() -> anyhow::Result<()> {
 
     let env = Env::parse()?;
 
-    let pool = db::init_pool(&env.database_url).await?;
     let dirs = Directories::new(&env.data_dir);
     dirs.create_all().await?;
+
+    let database_path = dirs.data_dir().join("database.sqlite");
+    let pool = db::init_pool(database_path.to_str().unwrap()).await?;
 
     let settings = Settings {
         enable_account_creation: env.enable_account_creation,

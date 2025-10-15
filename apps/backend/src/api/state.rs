@@ -1,14 +1,14 @@
 use anyhow::ensure;
 use axum::extract::FromRef;
 use axum_extra::extract::cookie::Key;
-use sqlx::PgPool;
+use sqlx::SqlitePool;
 
 use crate::{directories::Directories, models::settings::Settings};
 
 #[derive(Clone)]
 pub struct AppState {
     pub session_secret: String,
-    pub pool: PgPool,
+    pub pool: SqlitePool,
     pub dirs: Directories,
     pub settings: Settings,
 }
@@ -16,7 +16,7 @@ pub struct AppState {
 impl AppState {
     pub fn try_from(
         session_secret: String,
-        pool: PgPool,
+        pool: SqlitePool,
         dirs: Directories,
         settings: Settings,
     ) -> anyhow::Result<Self> {

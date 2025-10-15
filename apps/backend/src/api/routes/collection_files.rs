@@ -6,12 +6,12 @@ use axum::{
     routing::{delete, get, post},
 };
 use serde::Deserialize;
-use uuid::Uuid;
 
 use crate::{
     api::{error::Error, state::AppState},
     db::collection,
     models::session::Session,
+    types::Uuid,
 };
 
 async fn index(
@@ -19,9 +19,7 @@ async fn index(
     session: Session,
     Path(collection_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    let files =
-        collection::get_files(&pool, &collection_id, &session.user_id)
-            .await?;
+    let files = collection::get_files(&pool, &collection_id, &session.user_id).await?;
 
     Ok(Json(files))
 }

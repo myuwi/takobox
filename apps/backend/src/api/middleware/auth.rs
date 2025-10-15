@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use axum::{
     body::Body,
     extract::{FromRequestParts, State},
@@ -8,19 +6,19 @@ use axum::{
     response::Response,
 };
 use axum_extra::extract::PrivateCookieJar;
-use sqlx::PgPool;
-use uuid::Uuid;
+use sqlx::SqlitePool;
 
 use crate::{
     api::{error::Error, state::AppState},
     db::session,
     models::session::Session,
+    types::Uuid,
 };
 
-async fn resolve_session(pool: &PgPool, jar: PrivateCookieJar) -> Option<Session> {
+async fn resolve_session(pool: &SqlitePool, jar: PrivateCookieJar) -> Option<Session> {
     let session_id = jar
         .get("session")
-        .and_then(|c| Uuid::from_str(c.value()).ok())?;
+        .and_then(|c| Uuid::try_from(c.value().to_string()).ok())?;
 
     session::get_by_id(pool, &session_id).await.ok()
 }

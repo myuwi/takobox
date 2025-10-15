@@ -6,9 +6,3 @@ dev-deps:
 
 dev:
   watchexec -r -w Cargo.toml -w src 'cargo run'
-
-test:
-  DATABASE_URL=$TAKOBOX_DATABASE_URL cargo test
-
-prepare:
-  cargo sqlx prepare --database-url $TAKOBOX_DATABASE_URL

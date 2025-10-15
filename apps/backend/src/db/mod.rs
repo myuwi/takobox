@@ -1,7 +1,7 @@
 use sqlx::{
-    PgPool, Postgres,
+    Sqlite, SqlitePool,
     migrate::{MigrateDatabase, MigrateError},
-    postgres::PgPoolOptions,
+    sqlite::SqlitePoolOptions,
 };
 
 pub mod collection;
@@ -9,14 +9,14 @@ pub mod file;
 pub mod session;
 pub mod user;
 
-pub async fn init_pool(database_url: &str) -> Result<PgPool, MigrateError> {
-    if !Postgres::database_exists(database_url).await? {
-        Postgres::create_database(database_url).await?
+pub async fn init_pool(database_path: &str) -> Result<SqlitePool, MigrateError> {
+    if !Sqlite::database_exists(database_path).await? {
+        Sqlite::create_database(database_path).await?
     }
 
-    let pool = PgPoolOptions::new()
+    let pool = SqlitePoolOptions::new()
         .max_connections(50)
-        .connect(database_url)
+        .connect(database_path)
         .await?;
 
     sqlx::migrate!().run(&pool).await?;

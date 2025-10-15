@@ -1,14 +1,15 @@
 use axum_extra::extract::cookie::{Cookie, SameSite};
 use sqlx::FromRow;
-use time::PrimitiveDateTime;
-use uuid::Uuid;
+use time::OffsetDateTime;
+
+use crate::types::Uuid;
 
 #[derive(Clone, Copy, Debug, FromRow)]
 pub struct Session {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub created_at: PrimitiveDateTime,
-    pub expires_at: PrimitiveDateTime,
+    pub created_at: i64,
+    pub expires_at: i64,
 }
 
 impl<'a> Session {
@@ -17,7 +18,7 @@ impl<'a> Session {
             .http_only(true)
             .secure(true)
             .path("/")
-            .expires(self.expires_at.assume_utc())
+            .expires(OffsetDateTime::from_unix_timestamp(self.expires_at).unwrap())
             .same_site(SameSite::Lax)
             .build()
     }
