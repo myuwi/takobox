@@ -2,7 +2,7 @@ use serde::Serialize;
 use sqlx::FromRow;
 
 use super::collection::FileCollection;
-use crate::types::Uuid;
+use crate::{serialize::serialize_timestamp, types::Uuid};
 
 #[derive(Clone, Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
@@ -12,6 +12,7 @@ pub struct File {
     pub name: String,
     pub original: String,
     pub size: i64,
+    #[serde(serialize_with = "serialize_timestamp")]
     pub created_at: i64,
 }
 
@@ -23,6 +24,7 @@ pub struct FileWithCollections {
     pub name: String,
     pub original: String,
     pub size: i64,
+    #[serde(serialize_with = "serialize_timestamp")]
     pub created_at: i64,
     #[sqlx(json)]
     pub collections: Vec<FileCollection>,

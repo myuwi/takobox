@@ -7,12 +7,6 @@ export type FileDto = {
   createdAt: string;
 };
 
-export type FileWithCollections = {
-  id: string;
-  userId: string;
-  name: string;
-  original: string;
-  size: number;
-  createdAt: string;
+export type FileWithCollections = FileDto & {
   collections: { id: string; name: string }[];
 };

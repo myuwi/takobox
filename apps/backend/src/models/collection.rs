@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
-use crate::types::Uuid;
+use crate::{serialize::serialize_timestamp, types::Uuid};
 
 #[derive(Clone, Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
@@ -9,6 +9,7 @@ pub struct Collection {
     pub id: Uuid,
     pub user_id: Uuid,
     pub name: String,
+    #[serde(serialize_with = "serialize_timestamp")]
     pub created_at: i64,
 }
 
