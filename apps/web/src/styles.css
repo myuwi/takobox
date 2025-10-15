@@ -32,4 +32,8 @@
   body {
     @apply h-dvh bg-background text-sm text-foreground;
   }
+
+  svg {
+    @apply shrink-0;
+  }
 }
