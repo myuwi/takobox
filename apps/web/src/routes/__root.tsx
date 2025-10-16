@@ -11,7 +11,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { meOptions } from "@/queries/me";
 import { settingsOptions } from "@/queries/settings";
-import css from "../styles.css?url";
+import css from "../styles.css?inline";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -29,13 +29,13 @@ export const Route = createRootRouteWithContext<{
       { title: "Takobox" },
     ],
     links: [
-      { rel: "stylesheet", href: css },
       { rel: "icon", href: "/favicon.ico" },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap",
       },
     ],
+    styles: [{ children: css }],
   }),
   component: Root,
 });
