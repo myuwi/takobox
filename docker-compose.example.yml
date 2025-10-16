@@ -1,6 +1,6 @@
 services:
   takobox_web:
-    image: takobox-web:dev
+    image: ghcr.io/myuwi/takobox-web:dev
     environment:
       - TAKOBOX_INTERNAL_API_URL=http://takobox_server:8000
       - TAKOBOX_DISABLE_LANDING_PAGE=true
@@ -9,10 +9,10 @@ services:
     restart: unless-stopped
 
   takobox_server:
-    image: takobox-server:dev
+    image: ghcr.io/myuwi/takobox-server:dev
     environment:
       - TAKOBOX_SESSION_SECRET="<super_secret_session_secret_please_change_pretty_please_i_beg_you>"
-      - TAKOBOX_DATA_DIR="/takobox_data"
+      - TAKOBOX_ENABLE_ACCOUNT_CREATION=false
     volumes:
       - ./takobox_data:/takobox_data
     restart: unless-stopped
@@ -25,5 +25,5 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./takobox_data:/data:ro
     ports:
-      - 80:80
+      - 8080:80
     restart: unless-stopped
