@@ -44,7 +44,7 @@ jobs:
 
       - name: Build and push web
         uses: docker/build-push-action@v6
-        if: steps.changes.outputs.web == "true"
+        if: steps.changes.outputs.web == 'true'
         with:
           context: .
           file: apps/web/Dockerfile
@@ -53,7 +53,7 @@ jobs:
 
       - name: Build and push server
         uses: docker/build-push-action@v6
-        if: steps.changes.outputs.server == "true"
+        if: steps.changes.outputs.server == 'true'
         with:
           context: .
           file: apps/backend/Dockerfile
