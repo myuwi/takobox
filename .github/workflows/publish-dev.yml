@@ -13,6 +13,7 @@ concurrency:
 
 jobs:
   build-and-push:
+    name: Build and push images
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -20,6 +21,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Get changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            web:
+              - "apps/web/**"
+            server:
+              - "apps/backend/**"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -31,16 +42,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push web
         uses: docker/build-push-action@v6
+        if: steps.changes.outputs.web == "true"
         with:
           context: .
           file: apps/web/Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/takobox-web:dev
 
-      - name: Build and push
+      - name: Build and push server
         uses: docker/build-push-action@v6
+        if: steps.changes.outputs.server == "true"
         with:
           context: .
           file: apps/backend/Dockerfile
