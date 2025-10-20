@@ -8,6 +8,7 @@ use crate::{serialize::serialize_timestamp, types::Uuid};
 #[serde(rename_all = "camelCase")]
 pub struct File {
     pub id: Uuid,
+    #[serde(skip_serializing)]
     pub user_id: Uuid,
     pub name: String,
     pub original: String,
@@ -20,6 +21,7 @@ pub struct File {
 #[serde(rename_all = "camelCase")]
 pub struct FileWithCollections {
     pub id: Uuid,
+    #[serde(skip_serializing)]
     pub user_id: Uuid,
     pub name: String,
     pub original: String,

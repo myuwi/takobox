@@ -7,6 +7,7 @@ use crate::{serialize::serialize_timestamp, types::Uuid};
 #[serde(rename_all = "camelCase")]
 pub struct Collection {
     pub id: Uuid,
+    #[serde(skip_serializing)]
     pub user_id: Uuid,
     pub name: String,
     #[serde(serialize_with = "serialize_timestamp")]
