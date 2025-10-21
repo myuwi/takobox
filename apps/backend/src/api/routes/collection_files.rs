@@ -19,7 +19,7 @@ async fn index(
     session: Session,
     Path(collection_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    let files = collection::get_files(&pool, &collection_id, &session.user_id).await?;
+    let files = collection::get_files(&pool, session.user_id, &collection_id).await?;
 
     Ok(Json(files))
 }
@@ -35,7 +35,7 @@ async fn add(
     Path(collection_id): Path<Uuid>,
     Json(body): Json<CollectionFilesPayload>,
 ) -> Result<impl IntoResponse, Error> {
-    collection::add_file(&pool, &collection_id, &body.id, &session.user_id)
+    collection::add_file(&pool, session.user_id, &collection_id, &body.id)
         .await?
         .ok_or_else(|| {
             Error::NotFound("Collection or file doesn't exist or belongs to another user.")
@@ -50,7 +50,7 @@ async fn remove(
     Path(collection_id): Path<Uuid>,
     Json(body): Json<CollectionFilesPayload>,
 ) -> Result<impl IntoResponse, Error> {
-    collection::remove_file(&pool, &collection_id, &body.id, &session.user_id)
+    collection::remove_file(&pool, session.user_id, &collection_id, &body.id)
         .await?
         .ok_or_else(|| {
             Error::NotFound("Collection or file doesn't exist or belongs to another user.")

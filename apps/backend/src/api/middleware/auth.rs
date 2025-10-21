@@ -20,7 +20,7 @@ async fn resolve_session(pool: &SqlitePool, jar: PrivateCookieJar) -> Option<Ses
         .get("session")
         .and_then(|c| Uuid::try_from(c.value().to_string()).ok())?;
 
-    session::get_by_id(pool, &session_id).await.ok()
+    session::get_by_public_id(pool, &session_id).await.ok()
 }
 
 pub async fn auth(

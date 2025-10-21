@@ -22,7 +22,7 @@ async fn index(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
 ) -> Result<impl IntoResponse, Error> {
-    let collections = collection::get_all_for_user(&pool, &session.user_id).await?;
+    let collections = collection::get_all_for_user(&pool, session.user_id).await?;
 
     Ok(Json(collections))
 }
@@ -45,7 +45,7 @@ async fn create(
         ));
     }
 
-    let collection = collection::create(&pool, &session.user_id, name)
+    let collection = collection::create(&pool, session.user_id, name)
         .await
         .on_constraint("collections_user_id_name_key", |_| {
             Error::Conflict("A collection with this name already exists. Please try another name.")
@@ -73,7 +73,7 @@ async fn rename(
         ));
     }
 
-    let collection = collection::rename(&pool, name, &collection_id, &session.user_id)
+    let collection = collection::rename(&pool, session.user_id, &collection_id, name)
         .await
         .on_constraint("collections_user_id_name_key", |_| {
             Error::Conflict("A collection with this name already exists. Please try another name.")
@@ -88,7 +88,7 @@ async fn remove(
     session: Session,
     Path(collection_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    collection::delete(&pool, &collection_id, &session.user_id)
+    collection::delete(&pool, session.user_id, &collection_id)
         .await?
         .ok_or_else(|| Error::NotFound("Collection doesn't exist or belongs to another user."))?;
 

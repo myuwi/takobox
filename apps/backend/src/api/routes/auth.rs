@@ -33,7 +33,7 @@ async fn login(
     verify_password(&body.password, &user.password)
         .map_err(|_| Error::Unauthorized("Invalid username or password"))?;
 
-    let session = session::create(&pool, &user.id).await?;
+    let session = session::create(&pool, user.id).await?;
 
     Ok((StatusCode::OK, jar.add(session.to_cookie())))
 }
@@ -84,7 +84,7 @@ async fn register(
             Error::UnprocessableEntity("Username is invalid.")
         })?;
 
-    let session = session::create(&pool, &user.id).await?;
+    let session = session::create(&pool, user.id).await?;
 
     Ok((StatusCode::CREATED, jar.add(session.to_cookie())))
 }
@@ -94,7 +94,7 @@ async fn logout(
     session: Session,
     jar: PrivateCookieJar,
 ) -> Result<impl IntoResponse, Error> {
-    session::delete(&pool, &session.id).await?;
+    session::delete(&pool, session.id).await?;
 
     Ok((StatusCode::OK, jar.remove(Cookie::from("session"))))
 }

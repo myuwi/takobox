@@ -7,7 +7,7 @@ use crate::{
 
 pub async fn get_all_for_user(
     conn: impl SqliteExecutor<'_>,
-    user_id: &Uuid,
+    user_id: i64,
 ) -> Result<Vec<Collection>, sqlx::Error> {
     sqlx::query_as(
         "select * from collections
@@ -21,13 +21,13 @@ pub async fn get_all_for_user(
 
 pub async fn create(
     conn: impl SqliteExecutor<'_>,
-    user_id: &Uuid,
+    user_id: i64,
     name: &str,
 ) -> Result<Collection, sqlx::Error> {
     let id = Uuid::new();
 
     sqlx::query_as(
-        "insert into collections (id, user_id, name)
+        "insert into collections (public_id, user_id, name)
         values ($1, $2, $3)
         returning *",
     )
@@ -40,14 +40,14 @@ pub async fn create(
 
 pub async fn rename(
     conn: impl SqliteExecutor<'_>,
-    name: &str,
+    user_id: i64,
     collection_id: &Uuid,
-    user_id: &Uuid,
+    name: &str,
 ) -> Result<Option<Collection>, sqlx::Error> {
     sqlx::query_as(
         "update collections
         set name = $1
-        where id = $2 and user_id = $3
+        where public_id = $2 and user_id = $3
         returning *",
     )
     .bind(name)
@@ -59,12 +59,12 @@ pub async fn rename(
 
 pub async fn delete(
     conn: impl SqliteExecutor<'_>,
+    user_id: i64,
     collection_id: &Uuid,
-    user_id: &Uuid,
 ) -> Result<Option<Collection>, sqlx::Error> {
     sqlx::query_as(
         "delete from collections
-        where id = $1 and user_id = $2
+        where public_id = $1 and user_id = $2
         returning *",
     )
     .bind(collection_id)
@@ -75,15 +75,15 @@ pub async fn delete(
 
 pub async fn get_files(
     conn: impl SqliteExecutor<'_>,
+    user_id: i64,
     collection_id: &Uuid,
-    user_id: &Uuid,
 ) -> Result<Vec<File>, sqlx::Error> {
     sqlx::query_as(
         "select f.* from collection_files cf
         join files f on cf.file_id = f.id
         join collections c on cf.collection_id = c.id
-        where c.id = $1 and c.user_id = $2
-        order by created_at desc",
+        where c.public_id = $1 and c.user_id = $2
+        order by id desc",
     )
     .bind(collection_id)
     .bind(user_id)
@@ -93,19 +93,17 @@ pub async fn get_files(
 
 pub async fn add_file(
     conn: impl SqliteExecutor<'_>,
+    user_id: i64,
     collection_id: &Uuid,
     file_id: &Uuid,
-    user_id: &Uuid,
 ) -> Result<Option<SqliteRow>, sqlx::Error> {
     sqlx::query(
         "insert into collection_files (collection_id, file_id)
-        select $1, $2
-        where exists (
-            select 1
-            from collections c
-            where c.id = $1
-              and c.user_id = $3
-        )
+        select c.id, f.id
+        from collections c
+        join files f on f.public_id = $2 
+        where c.public_id = $1
+          and c.user_id = $3
         returning *",
     )
     .bind(collection_id)
@@ -117,19 +115,22 @@ pub async fn add_file(
 
 pub async fn remove_file(
     conn: impl SqliteExecutor<'_>,
+    user_id: i64,
     collection_id: &Uuid,
     file_id: &Uuid,
-    user_id: &Uuid,
 ) -> Result<Option<SqliteRow>, sqlx::Error> {
     sqlx::query(
         "delete from collection_files
-        where collection_id = $1
-            and file_id = $2
-            and exists (
-            select 1
+        where collection_id = (
+            select c.id
             from collections c
-            where c.id = $1
+            where c.public_id = $1
               and c.user_id = $3
+        )
+        and file_id = (
+            select f.id
+            from files f
+            where f.public_id = $2
         )
         returning *",
     )

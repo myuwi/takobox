@@ -34,7 +34,7 @@ async fn index(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
 ) -> Result<impl IntoResponse, Error> {
-    let files = file::get_all_for_user(&pool, &session.user_id).await?;
+    let files = file::get_all_for_user(&pool, session.user_id).await?;
 
     Ok(Json(files))
 }
@@ -44,7 +44,7 @@ async fn show(
     session: Session,
     Path(file_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    let file = file::get_with_collections_by_id(&pool, &file_id, &session.user_id)
+    let file = file::get_with_collections_by_public_id(&pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 
@@ -113,7 +113,7 @@ async fn create(
 
     let file = file::create(
         &mut *transaction,
-        &session.user_id,
+        session.user_id,
         &file_name,
         &original_name,
         &file_size,
@@ -123,9 +123,9 @@ async fn create(
     if let Some(collection_id) = collection_id {
         collection::add_file(
             &mut *transaction,
+            session.user_id,
             &collection_id,
-            &file.id,
-            &session.user_id,
+            &file.public_id,
         )
         .await?
         .ok_or_else(|| {
@@ -159,7 +159,7 @@ async fn remove(
     session: Session,
     Path(file_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    let file = file::delete(&pool, &file_id, &session.user_id)
+    let file = file::delete(&pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 
@@ -183,7 +183,7 @@ async fn download(
     session: Session,
     Path(file_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    let file = file::get_by_id(&pool, &file_id, &session.user_id)
+    let file = file::get_by_public_id(&pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 
@@ -201,7 +201,7 @@ async fn regenerate_thumbnail(
     session: Session,
     Path(file_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, Error> {
-    let file = file::get_by_id(&pool, &file_id, &session.user_id)
+    let file = file::get_by_public_id(&pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
 

@@ -9,7 +9,7 @@ pub async fn create(
 ) -> Result<User, sqlx::Error> {
     let id = Uuid::new();
 
-    sqlx::query_as("insert into users (id, username, password) values ($1, $2, $3) returning *")
+    sqlx::query_as("insert into users (public_id, username, password) values ($1, $2, $3) returning *")
         .bind(id)
         .bind(username)
         .bind(password_hash)
@@ -17,7 +17,7 @@ pub async fn create(
         .await
 }
 
-pub async fn get_by_id(conn: impl SqliteExecutor<'_>, user_id: &Uuid) -> Result<User, sqlx::Error> {
+pub async fn get_by_id(conn: impl SqliteExecutor<'_>, user_id: i64) -> Result<User, sqlx::Error> {
     sqlx::query_as("select * from users where id = $1")
         .bind(user_id)
         .fetch_one(conn)
