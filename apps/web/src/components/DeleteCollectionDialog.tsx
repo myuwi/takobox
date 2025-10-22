@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { deleteCollectionOptions } from "@/queries/collections";
 import type { CollectionDto } from "@/types/CollectionDto";
 import { Button } from "./primitives/Button";
@@ -17,6 +18,9 @@ export const DeleteCollectionDialog = ({
   setOpen,
   focusRef,
 }: DeleteCollectionDialogProps) => {
+  const search = useSearch({ strict: false });
+  const navigate = useNavigate();
+
   const { mutateAsync: deleteCollection } = useMutation(
     deleteCollectionOptions,
   );
@@ -24,6 +28,13 @@ export const DeleteCollectionDialog = ({
   const handleDelete = async () => {
     try {
       await deleteCollection(collection.id);
+
+      if (search.collection === collection.id) {
+        await navigate({
+          to: ".",
+          search: (prev) => ({ ...prev, collection: undefined }),
+        });
+      }
     } catch (_) {}
   };
 

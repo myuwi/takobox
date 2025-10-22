@@ -33,9 +33,14 @@ export const Route = createFileRoute("/(app)/(dashboard)/home")({
 });
 
 function RouteComponent() {
+  const navigate = Route.useNavigate();
   const { collection: collectionId } = Route.useSearch();
   const { data: settings } = useQuery(settingsOptions);
-  const { data: files, isPending } = useQuery(
+  const {
+    data: files,
+    isPending,
+    error,
+  } = useQuery(
     !collectionId ? filesOptions : collectionFilesOptions(collectionId),
   );
   const { data: collection } = useQuery({
@@ -53,6 +58,15 @@ function RouteComponent() {
   } = useUploads();
 
   const setSelectedFiles = useSetAtom(selectedFilesAtom);
+
+  useEffect(() => {
+    if (collectionId && error?.status === 404) {
+      navigate({
+        to: ".",
+        search: (prev) => ({ ...prev, collection: undefined }),
+      });
+    }
+  }, [collectionId, error?.status, navigate]);
 
   useEffect(() => {
     return () => {

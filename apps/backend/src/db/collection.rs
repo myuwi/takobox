@@ -74,10 +74,23 @@ pub async fn delete(
 }
 
 pub async fn get_files(
-    conn: impl SqliteExecutor<'_>,
+    conn: impl SqliteExecutor<'_> + Copy,
     user_id: i64,
     collection_id: &Uid,
-) -> Result<Vec<File>, sqlx::Error> {
+) -> Result<Option<Vec<File>>, sqlx::Error> {
+    let exists: bool = sqlx::query_scalar(
+        "select count(*) > 0 from collections
+        where public_id = $1 and user_id = $2",
+    )
+    .bind(collection_id)
+    .bind(user_id)
+    .fetch_one(conn)
+    .await?;
+
+    if !exists {
+        return Ok(None);
+    }
+
     sqlx::query_as(
         "select f.* from collection_files cf
         join files f on cf.file_id = f.id
@@ -89,6 +102,7 @@ pub async fn get_files(
     .bind(user_id)
     .fetch_all(conn)
     .await
+    .map(Some)
 }
 
 pub async fn add_file(

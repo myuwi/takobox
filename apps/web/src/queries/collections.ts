@@ -15,6 +15,12 @@ export const collectionsOptions = queryOptions({
   queryFn: getCollections,
 });
 
+const collectionOptions = (collectionId: string) =>
+  queryOptions({
+    queryKey: ["collections", collectionId],
+    // queryFn: getCollection,
+  });
+
 export const createCollectionOptions = mutationOptions({
   mutationFn: createCollection,
   onSuccess: async (_, _variables, _mutateResult, context) => {
@@ -36,7 +42,9 @@ export const renameCollectionOptions = mutationOptions({
 
 export const deleteCollectionOptions = mutationOptions({
   mutationFn: deleteCollection,
-  onSuccess: async (_, _variables, _mutateResult, context) => {
+  onSuccess: async (_, collectionId, _mutateResult, context) => {
+    context.client.removeQueries(collectionOptions(collectionId));
+
     await context.client.invalidateQueries({
       queryKey: collectionsOptions.queryKey,
     });

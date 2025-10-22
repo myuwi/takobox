@@ -19,8 +19,9 @@ async fn index(
     session: Session,
     Path(collection_id): Path<Uid>,
 ) -> Result<impl IntoResponse, Error> {
-    // TODO: respond 404 if collection doesn't exist
-    let files = collection::get_files(&pool, session.user_id, &collection_id).await?;
+    let files = collection::get_files(&pool, session.user_id, &collection_id)
+        .await?
+        .ok_or_else(|| Error::NotFound("Collection doesn't exist or belongs to another user."))?;
 
     Ok(Json(files))
 }
