@@ -1,14 +1,14 @@
 use sqlx::SqliteExecutor;
 use time::{Duration, UtcDateTime};
 
-use crate::{models::session::Session, types::Uuid};
+use crate::{models::session::Session, types::Uid};
 
 // TODO: Clear expired sessions?
 
 const EXPIRATION: Duration = Duration::days(30);
 
 pub async fn create(conn: impl SqliteExecutor<'_>, user_id: i64) -> Result<Session, sqlx::Error> {
-    let id = Uuid::new();
+    let id = Uid::new(32);
     let expires_at = (UtcDateTime::now() + EXPIRATION).unix_timestamp();
 
     sqlx::query_as(
@@ -25,7 +25,7 @@ pub async fn create(conn: impl SqliteExecutor<'_>, user_id: i64) -> Result<Sessi
 
 pub async fn get_by_public_id(
     conn: impl SqliteExecutor<'_>,
-    session_id: &Uuid,
+    session_id: &Uid,
 ) -> Result<Session, sqlx::Error> {
     sqlx::query_as("select * from sessions where public_id = $1 and expires_at > unixepoch()")
         .bind(session_id)

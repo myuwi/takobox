@@ -1,2 +1,2 @@
-mod uuid;
-pub use uuid::Uuid;
+mod uid;
+pub use uid::Uid;

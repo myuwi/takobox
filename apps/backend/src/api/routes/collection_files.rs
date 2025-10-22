@@ -11,14 +11,15 @@ use crate::{
     api::{error::Error, state::AppState},
     db::collection,
     models::session::Session,
-    types::Uuid,
+    types::Uid,
 };
 
 async fn index(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
-    Path(collection_id): Path<Uuid>,
+    Path(collection_id): Path<Uid>,
 ) -> Result<impl IntoResponse, Error> {
+    // TODO: respond 404 if collection doesn't exist
     let files = collection::get_files(&pool, session.user_id, &collection_id).await?;
 
     Ok(Json(files))
@@ -26,13 +27,13 @@ async fn index(
 
 #[derive(Debug, Deserialize)]
 pub struct CollectionFilesPayload {
-    pub id: Uuid,
+    pub id: Uid,
 }
 
 async fn add(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
-    Path(collection_id): Path<Uuid>,
+    Path(collection_id): Path<Uid>,
     Json(body): Json<CollectionFilesPayload>,
 ) -> Result<impl IntoResponse, Error> {
     collection::add_file(&pool, session.user_id, &collection_id, &body.id)
@@ -47,7 +48,7 @@ async fn add(
 async fn remove(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
-    Path(collection_id): Path<Uuid>,
+    Path(collection_id): Path<Uid>,
     Json(body): Json<CollectionFilesPayload>,
 ) -> Result<impl IntoResponse, Error> {
     collection::remove_file(&pool, session.user_id, &collection_id, &body.id)

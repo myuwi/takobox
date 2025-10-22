@@ -12,13 +12,13 @@ use crate::{
     api::{error::Error, state::AppState},
     db::session,
     models::session::Session,
-    types::Uuid,
+    types::Uid,
 };
 
 async fn resolve_session(pool: &SqlitePool, jar: PrivateCookieJar) -> Option<Session> {
     let session_id = jar
         .get("session")
-        .and_then(|c| Uuid::try_from(c.value().to_string()).ok())?;
+        .and_then(|c| Uid::try_from(c.value().to_string()).ok())?;
 
     session::get_by_public_id(pool, &session_id).await.ok()
 }
@@ -54,6 +54,6 @@ impl<S: Send + Sync> FromRequestParts<S> for Session {
             .extensions
             .get::<Session>()
             .ok_or(Error::Unauthorized("Unauthorized"))
-            .copied()
+            .cloned()
     }
 }

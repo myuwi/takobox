@@ -15,7 +15,7 @@ use crate::{
     },
     db::collection,
     models::session::Session,
-    types::Uuid,
+    types::Uid,
 };
 
 async fn index(
@@ -62,7 +62,7 @@ pub struct RenameCollectionPayload {
 async fn rename(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
-    Path(collection_id): Path<Uuid>,
+    Path(collection_id): Path<Uid>,
     Json(body): Json<RenameCollectionPayload>,
 ) -> Result<impl IntoResponse, Error> {
     let name = body.name.trim();
@@ -86,7 +86,7 @@ async fn rename(
 async fn remove(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
-    Path(collection_id): Path<Uuid>,
+    Path(collection_id): Path<Uid>,
 ) -> Result<impl IntoResponse, Error> {
     collection::delete(&pool, session.user_id, &collection_id)
         .await?

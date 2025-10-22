@@ -10,7 +10,6 @@ use axum::{
     routing::{delete, get, post},
 };
 use axum_extra::response::FileStream;
-use nanoid::nanoid;
 use tokio::io::AsyncWriteExt;
 use tokio_util::io::ReaderStream;
 use tracing::error;
@@ -20,15 +19,8 @@ use crate::{
     db::{collection, file},
     models::session::Session,
     services::thumbnails::{ThumbnailError, generate_thumbnail},
-    types::Uuid,
+    types::Uid,
 };
-
-pub const ALPHABET: [char; 62] = [
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
-    'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B',
-    'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
-    'V', 'W', 'X', 'Y', 'Z',
-];
 
 async fn index(
     State(AppState { pool, .. }): State<AppState>,
@@ -42,7 +34,7 @@ async fn index(
 async fn show(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
-    Path(file_id): Path<Uuid>,
+    Path(file_id): Path<Uid>,
 ) -> Result<impl IntoResponse, Error> {
     let file = file::get_with_collections_by_public_id(&pool, session.user_id, &file_id)
         .await?
@@ -57,7 +49,7 @@ async fn create(
     session: Session,
     mut multipart: Multipart,
 ) -> Result<impl IntoResponse, Error> {
-    let mut collection_id: Option<Uuid> = None;
+    let mut collection_id: Option<Uid> = None;
     let mut file: Option<(String, Bytes)> = None;
 
     while let Some(field) = multipart
@@ -73,7 +65,7 @@ async fn create(
                         .await
                         .map_err(|_| Error::BadRequest("Bad request"))
                         .and_then(|text| {
-                            Uuid::try_from(text).map_err(|_| Error::BadRequest("Bad request"))
+                            Uid::try_from(text).map_err(|_| Error::BadRequest("Bad request"))
                         })?,
                 );
             }
@@ -97,15 +89,14 @@ async fn create(
     };
 
     // TODO: retry on db collision
-    // TODO: make length configurable?
-    let file_id = nanoid!(6, &ALPHABET);
+    let file_id = Uid::new(6);
     let ext = std::path::Path::new(&original_name)
         .extension()
         .and_then(OsStr::to_str)
         .map(|p| ".".to_string() + p)
         .unwrap_or("".to_string());
 
-    let file_name = file_id + &ext;
+    let file_name = file_id.to_string() + &ext;
     let file_path = dirs.uploads_dir().join(&file_name);
     let file_size = file_bytes.len();
 
@@ -114,6 +105,7 @@ async fn create(
     let file = file::create(
         &mut *transaction,
         session.user_id,
+        &file_id,
         &file_name,
         &original_name,
         &file_size,
@@ -157,7 +149,7 @@ async fn create(
 async fn remove(
     State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
-    Path(file_id): Path<Uuid>,
+    Path(file_id): Path<Uid>,
 ) -> Result<impl IntoResponse, Error> {
     let file = file::delete(&pool, session.user_id, &file_id)
         .await?
@@ -181,7 +173,7 @@ async fn remove(
 async fn download(
     State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
-    Path(file_id): Path<Uuid>,
+    Path(file_id): Path<Uid>,
 ) -> Result<impl IntoResponse, Error> {
     let file = file::get_by_public_id(&pool, session.user_id, &file_id)
         .await?
@@ -199,7 +191,7 @@ async fn download(
 async fn regenerate_thumbnail(
     State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
-    Path(file_id): Path<Uuid>,
+    Path(file_id): Path<Uid>,
 ) -> Result<impl IntoResponse, Error> {
     let file = file::get_by_public_id(&pool, session.user_id, &file_id)
         .await?

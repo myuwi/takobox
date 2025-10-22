@@ -2,7 +2,7 @@ use sqlx::{SqliteExecutor, sqlite::SqliteRow};
 
 use crate::{
     models::{collection::Collection, file::File},
-    types::Uuid,
+    types::Uid,
 };
 
 pub async fn get_all_for_user(
@@ -24,7 +24,7 @@ pub async fn create(
     user_id: i64,
     name: &str,
 ) -> Result<Collection, sqlx::Error> {
-    let id = Uuid::new();
+    let id = Uid::new(6);
 
     sqlx::query_as(
         "insert into collections (public_id, user_id, name)
@@ -41,7 +41,7 @@ pub async fn create(
 pub async fn rename(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    collection_id: &Uuid,
+    collection_id: &Uid,
     name: &str,
 ) -> Result<Option<Collection>, sqlx::Error> {
     sqlx::query_as(
@@ -60,7 +60,7 @@ pub async fn rename(
 pub async fn delete(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    collection_id: &Uuid,
+    collection_id: &Uid,
 ) -> Result<Option<Collection>, sqlx::Error> {
     sqlx::query_as(
         "delete from collections
@@ -76,7 +76,7 @@ pub async fn delete(
 pub async fn get_files(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    collection_id: &Uuid,
+    collection_id: &Uid,
 ) -> Result<Vec<File>, sqlx::Error> {
     sqlx::query_as(
         "select f.* from collection_files cf
@@ -94,8 +94,8 @@ pub async fn get_files(
 pub async fn add_file(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    collection_id: &Uuid,
-    file_id: &Uuid,
+    collection_id: &Uid,
+    file_id: &Uid,
 ) -> Result<Option<SqliteRow>, sqlx::Error> {
     sqlx::query(
         "insert into collection_files (collection_id, file_id)
@@ -116,8 +116,8 @@ pub async fn add_file(
 pub async fn remove_file(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    collection_id: &Uuid,
-    file_id: &Uuid,
+    collection_id: &Uid,
+    file_id: &Uid,
 ) -> Result<Option<SqliteRow>, sqlx::Error> {
     sqlx::query(
         "delete from collection_files

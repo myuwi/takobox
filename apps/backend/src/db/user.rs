@@ -1,13 +1,13 @@
 use sqlx::SqliteExecutor;
 
-use crate::{models::user::User, types::Uuid};
+use crate::{models::user::User, types::Uid};
 
 pub async fn create(
     conn: impl SqliteExecutor<'_>,
     username: &str,
     password_hash: &str,
 ) -> Result<User, sqlx::Error> {
-    let id = Uuid::new();
+    let id = Uid::new(6);
 
     sqlx::query_as("insert into users (public_id, username, password) values ($1, $2, $3) returning *")
         .bind(id)

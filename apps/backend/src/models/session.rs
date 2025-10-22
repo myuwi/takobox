@@ -2,12 +2,12 @@ use axum_extra::extract::cookie::{Cookie, SameSite};
 use sqlx::FromRow;
 use time::OffsetDateTime;
 
-use crate::types::Uuid;
+use crate::types::Uid;
 
-#[derive(Clone, Copy, Debug, FromRow)]
+#[derive(Clone, Debug, FromRow)]
 pub struct Session {
     pub id: i64,
-    pub public_id: Uuid,
+    pub public_id: Uid,
     pub user_id: i64,
     pub created_at: i64,
     pub expires_at: i64,

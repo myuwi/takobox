@@ -2,7 +2,7 @@ use sqlx::SqliteExecutor;
 
 use crate::{
     models::file::{File, FileWithCollections},
-    types::Uuid,
+    types::Uid,
 };
 
 pub async fn get_all_for_user(
@@ -22,7 +22,7 @@ pub async fn get_all_for_user(
 pub async fn get_by_public_id(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    id: &Uuid,
+    id: &Uid,
 ) -> Result<Option<File>, sqlx::Error> {
     sqlx::query_as(
         "select * from files
@@ -37,7 +37,7 @@ pub async fn get_by_public_id(
 pub async fn get_with_collections_by_public_id(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    id: &Uuid,
+    id: &Uid,
 ) -> Result<Option<FileWithCollections>, sqlx::Error> {
     sqlx::query_as(
         r#"select 
@@ -67,12 +67,12 @@ pub async fn get_with_collections_by_public_id(
 pub async fn create(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
+    id: &Uid,
     file_name: &str,
     original_name: &str,
     file_size: &usize,
 ) -> Result<File, sqlx::Error> {
     let file_size = *file_size as i64;
-    let id = Uuid::new();
 
     sqlx::query_as(
         "insert into files (public_id, user_id, name, original, size)
@@ -91,7 +91,7 @@ pub async fn create(
 pub async fn delete(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    id: &Uuid,
+    id: &Uid,
 ) -> Result<Option<File>, sqlx::Error> {
     sqlx::query_as(
         "delete from files 
