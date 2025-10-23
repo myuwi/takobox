@@ -119,6 +119,7 @@ pub async fn add_file(
         join files f on f.public_id = $2 
         where c.public_id = $1
           and c.user_id = $3
+          and f.user_id = $3
         returning *",
     )
     .bind(collection_id)
