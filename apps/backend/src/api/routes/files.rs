@@ -38,7 +38,7 @@ async fn show(
 ) -> Result<impl IntoResponse, Error> {
     let file = file::get_with_collections_by_public_id(&pool, session.user_id, &file_id)
         .await?
-        .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
+        .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
     Ok(Json(file))
 }
@@ -120,9 +120,7 @@ async fn create(
             &file.public_id,
         )
         .await?
-        .ok_or_else(|| {
-            Error::NotFound("Collection or file doesn't exist or belongs to another user.")
-        })?;
+        .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
     }
 
     let mut file_handle = tokio::fs::File::create_new(&file_path)
@@ -153,7 +151,7 @@ async fn remove(
 ) -> Result<impl IntoResponse, Error> {
     let file = file::delete(&pool, session.user_id, &file_id)
         .await?
-        .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
+        .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
     let thumb_name = PathBuf::from(&file.name).with_extension("avif");
 
@@ -177,12 +175,12 @@ async fn download(
 ) -> Result<impl IntoResponse, Error> {
     let file = file::get_by_public_id(&pool, session.user_id, &file_id)
         .await?
-        .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
+        .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
     let file_path = dirs.uploads_dir().join(&file.name);
     let file_stream = FileStream::<ReaderStream<tokio::fs::File>>::from_path(file_path)
         .await
-        .map_err(|_| Error::NotFound("File doesn't exist or belongs to another user."))?
+        .map_err(|_| Error::NotFound("File not found or not owned by user."))?
         .file_name(file.original);
 
     Ok(file_stream)
@@ -195,7 +193,7 @@ async fn regenerate_thumbnail(
 ) -> Result<impl IntoResponse, Error> {
     let file = file::get_by_public_id(&pool, session.user_id, &file_id)
         .await?
-        .ok_or_else(|| Error::NotFound("File doesn't exist or belongs to another user."))?;
+        .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
     let file_path = dirs.uploads_dir().join(file.name);
 

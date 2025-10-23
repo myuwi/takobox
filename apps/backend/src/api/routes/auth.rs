@@ -77,11 +77,8 @@ async fn register(
 
     let user = user::create(&pool, &body.username, &password_hash)
         .await
-        .on_constraint("users_username_key", |_| {
+        .map_constraint_err("users.username", |_| {
             Error::Conflict("Username is already taken.")
-        })
-        .on_constraint("users_username_check", |_| {
-            Error::UnprocessableEntity("Username is invalid.")
         })?;
 
     let session = session::create(&pool, user.id).await?;

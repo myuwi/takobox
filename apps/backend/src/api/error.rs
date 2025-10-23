@@ -84,7 +84,7 @@ impl IntoResponse for Error {
 }
 
 pub trait ResultExt<T> {
-    fn on_constraint<F>(self, name: &str, map_err: F) -> Result<T, Error>
+    fn map_constraint_err<F>(self, name: &str, map_err: F) -> Result<T, Error>
     where
         F: FnOnce(Box<dyn sqlx::error::DatabaseError>) -> Error;
 }
@@ -93,12 +93,17 @@ impl<T, E> ResultExt<T> for Result<T, E>
 where
     E: Into<Error>,
 {
-    fn on_constraint<F>(self, name: &str, map_err: F) -> Result<T, Error>
+    fn map_constraint_err<F>(self, name: &str, map_err: F) -> Result<T, Error>
     where
         F: FnOnce(Box<dyn sqlx::error::DatabaseError>) -> Error,
     {
         self.map_err(|e| match e.into() {
-            Error::Sqlx(sqlx::Error::Database(e)) if e.constraint() == Some(name) => map_err(e),
+            Error::Sqlx(sqlx::Error::Database(e))
+                if e.message()
+                    .ends_with(&format!(" constraint failed: {name}")) =>
+            {
+                map_err(e)
+            }
             e => e,
         })
     }

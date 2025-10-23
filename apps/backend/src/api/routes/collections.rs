@@ -47,7 +47,7 @@ async fn create(
 
     let collection = collection::create(&pool, session.user_id, name)
         .await
-        .on_constraint("collections_user_id_name_key", |_| {
+        .map_constraint_err("collections.user_id, collections.name", |_| {
             Error::Conflict("A collection with this name already exists. Please try another name.")
         })?;
 
@@ -75,10 +75,10 @@ async fn rename(
 
     let collection = collection::rename(&pool, session.user_id, &collection_id, name)
         .await
-        .on_constraint("collections_user_id_name_key", |_| {
+        .map_constraint_err("collections.user_id, collections.name", |_| {
             Error::Conflict("A collection with this name already exists. Please try another name.")
         })?
-        .ok_or_else(|| Error::NotFound("Collection doesn't exist or belongs to another user."))?;
+        .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
 
     Ok(Json(collection))
 }
@@ -90,7 +90,7 @@ async fn remove(
 ) -> Result<impl IntoResponse, Error> {
     collection::delete(&pool, session.user_id, &collection_id)
         .await?
-        .ok_or_else(|| Error::NotFound("Collection doesn't exist or belongs to another user."))?;
+        .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
 
     Ok(StatusCode::NO_CONTENT)
 }
