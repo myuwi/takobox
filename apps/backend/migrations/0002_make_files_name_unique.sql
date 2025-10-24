@@ -1,4 +1,6 @@
-pragma foreign_keys=off;
+-- no-transaction
+pragma foreign_keys = off;
+begin transaction;
 
 create table new_files (
   id integer primary key autoincrement,
@@ -15,4 +17,6 @@ drop table files;
 alter table new_files rename to files;
 
 pragma foreign_key_check;
-pragma foreign_keys=on;
+
+commit;
+pragma foreign_keys = on;
