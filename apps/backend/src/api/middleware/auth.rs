@@ -10,7 +10,6 @@ use sqlx::SqlitePool;
 
 use crate::{
     api::{error::Error, state::AppState},
-    db::session,
     models::session::Session,
     types::Uid,
 };
@@ -20,7 +19,7 @@ async fn resolve_session(pool: &SqlitePool, jar: PrivateCookieJar) -> Option<Ses
         .get("session")
         .and_then(|c| Uid::try_from(c.value().to_string()).ok())?;
 
-    session::get_by_public_id(pool, &session_id).await.ok()
+    Session::get_by_public_id(pool, &session_id).await.ok()
 }
 
 pub async fn auth(

@@ -12,8 +12,7 @@ use crate::{
         error::{Error, ResultExt},
         state::AppState,
     },
-    db::collection,
-    models::session::Session,
+    models::{collection::Collection, session::Session},
     types::Uid,
 };
 
@@ -22,13 +21,13 @@ async fn index(
     session: Session,
     Path(collection_id): Path<Uid>,
 ) -> Result<impl IntoResponse, Error> {
-    if !collection::exists(&pool, session.user_id, &collection_id).await? {
+    if !Collection::exists(&pool, session.user_id, &collection_id).await? {
         return Err(Error::NotFound(
             "Collection not found or not owned by user.",
         ));
     }
 
-    let files = collection::get_files(&pool, session.user_id, &collection_id).await?;
+    let files = Collection::get_files(&pool, session.user_id, &collection_id).await?;
 
     Ok(Json(files))
 }
@@ -44,13 +43,13 @@ async fn add(
     Path(collection_id): Path<Uid>,
     Json(body): Json<CollectionFilesPayload>,
 ) -> Result<impl IntoResponse, Error> {
-    if !collection::exists(&pool, session.user_id, &collection_id).await? {
+    if !Collection::exists(&pool, session.user_id, &collection_id).await? {
         return Err(Error::NotFound(
             "Collection not found or not owned by user.",
         ));
     }
 
-    collection::add_file(&pool, session.user_id, &collection_id, &body.id)
+    Collection::add_file(&pool, session.user_id, &collection_id, &body.id)
         .await
         .map_constraint_err(
             "collection_files.collection_id, collection_files.file_id",
@@ -67,13 +66,13 @@ async fn remove(
     Path(collection_id): Path<Uid>,
     Json(body): Json<CollectionFilesPayload>,
 ) -> Result<impl IntoResponse, Error> {
-    if !collection::exists(&pool, session.user_id, &collection_id).await? {
+    if !Collection::exists(&pool, session.user_id, &collection_id).await? {
         return Err(Error::NotFound(
             "Collection not found or not owned by user.",
         ));
     }
 
-    collection::remove_file(&pool, session.user_id, &collection_id, &body.id)
+    Collection::remove_file(&pool, session.user_id, &collection_id, &body.id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found in collection."))?;
 

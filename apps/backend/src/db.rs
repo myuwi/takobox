@@ -4,11 +4,6 @@ use sqlx::{
     sqlite::SqlitePoolOptions,
 };
 
-pub mod collection;
-pub mod file;
-pub mod session;
-pub mod user;
-
 pub async fn init_pool(database_path: &str) -> Result<SqlitePool, MigrateError> {
     if !Sqlite::database_exists(database_path).await? {
         Sqlite::create_database(database_path).await?

@@ -13,8 +13,7 @@ use crate::{
         error::{Error, ResultExt},
         state::AppState,
     },
-    db::collection,
-    models::session::Session,
+    models::{collection::Collection, session::Session},
     types::Uid,
 };
 
@@ -22,7 +21,7 @@ async fn index(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
 ) -> Result<impl IntoResponse, Error> {
-    let collections = collection::get_all_for_user(&pool, session.user_id).await?;
+    let collections = Collection::get_all_for_user(&pool, session.user_id).await?;
 
     Ok(Json(collections))
 }
@@ -45,7 +44,7 @@ async fn create(
         ));
     }
 
-    let collection = collection::create(&pool, session.user_id, name)
+    let collection = Collection::create(&pool, session.user_id, name)
         .await
         .map_constraint_err("collections.user_id, collections.name", |_| {
             Error::Conflict("A collection with this name already exists. Please try another name.")
@@ -73,7 +72,7 @@ async fn rename(
         ));
     }
 
-    let collection = collection::rename(&pool, session.user_id, &collection_id, name)
+    let collection = Collection::rename(&pool, session.user_id, &collection_id, name)
         .await
         .map_constraint_err("collections.user_id, collections.name", |_| {
             Error::Conflict("A collection with this name already exists. Please try another name.")
@@ -88,7 +87,7 @@ async fn remove(
     session: Session,
     Path(collection_id): Path<Uid>,
 ) -> Result<impl IntoResponse, Error> {
-    collection::delete(&pool, session.user_id, &collection_id)
+    Collection::delete(&pool, session.user_id, &collection_id)
         .await?
         .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
 

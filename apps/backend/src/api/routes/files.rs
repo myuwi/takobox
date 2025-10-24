@@ -16,8 +16,11 @@ use tracing::error;
 
 use crate::{
     api::{error::Error, state::AppState},
-    db::{collection, file},
-    models::session::Session,
+    models::{
+        collection::Collection,
+        file::{File, FileWithCollections},
+        session::Session,
+    },
     services::thumbnails::{ThumbnailError, generate_thumbnail},
     types::Uid,
 };
@@ -26,7 +29,7 @@ async fn index(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
 ) -> Result<impl IntoResponse, Error> {
-    let files = file::get_all_for_user(&pool, session.user_id).await?;
+    let files = File::get_all_for_user(&pool, session.user_id).await?;
 
     Ok(Json(files))
 }
@@ -36,7 +39,7 @@ async fn show(
     session: Session,
     Path(file_id): Path<Uid>,
 ) -> Result<impl IntoResponse, Error> {
-    let file = file::get_with_collections_by_public_id(&pool, session.user_id, &file_id)
+    let file = FileWithCollections::get_by_public_id(&pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -102,7 +105,7 @@ async fn create(
 
     let mut transaction = pool.begin().await?;
 
-    let file = file::create(
+    let file = File::create(
         &mut *transaction,
         session.user_id,
         &file_id,
@@ -113,7 +116,7 @@ async fn create(
     .await?;
 
     if let Some(collection_id) = collection_id {
-        collection::add_file(
+        Collection::add_file(
             &mut *transaction,
             session.user_id,
             &collection_id,
@@ -149,7 +152,7 @@ async fn remove(
     session: Session,
     Path(file_id): Path<Uid>,
 ) -> Result<impl IntoResponse, Error> {
-    let file = file::delete(&pool, session.user_id, &file_id)
+    let file = File::delete(&pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -173,7 +176,7 @@ async fn download(
     session: Session,
     Path(file_id): Path<Uid>,
 ) -> Result<impl IntoResponse, Error> {
-    let file = file::get_by_public_id(&pool, session.user_id, &file_id)
+    let file = File::get_by_public_id(&pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -191,7 +194,7 @@ async fn regenerate_thumbnail(
     session: Session,
     Path(file_id): Path<Uid>,
 ) -> Result<impl IntoResponse, Error> {
-    let file = file::get_by_public_id(&pool, session.user_id, &file_id)
+    let file = File::get_by_public_id(&pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
