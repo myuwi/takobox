@@ -1,11 +1,13 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Alert } from "@/components/primitives/Alert";
 import { Button } from "@/components/primitives/Button";
 import { Input } from "@/components/primitives/Input";
 import { Label } from "@/components/primitives/Label";
 import { registerOptions } from "@/queries/register";
+import { settingsOptions } from "@/queries/settings";
 import type { AuthPayload } from "@/types/AuthPayload";
 import { formatError } from "@/utils/error";
 
@@ -14,9 +16,26 @@ export const Route = createFileRoute("/(auth)/signup")({
 });
 
 function SignUp() {
+  const { data: settings } = useQuery(settingsOptions);
   const { register, handleSubmit } = useForm<AuthPayload>();
   const navigate = useNavigate();
   const { mutateAsync: registerMutation, error } = useMutation(registerOptions);
+
+  if (!settings?.enableAccountCreation) {
+    return (
+      <div className="flex max-w-xs flex-col gap-6">
+        <Lock size={64} className="mx-auto opacity-60" />
+        <Alert>
+          <div className="flex flex-col items-start gap-2">
+            <p>Account creation is currently disabled for this instance.</p>
+            <Link className="not-hover:underline" to="/login">
+              Log in instead
+            </Link>
+          </div>
+        </Alert>
+      </div>
+    );
+  }
 
   const onSubmit = async (values: AuthPayload) => {
     await registerMutation(values);

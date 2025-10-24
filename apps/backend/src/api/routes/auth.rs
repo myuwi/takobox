@@ -67,7 +67,7 @@ async fn register(
 ) -> Result<impl IntoResponse, Error> {
     if !settings.enable_account_creation {
         return Err(Error::Unauthorized(
-            "Creation of new user accounts is currently disabled for this instance.",
+            "Account creation is currently disabled for this instance.",
         ));
     }
 

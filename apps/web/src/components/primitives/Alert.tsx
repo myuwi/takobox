@@ -8,8 +8,8 @@ export interface AlertProps extends PropsWithChildren {
 
 export const Alert = ({ children, onDismiss }: AlertProps) => {
   return (
-    <div className="flex items-center gap-3 rounded-md bg-red-300/20 px-3 py-2 text-red-500">
-      <CircleAlert size={20} />
+    <div className="flex gap-3 rounded-md bg-red-300/20 px-4 py-3 text-red-500">
+      <CircleAlert size={20} className="h-[1lh]" />
       {children}
       {onDismiss && (
         <Button
