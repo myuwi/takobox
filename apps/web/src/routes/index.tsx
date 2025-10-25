@@ -3,6 +3,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/primitives/Button";
 import { meOptions } from "@/queries/me";
+import { settingsOptions } from "@/queries/settings";
 
 export const Route = createFileRoute("/")({
   component: App,
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/")({
 });
 
 function App() {
-  const { data: user } = useQuery(meOptions);
+  const { data: settings } = useQuery(settingsOptions);
 
   return (
     <>
@@ -32,11 +33,15 @@ function App() {
           Lightweight, self-hostable and blazingly fast.
         </h2>
         <div className="flex flex-row gap-4">
-          {user ? (
-            <Button render={<Link to="/home" />}>Open Takobox</Button>
-          ) : (
-            <Button render={<Link to="/signup" />}>Get started</Button>
-          )}
+          <Button
+            render={
+              <Link
+                to={settings?.enableAccountCreation ? "/signup" : "/login"}
+              />
+            }
+          >
+            Get started
+          </Button>
         </div>
       </main>
     </>

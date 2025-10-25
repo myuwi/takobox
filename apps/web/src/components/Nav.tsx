@@ -5,6 +5,7 @@ import { logout } from "@/api/auth";
 import { Button } from "@/components/primitives/Button";
 import * as Menu from "@/components/primitives/Menu";
 import { meOptions } from "@/queries/me";
+import { settingsOptions } from "@/queries/settings";
 import type { User } from "@/types/User";
 
 interface AccountMenuProps {
@@ -52,6 +53,7 @@ interface NavProps {
 }
 
 export const Nav = ({ menuButton }: NavProps) => {
+  const { data: settings } = useQuery(settingsOptions);
   const { data: user } = useQuery(meOptions);
 
   return (
@@ -70,7 +72,9 @@ export const Nav = ({ menuButton }: NavProps) => {
             <Button variant="ghost" render={<Link to="/login" />}>
               Log in
             </Button>
-            <Button render={<Link to="/signup" />}>Sign up</Button>
+            {settings?.enableAccountCreation && (
+              <Button render={<Link to="/signup" />}>Sign up</Button>
+            )}
           </>
         )}
       </div>
