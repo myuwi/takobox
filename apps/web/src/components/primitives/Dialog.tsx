@@ -40,7 +40,7 @@ export function Content({
   );
 }
 
-export const Header = tw.div`flex flex-col gap-2 text-center sm:text-left`;
+export const Header = tw.div`flex flex-col gap-4 text-center sm:text-left`;
 
 export const Footer = tw.div`flex flex-col-reverse gap-2 sm:flex-row sm:justify-end`;
 

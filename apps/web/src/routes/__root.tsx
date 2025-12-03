@@ -9,6 +9,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 import { meOptions } from "@/queries/me";
 import { settingsOptions } from "@/queries/settings";
 import css from "../styles.css?inline";
@@ -49,6 +50,7 @@ function Root() {
       <body>
         <StrictMode>
           <Outlet />
+          <ConfirmationDialog />
           <Scripts />
           <TanStackDevtools
             plugins={[

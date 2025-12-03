@@ -1,7 +1,11 @@
 import { useRef, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useSetAtom } from "jotai";
 import { MoreHorizontal, Pen, Trash } from "lucide-react";
+import { confirmationDialogAtom } from "@/atoms/dialogs";
+import { deleteCollectionOptions } from "@/queries/collections";
 import type { CollectionDto } from "@/types/CollectionDto";
-import { DeleteCollectionDialog } from "./DeleteCollectionDialog";
 import { Button } from "./primitives/Button";
 import * as Menu from "./primitives/Menu";
 import { RenameCollectionDialog } from "./RenameCollectionDialog";
@@ -12,7 +16,27 @@ interface CollectionMenuProps {
 
 export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const confirm = useSetAtom(confirmationDialogAtom);
+
+  const search = useSearch({ strict: false });
+  const navigate = useNavigate();
+
+  const { mutateAsync: deleteCollection } = useMutation(
+    deleteCollectionOptions,
+  );
+
+  const handleDelete = async () => {
+    try {
+      await deleteCollection(collection.id);
+
+      if (search.collection === collection.id) {
+        await navigate({
+          to: ".",
+          search: (prev) => ({ ...prev, collection: undefined }),
+        });
+      }
+    } catch (_) {}
+  };
 
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -43,7 +67,17 @@ export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
           </Menu.Item>
           <Menu.Item
             variant="destructive"
-            onClick={() => setTimeout(() => setDeleteDialogOpen(true), 0)}
+            onClick={() =>
+              setTimeout(() => {
+                confirm({
+                  title: "Delete collection?",
+                  description: `Are you sure you want to delete the collection "${collection.name}"? Files inside the collection will remain unaffected. This cannot be undone.`,
+                  confirmText: "Delete Collection",
+                  callback: handleDelete,
+                  focusRef: menuTriggerRef,
+                });
+              }, 0)
+            }
           >
             <Trash />
             <span>Delete collection</span>
@@ -55,13 +89,6 @@ export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
         collection={collection}
         open={renameDialogOpen}
         setOpen={setRenameDialogOpen}
-        focusRef={menuTriggerRef}
-      />
-
-      <DeleteCollectionDialog
-        collection={collection}
-        open={deleteDialogOpen}
-        setOpen={setDeleteDialogOpen}
         focusRef={menuTriggerRef}
       />
     </>

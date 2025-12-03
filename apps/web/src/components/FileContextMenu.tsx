@@ -10,6 +10,7 @@ import {
   Trash,
 } from "lucide-react";
 import { regenerateThumbnail } from "@/api/files";
+import { confirmationDialogAtom } from "@/atoms/dialogs";
 import { selectedFilesAtom } from "@/atoms/selected-files";
 import {
   addFileToCollectionOptions,
@@ -34,6 +35,8 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
   const { data: collections } = useQuery(collectionsOptions);
   const setSelectedFiles = useSetAtom(selectedFilesAtom);
   const { mutateAsync: deleteFile } = useMutation(deleteFileOptions);
+
+  const confirm = useSetAtom(confirmationDialogAtom);
 
   const { data: fileCollections = [] } = useQuery({
     ...fileOptions(file.id),
@@ -180,7 +183,19 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
             <RefreshCcw />
             <span>Regenerate thumbnail</span>
           </Menu.Item>
-          <Menu.Item variant="destructive" onClick={handleDelete}>
+          <Menu.Item
+            variant="destructive"
+            onClick={() =>
+              setTimeout(() => {
+                confirm({
+                  title: "Delete file?",
+                  description: `Are you sure you want to delete the file "${file.original}"? This cannot be undone.`,
+                  confirmText: "Delete File",
+                  callback: handleDelete,
+                });
+              }, 0)
+            }
+          >
             <Trash />
             <span>Delete</span>
           </Menu.Item>
