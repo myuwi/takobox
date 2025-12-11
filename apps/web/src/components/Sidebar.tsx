@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useAtom } from "jotai";
-import { Folder, Plus, Tag } from "lucide-react";
+import { Files, Folder, Plus } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { sidebarOpenMobileAtom } from "@/atoms/sidebar";
 import { Button } from "@/components/primitives/Button";
@@ -47,7 +47,7 @@ export const Sidebar = () => {
               />
             }
           >
-            <Folder className="p-0.5" />
+            <Files className="p-0.5" />
             <span>All files</span>
           </Button>
         </SidebarGroupContent>
@@ -75,7 +75,7 @@ export const Sidebar = () => {
                     />
                   }
                 >
-                  <Tag className="p-0.5" />
+                  <Folder className="p-0.5" />
                   <span>{collection.name}</span>
                   <CollectionMenu collection={collection} />
                 </Button>

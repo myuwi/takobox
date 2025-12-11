@@ -4,9 +4,9 @@ import { useSetAtom } from "jotai";
 import {
   Download,
   EllipsisVertical,
+  FolderPlus,
   LinkIcon,
   RefreshCcw,
-  Tag,
   Trash,
 } from "lucide-react";
 import { regenerateThumbnail } from "@/api/files";
@@ -132,7 +132,7 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
           </Menu.Item>
           <Menu.Sub>
             <Menu.SubTrigger>
-              <Tag />
+              <FolderPlus />
               <span>Add to Collection</span>
             </Menu.SubTrigger>
             <Menu.SubContent>
