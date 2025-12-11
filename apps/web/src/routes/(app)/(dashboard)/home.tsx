@@ -27,7 +27,8 @@ export const Route = createFileRoute("/(app)/(dashboard)/home")({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>): HomeSearchParams => {
     return {
-      collection: search.collection as string | undefined,
+      collection:
+        search.collection != null ? String(search.collection) : undefined,
     };
   },
 });
