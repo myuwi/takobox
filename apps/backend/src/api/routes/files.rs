@@ -156,9 +156,9 @@ async fn remove(
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
-    let thumb_name = PathBuf::from(&file.name).with_extension("avif");
+    let thumb_name = PathBuf::from(&file.filename).with_extension("avif");
 
-    let file_path = dirs.uploads_dir().join(&file.name);
+    let file_path = dirs.uploads_dir().join(&file.filename);
     let thumb_path = dirs.thumbs_dir().join(thumb_name);
 
     let _ = tokio::fs::remove_file(&file_path)
@@ -180,11 +180,11 @@ async fn download(
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
-    let file_path = dirs.uploads_dir().join(&file.name);
+    let file_path = dirs.uploads_dir().join(&file.filename);
     let file_stream = FileStream::<ReaderStream<tokio::fs::File>>::from_path(file_path)
         .await
         .map_err(|_| Error::NotFound("File not found or not owned by user."))?
-        .file_name(file.original);
+        .file_name(file.name);
 
     Ok(file_stream)
 }
@@ -198,9 +198,9 @@ async fn regenerate_thumbnail(
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
-    let file_path = dirs.uploads_dir().join(file.name);
+    let file_path = dirs.uploads_dir().join(file.filename);
 
-    let file_name = generate_thumbnail(&file_path, dirs.thumbs_dir())
+    let thumb_file_name = generate_thumbnail(&file_path, dirs.thumbs_dir())
         .await
         .map_err(|err| match err {
             ThumbnailError::UnsupportedFiletype => {
@@ -215,7 +215,7 @@ async fn regenerate_thumbnail(
 
     Ok((
         StatusCode::CREATED,
-        [("Location", format!("/thumbs/{}", file_name))],
+        [("Location", format!("/thumbs/{}", thumb_file_name))],
     ))
 }
 

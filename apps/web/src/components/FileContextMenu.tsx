@@ -76,11 +76,11 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
   };
 
   const downloadUrl = `/api/files/${file.id}/download`;
-  const thumbnailPath = getThumbnailPath(file.name);
+  const thumbnailPath = getThumbnailPath(file.filename);
 
   const handleCopyToClipboard = async () => {
     try {
-      const url = new URL(file.name, location.origin);
+      const url = new URL(file.filename, location.origin);
       await copyToClipboard(url.toString());
     } catch (err) {
       console.warn("Failed to copy link to clipboard", err);
@@ -189,7 +189,7 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
               setTimeout(() => {
                 confirm({
                   title: "Delete file?",
-                  description: `Are you sure you want to delete the file "${file.original}"? This cannot be undone.`,
+                  description: `Are you sure you want to delete the file "${file.name}"? This cannot be undone.`,
                   confirmText: "Delete File",
                   callback: handleDelete,
                 });

@@ -12,12 +12,12 @@ export const formatBytes = (bytes: number) => {
   return `${result} ${suffix}`;
 };
 
-export const getThumbnailPath = (fileName: string) => {
+export const getThumbnailPath = (filename: string) => {
   const supportsThumbnail = thumbnailExtensions.some((ext) =>
-    fileName.endsWith(`.${ext}`),
+    filename.endsWith(`.${ext}`),
   );
 
   if (!supportsThumbnail) return undefined;
 
-  return `/thumbs/${fileName.replace(/\.\w*$/, ".avif")}`;
+  return `/thumbs/${filename.replace(/\.\w*$/, ".avif")}`;
 };

@@ -1,7 +1,7 @@
 export type FileDto = {
   id: string;
   name: string;
-  original: string;
+  filename: string;
   size: number;
   createdAt: string;
 };

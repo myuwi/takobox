@@ -22,7 +22,7 @@ const SelectedFilesIndicator = ({ files }: SelectedFilesIndicatorProps) => {
 
   const totalBytes = files.reduce((acc, file) => acc + file.size, 0);
   const identifier =
-    files.length > 1 ? `${files.length} files` : `"${files[0].original}"`;
+    files.length > 1 ? `${files.length} files` : `"${files[0].name}"`;
 
   const text = `${identifier} selected (${formatBytes(totalBytes)})`;
 
@@ -38,7 +38,7 @@ interface FileThumbnailProps {
 }
 
 const FileThumbnail = ({ file }: FileThumbnailProps) => {
-  const src = getThumbnailPath(file.name);
+  const src = getThumbnailPath(file.filename);
   const [loaded, setLoaded] = useState(!!src);
 
   const imgRef = useRef<HTMLImageElement>(null);
@@ -90,7 +90,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
         {files.map((file) => {
           const selected = selectedFiles.includes(file);
 
-          const handleOpen = () => window.open(`/${file.name}`);
+          const handleOpen = () => window.open(`/${file.filename}`);
 
           const handleSelect = (ctrlKey: boolean) => {
             if (ctrlKey) {
@@ -157,9 +157,9 @@ export const FileGrid = ({ files }: FileGridProps) => {
               </div>
               <span
                 className="line-clamp-1 px-1 text-center break-all"
-                title={file.original}
+                title={file.name}
               >
-                {file.original}
+                {file.name}
               </span>
             </div>
           );

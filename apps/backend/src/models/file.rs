@@ -14,7 +14,7 @@ pub struct File {
     #[serde(skip_serializing)]
     pub user_id: i64,
     pub name: String,
-    pub original: String,
+    pub filename: String,
     pub size: i64,
     #[serde(serialize_with = "serialize_timestamp")]
     pub created_at: i64,
@@ -56,12 +56,12 @@ impl File {
         id: &Uid,
         file_name: &str,
         original_name: &str,
-        file_size: &usize,
+        size: &usize,
     ) -> Result<File, sqlx::Error> {
-        let file_size = *file_size as i64;
+        let file_size = *size as i64;
 
         sqlx::query_as(
-            "insert into files (public_id, user_id, name, original, size)
+            "insert into files (public_id, user_id, filename, name, size)
             values ($1, $2, $3, $4, $5)
             returning *",
         )
@@ -109,7 +109,7 @@ impl FileWithCollections {
     ) -> Result<Option<FileWithCollections>, sqlx::Error> {
         sqlx::query_as(
             r#"select 
-                f.id, f.public_id, f.user_id, f.name, f.original, f.size, f.created_at,
+                f.id, f.public_id, f.user_id, f.filename, f.name, f.size, f.created_at,
                 coalesce(
                     (
                         select json_group_array(
@@ -124,7 +124,7 @@ impl FileWithCollections {
             left join collection_files cf on f.id = cf.file_id
             left join collections c on cf.collection_id = c.id
             where f.public_id = $1 and f.user_id = $2
-            group by f.id, f.public_id, f.user_id, f.name, f.original, f.size, f.created_at"#,
+            group by f.id, f.public_id, f.user_id, f.filename, f.name, f.size, f.created_at"#,
         )
         .bind(id)
         .bind(user_id)
