@@ -3,6 +3,7 @@ import {
   deleteFile,
   getFile,
   getFiles,
+  renameFile,
   uploadFile,
   type ProgressCallback,
 } from "@/api/files";
@@ -45,6 +46,23 @@ export const uploadFileOptions = mutationOptions({
         context.client.invalidateQueries({
           queryKey: collectionFilesOptions(variables.collectionId).queryKey,
         }),
+    ]);
+  },
+});
+
+export const renameFileOptions = mutationOptions({
+  mutationFn: ({ id, name }: { id: string; name: string }) =>
+    renameFile(id, name),
+  onSuccess: async (_, _variables, _mutateResult, context) => {
+    await Promise.all([
+      context.client.invalidateQueries({
+        queryKey: filesOptions.queryKey,
+        exact: true,
+      }),
+      context.client.invalidateQueries({
+        predicate: (query) =>
+          query.queryKey[0] === "collections" && query.queryKey[2] === "files",
+      }),
     ]);
   },
 });

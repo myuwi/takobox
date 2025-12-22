@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { isAxiosError, type AxiosError } from "axios";
+import { useAtom } from "jotai";
 import { useForm } from "react-hook-form";
-import { renameCollectionOptions } from "@/queries/collections";
-import type { CollectionDto } from "@/types/CollectionDto";
+import { renameDialogAtom } from "@/atoms/dialogs";
 import { formatError } from "@/utils/error";
 import { Alert } from "./primitives/Alert";
 import { Button } from "./primitives/Button";
@@ -10,69 +10,63 @@ import * as Dialog from "./primitives/Dialog";
 import { Input } from "./primitives/Input";
 import { Label } from "./primitives/Label";
 
-interface RenameCollectionDialogProps {
-  collection: CollectionDto;
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  focusRef: React.RefObject<HTMLElement | null>;
-}
+export const RenameDialog = () => {
+  const [open, setOpen] = useState(false);
+  const [renameDialog, setRenameDialog] = useAtom(renameDialogAtom);
+  const [error, setError] = useState<AxiosError>();
+  const isError = !!error;
 
-export const RenameCollectionDialog = ({
-  collection,
-  open,
-  setOpen,
-  focusRef,
-}: RenameCollectionDialogProps) => {
   const { register, handleSubmit, reset, watch } = useForm<{
     name: string;
   }>({
     values: {
-      name: collection.name,
+      name: renameDialog?.initialValue ?? "",
     },
   });
 
-  const {
-    mutateAsync: renameCollection,
-    isError,
-    error,
-  } = useMutation(renameCollectionOptions);
-
-  const [showError, setShowError] = useState(false);
-
-  const handleCleanup = (open: boolean) => {
+  const handleOpenChangeComplete = (open: boolean) => {
     if (!open) {
       reset();
-      setShowError(false);
+      setError(undefined);
+      setRenameDialog(null);
     }
   };
+
+  useEffect(() => {
+    setOpen(!!renameDialog);
+  }, [renameDialog]);
 
   const onSubmit = async (values: { name: string }) => {
     try {
-      await renameCollection({ id: collection.id, name: values.name });
+      await renameDialog?.callback(values.name);
       setOpen(false);
-    } catch (_) {
-      setShowError(true);
+    } catch (err) {
+      if (isAxiosError(err)) {
+        setError(err);
+      } else {
+        console.error(err);
+      }
     }
   };
 
-  const name = watch("name", collection.name);
+  const name = watch("name");
   const disabled =
-    (isError && showError) || name === collection.name || name === "";
+    isError || name === renameDialog?.initialValue || name === "";
 
   return (
     <Dialog.Root
       open={open}
       onOpenChange={setOpen}
-      onOpenChangeComplete={handleCleanup}
+      onOpenChangeComplete={handleOpenChangeComplete}
     >
-      <Dialog.Content finalFocus={focusRef}>
+      <Dialog.Content finalFocus={renameDialog?.focusRef}>
         <form
           className="contents"
           onSubmit={handleSubmit(onSubmit)}
-          onChange={() => setShowError(false)}
+          onChange={() => setError(undefined)}
         >
           <Dialog.Header>
-            <Dialog.Title>Rename collection</Dialog.Title>
+            <Dialog.Title>{renameDialog?.title}</Dialog.Title>
           </Dialog.Header>
 
           <div>
@@ -81,11 +75,11 @@ export const RenameCollectionDialog = ({
               <Input
                 {...register("name", { required: true })}
                 type="text"
-                placeholder="Collection name"
+                placeholder={renameDialog?.placeholder ?? "Name"}
                 autoComplete="off"
-                aria-invalid={showError && isError}
+                aria-invalid={isError}
               />
-              {isError && showError && <Alert>{formatError(error)}</Alert>}
+              {isError && <Alert>{formatError(error)}</Alert>}
             </Label>
           </div>
 

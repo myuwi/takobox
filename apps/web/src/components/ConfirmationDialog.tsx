@@ -23,8 +23,8 @@ export const ConfirmationDialog = () => {
   };
 
   useEffect(() => {
-    setOpen(!!confirmationDialog?.callback);
-  }, [confirmationDialog?.callback]);
+    setOpen(!!confirmationDialog);
+  }, [confirmationDialog]);
 
   return (
     <Dialog.Root

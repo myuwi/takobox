@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { isAxiosError, type AxiosError } from "axios";
 import { Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { createCollectionOptions } from "@/queries/collections";
@@ -11,22 +12,22 @@ import { Input } from "./primitives/Input";
 import { Label } from "./primitives/Label";
 
 export const CreateCollectionDialog = () => {
-  const { register, handleSubmit, reset } = useForm<{ name: string }>();
-
-  const {
-    mutateAsync: createCollection,
-    isError,
-    error,
-  } = useMutation(createCollectionOptions);
-
-  const [showError, setShowError] = useState(false);
-
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState<AxiosError>();
+  const isError = !!error;
+
+  const { register, handleSubmit, reset, watch } = useForm<{ name: string }>({
+    values: { name: "" },
+  });
+
+  const { mutateAsync: createCollection } = useMutation(
+    createCollectionOptions,
+  );
 
   const handleCleanup = (open: boolean) => {
     if (!open) {
       reset();
-      setShowError(false);
+      setError(undefined);
     }
   };
 
@@ -34,12 +35,17 @@ export const CreateCollectionDialog = () => {
     try {
       await createCollection(values.name);
       setOpen(false);
-    } catch (_) {
-      setShowError(true);
+    } catch (err) {
+      if (isAxiosError(err)) {
+        setError(err);
+      } else {
+        console.error(err);
+      }
     }
   };
 
-  const disabled = isError && showError;
+  const name = watch("name");
+  const disabled = isError || name === "";
 
   return (
     <Dialog.Root
@@ -58,7 +64,7 @@ export const CreateCollectionDialog = () => {
         <form
           className="contents"
           onSubmit={handleSubmit(onSubmit)}
-          onChange={() => setShowError(false)}
+          onChange={() => setError(undefined)}
         >
           <Dialog.Header>
             <Dialog.Title>Create new collection</Dialog.Title>
@@ -72,9 +78,9 @@ export const CreateCollectionDialog = () => {
                 type="text"
                 placeholder="Collection name"
                 autoComplete="off"
-                aria-invalid={showError && isError}
+                aria-invalid={isError}
               />
-              {isError && showError && <Alert>{formatError(error)}</Alert>}
+              {isError && <Alert>{formatError(error)}</Alert>}
             </Label>
           </div>
 

@@ -40,7 +40,7 @@ async fn create(
 
     if name.is_empty() {
         return Err(Error::UnprocessableEntity(
-            "Collection name must not be empty",
+            "Collection name must not be empty.",
         ));
     }
 

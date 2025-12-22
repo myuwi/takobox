@@ -9,3 +9,13 @@ interface ConfirmationDialogAtom {
 }
 
 export const confirmationDialogAtom = atom<ConfirmationDialogAtom | null>(null);
+
+interface RenameDialogAtom {
+  title: string;
+  placeholder: string;
+  initialValue: string;
+  callback: (name: string) => void | Promise<void>;
+  focusRef?: React.RefObject<HTMLElement | null>;
+}
+
+export const renameDialogAtom = atom<RenameDialogAtom | null>(null);

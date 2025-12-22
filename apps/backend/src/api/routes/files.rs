@@ -7,9 +7,11 @@ use axum::{
     extract::{DefaultBodyLimit, Multipart, Path, State},
     http::StatusCode,
     response::IntoResponse,
-    routing::{delete, get, post},
+    routing::{delete, get, patch, post},
 };
 use axum_extra::response::FileStream;
+use sanitize_filename::is_sanitized;
+use serde::Deserialize;
 use tokio::io::AsyncWriteExt;
 use tokio_util::io::ReaderStream;
 use tracing::error;
@@ -147,6 +149,49 @@ async fn create(
     Ok(Json(file))
 }
 
+#[derive(Debug, Deserialize)]
+pub struct RenameFilePayload {
+    pub name: String,
+}
+
+async fn rename(
+    State(AppState { pool, .. }): State<AppState>,
+    session: Session,
+    Path(file_id): Path<Uid>,
+    Json(body): Json<RenameFilePayload>,
+) -> Result<impl IntoResponse, Error> {
+    let name = body.name.trim();
+
+    if name.is_empty() {
+        return Err(Error::UnprocessableEntity("File name must not be empty."));
+    }
+
+    if !is_sanitized(name) {
+        return Err(Error::UnprocessableEntity(
+            "File name contains invalid characters.",
+        ));
+    }
+
+    let file = File::get_by_public_id(&pool, session.user_id, &file_id)
+        .await?
+        .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
+
+    let old_ext = std::path::Path::new(&file.filename).extension();
+    let new_ext = std::path::Path::new(&name).extension();
+
+    if old_ext != new_ext {
+        return Err(Error::UnprocessableEntity(
+            "New file extension much match the old one.",
+        ));
+    }
+
+    let file = File::rename(&pool, session.user_id, &file_id, name)
+        .await?
+        .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
+
+    Ok(Json(file))
+}
+
 async fn remove(
     State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
@@ -229,6 +274,7 @@ pub fn routes(state: &AppState) -> Router<AppState> {
             "/",
             post(create).layer(DefaultBodyLimit::max(settings.max_file_size)),
         )
+        .route("/{id}", patch(rename))
         .route("/{id}", delete(remove))
         .route("/{id}/download", get(download))
         .route("/{id}/regenerate-thumbnail", post(regenerate_thumbnail))

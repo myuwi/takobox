@@ -74,6 +74,25 @@ impl File {
         .await
     }
 
+    pub async fn rename(
+        conn: impl SqliteExecutor<'_>,
+        user_id: i64,
+        id: &Uid,
+        name: &str,
+    ) -> Result<Option<File>, sqlx::Error> {
+        sqlx::query_as(
+            "update files
+            set name = $1
+            where public_id = $2 and user_id = $3
+            returning *",
+        )
+        .bind(name)
+        .bind(id)
+        .bind(user_id)
+        .fetch_optional(conn)
+        .await
+    }
+
     pub async fn delete(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,

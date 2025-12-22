@@ -38,6 +38,11 @@ export const uploadFile = async (
   return data;
 };
 
+export const renameFile = async (id: string, name: string) => {
+  const { data } = await client.patch(`files/${id}`, { name });
+  return data;
+};
+
 export const deleteFile = async (id: string) => {
   const { data } = await client.delete(`files/${id}`);
   return data;

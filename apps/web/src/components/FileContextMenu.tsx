@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useMutationState, useQuery } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 import {
@@ -6,18 +6,23 @@ import {
   EllipsisVertical,
   FolderPlus,
   LinkIcon,
+  PencilLine,
   RefreshCcw,
   Trash,
 } from "lucide-react";
 import { regenerateThumbnail } from "@/api/files";
-import { confirmationDialogAtom } from "@/atoms/dialogs";
+import { confirmationDialogAtom, renameDialogAtom } from "@/atoms/dialogs";
 import { selectedFilesAtom } from "@/atoms/selected-files";
 import {
   addFileToCollectionOptions,
   collectionsOptions,
   removeFileFromCollectionOptions,
 } from "@/queries/collections";
-import { deleteFileOptions, fileOptions } from "@/queries/files";
+import {
+  deleteFileOptions,
+  fileOptions,
+  renameFileOptions,
+} from "@/queries/files";
 import type { FileDto } from "@/types/FileDto";
 import { copyToClipboard } from "@/utils/clipboard";
 import { stopPropagation } from "@/utils/event";
@@ -36,13 +41,16 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
   const setSelectedFiles = useSetAtom(selectedFilesAtom);
   const { mutateAsync: deleteFile } = useMutation(deleteFileOptions);
 
-  const confirm = useSetAtom(confirmationDialogAtom);
+  const setConfirmDialog = useSetAtom(confirmationDialogAtom);
+  const setRenameDialog = useSetAtom(renameDialogAtom);
 
   const { data: fileCollections = [] } = useQuery({
     ...fileOptions(file.id),
     select: (file) => file.collections,
     enabled: open,
   });
+
+  const { mutateAsync: renameFile } = useMutation(renameFileOptions);
 
   const { mutateAsync: addToCollection } = useMutation(
     addFileToCollectionOptions,
@@ -98,12 +106,18 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
       });
   };
 
+  const handleRename = async (name: string) => {
+    await renameFile({ id: file.id, name });
+  };
+
   const handleDelete = async () => {
     await deleteFile(file.id);
     setSelectedFiles((selectedFiles) =>
       selectedFiles.filter((f) => f !== file),
     );
   };
+
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
     <Menu.Root open={open} onOpenChange={handleOpenChange} modal={false}>
@@ -119,6 +133,7 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
             <EllipsisVertical className="size-4" />
           </Button>
         }
+        ref={menuTriggerRef}
       />
       <Menu.Content align="end">
         <Menu.Group>
@@ -177,6 +192,22 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
             </Menu.SubContent>
           </Menu.Sub>
           <Menu.Item
+            // Use a timeout to get around focus fuckery
+            onClick={() =>
+              setTimeout(() => {
+                setRenameDialog({
+                  title: "Rename file",
+                  placeholder: "File name",
+                  initialValue: file.name,
+                  callback: handleRename,
+                });
+              }, 0)
+            }
+          >
+            <PencilLine />
+            <span>Rename</span>
+          </Menu.Item>
+          <Menu.Item
             onClick={handleRegenerateThumbnail}
             disabled={!thumbnailPath}
           >
@@ -187,7 +218,7 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
             variant="destructive"
             onClick={() =>
               setTimeout(() => {
-                confirm({
+                setConfirmDialog({
                   title: "Delete file?",
                   description: `Are you sure you want to delete the file "${file.name}"? This cannot be undone.`,
                   confirmText: "Delete File",
