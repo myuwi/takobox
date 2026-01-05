@@ -9,12 +9,10 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 import { Dialogs } from "@/components/Dialogs";
-import { RenameDialog } from "@/components/RenameDialog";
 import { meOptions } from "@/queries/me";
 import { settingsOptions } from "@/queries/settings";
-import css from "../styles.css?inline";
+import css from "../styles.css?url";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -33,12 +31,12 @@ export const Route = createRootRouteWithContext<{
     ],
     links: [
       { rel: "icon", href: "/favicon.ico" },
+      { rel: "stylesheet", href: css },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap",
       },
     ],
-    styles: [{ children: css }],
   }),
   component: Root,
 });
