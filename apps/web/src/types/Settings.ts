@@ -1,4 +1,4 @@
 export type Settings = {
-  enableAccountCreation: bool;
+  enableAccountCreation: boolean;
   maxFileSize: number;
 };
