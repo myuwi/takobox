@@ -133,7 +133,7 @@ export const GroupLabel = ({
   />
 );
 
-export const Separator = tw(MenuPrimitive.Separator)`-mx-1 my-1 h-px bg-muted`;
+export const Separator = tw(MenuPrimitive.Separator)`-mx-1 my-1 h-px bg-border`;
 
 export const Shortcut = tw.span`ml-auto text-xs tracking-widest opacity-60`;
 

@@ -28,6 +28,10 @@ export const Sidebar = () => {
 
   const sidebar = (
     <div className="flex w-54 shrink-0 flex-col gap-4">
+      <Link to="/" className="flex h-9 items-center text-xl md:hidden">
+        Tako<span className="text-primary">box</span>
+      </Link>
+
       <input {...getInputProps()} />
       <Button size="lg" onClick={open}>
         <Plus />
@@ -94,7 +98,7 @@ export const Sidebar = () => {
 
       {/* Mobile Sidebar */}
       <Sheet.Root open={openMobile} onOpenChange={setOpenMobile}>
-        <Sheet.Content side="left" className="w-auto px-4 py-8 md:hidden">
+        <Sheet.Content side="left" className="w-auto p-4 md:hidden">
           {sidebar}
         </Sheet.Content>
       </Sheet.Root>

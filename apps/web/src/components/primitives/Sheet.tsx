@@ -21,12 +21,12 @@ const sheetVariants = cva(
   {
     variants: {
       side: {
-        top: "inset-x-0 top-0 h-auto origin-top data-ending-style:-translate-y-full data-starting-style:-translate-y-full",
-        left: "inset-y-0 left-0 h-full w-3/4 origin-left data-ending-style:-translate-x-full data-starting-style:-translate-x-full sm:max-w-sm",
+        top: "inset-x-0 top-0 h-auto origin-top rounded-b-lg data-ending-style:-translate-y-full data-starting-style:-translate-y-full",
+        left: "inset-y-0 left-0 h-full w-3/4 origin-left rounded-r-lg data-ending-style:-translate-x-full data-starting-style:-translate-x-full sm:max-w-sm",
         right:
-          "inset-y-0 right-0 h-full w-3/4 origin-right data-ending-style:translate-x-full data-starting-style:translate-x-full sm:max-w-sm",
+          "inset-y-0 right-0 h-full w-3/4 origin-right rounded-l-lg data-ending-style:translate-x-full data-starting-style:translate-x-full sm:max-w-sm",
         bottom:
-          "inset-x-0 bottom-0 h-auto origin-bottom data-ending-style:translate-y-full data-starting-style:translate-y-full",
+          "inset-x-0 bottom-0 h-auto origin-bottom rounded-t-lg data-ending-style:translate-y-full data-starting-style:translate-y-full",
       },
     },
     defaultVariants: {
@@ -45,7 +45,7 @@ export function Content({
 }) {
   return (
     <Portal>
-      <Backdrop />
+      <Backdrop forceRender />
       <SheetPrimitive.Popup
         className={cn(sheetVariants({ side }), className)}
         {...props}
