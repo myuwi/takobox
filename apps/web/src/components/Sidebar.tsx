@@ -11,6 +11,7 @@ import { collectionsOptions } from "@/queries/collections";
 import { tw } from "@/utils/tw";
 import { CollectionMenu } from "./CollectionMenu";
 import { CreateCollectionDialog } from "./CreateCollectionDialog";
+import { Logo } from "./Logo";
 
 const SidebarContent = tw.div`flex flex-col gap-4`;
 const SidebarGroup = tw.div`flex flex-col gap-1`;
@@ -27,9 +28,9 @@ export const Sidebar = () => {
   });
 
   const sidebar = (
-    <div className="flex w-54 shrink-0 flex-col gap-4">
-      <Link to="/" className="flex h-9 items-center text-xl md:hidden">
-        Tako<span className="text-primary">box</span>
+    <div className="flex w-54 shrink-0 flex-col gap-4 py-4">
+      <Link to="/" className="flex h-9 items-center">
+        <Logo />
       </Link>
 
       <input {...getInputProps()} />
@@ -98,7 +99,7 @@ export const Sidebar = () => {
 
       {/* Mobile Sidebar */}
       <Sheet.Root open={openMobile} onOpenChange={setOpenMobile}>
-        <Sheet.Content side="left" className="w-auto p-4 md:hidden">
+        <Sheet.Content side="left" className="w-auto px-4 md:hidden">
           {sidebar}
         </Sheet.Content>
       </Sheet.Root>

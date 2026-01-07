@@ -85,7 +85,7 @@ function RouteComponent() {
   const headerText = (collectionId && collection?.name) || "All files";
 
   return (
-    <main className="flex w-full flex-col gap-4 [&_>_*]:mx-4">
+    <main className="flex h-full w-full flex-col gap-4 [&_>_*]:mx-4">
       <h1 className="text-base font-medium">{headerText}</h1>
 
       {/* TODO: replace with a list of rejected files. also show failed uploads there */}
