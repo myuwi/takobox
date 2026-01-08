@@ -85,7 +85,7 @@ function RouteComponent() {
   const headerText = (collectionId && collection?.name) || "All files";
 
   return (
-    <main className="flex h-full w-full flex-col gap-4 [&_>_*]:mx-4">
+    <main className="flex h-full w-full flex-col gap-4 px-2 pb-4 max-md:px-4 [&_>_*]:mx-2">
       <h1 className="text-base font-medium">{headerText}</h1>
 
       {/* TODO: replace with a list of rejected files. also show failed uploads there */}
@@ -143,7 +143,7 @@ function RouteComponent() {
         </div>
       ) : (
         <div
-          className="mx-0! -mt-2 flex w-full grow flex-col items-center justify-center gap-3 overflow-hidden rounded-md inset-ring inset-ring-transparent data-[dragging=true]:bg-accent data-[dragging=true]:inset-ring-border"
+          className="-mx-0! -mt-2 flex w-full grow flex-col items-center justify-center overflow-hidden rounded-md inset-ring inset-ring-transparent data-[dragging=true]:bg-accent data-[dragging=true]:inset-ring-border"
           data-dragging={isDragActive}
           {...getRootProps()}
         >

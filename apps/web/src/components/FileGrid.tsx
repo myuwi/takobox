@@ -9,15 +9,20 @@ import { useAtom } from "jotai";
 import { Check, File } from "lucide-react";
 import { selectedFilesAtom } from "@/atoms/selected-files";
 import type { FileDto } from "@/types/FileDto";
+import { cn } from "@/utils/cn";
 import { stopPropagation } from "@/utils/event";
 import { formatBytes, getThumbnailPath } from "@/utils/files";
 import { FileContextMenu } from "./FileContextMenu";
 
 interface SelectedFilesIndicatorProps {
+  className?: string;
   files: FileDto[];
 }
 
-const SelectedFilesIndicator = ({ files }: SelectedFilesIndicatorProps) => {
+const SelectedFilesIndicator = ({
+  className,
+  files,
+}: SelectedFilesIndicatorProps) => {
   if (!files[0]) return null;
 
   const totalBytes = files.reduce((acc, file) => acc + file.size, 0);
@@ -27,7 +32,7 @@ const SelectedFilesIndicator = ({ files }: SelectedFilesIndicatorProps) => {
   const text = `${identifier} selected (${formatBytes(totalBytes)})`;
 
   return (
-    <div className="absolute right-1 bottom-1 rounded-md bg-accent px-2 py-1">
+    <div className={cn("rounded-md bg-accent px-2 py-1", className)}>
       {text}
     </div>
   );
@@ -82,9 +87,9 @@ export const FileGrid = ({ files }: FileGridProps) => {
   };
 
   return (
-    <div className="relative h-full w-full" onClick={handleGridClick}>
+    <div className="relative w-full grow" onClick={handleGridClick}>
       <div
-        className="group/grid grid h-full w-full grid-cols-[repeat(auto-fill,10rem)] content-start justify-around gap-2 overflow-auto p-2"
+        className="group/grid absolute inset-0 grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] content-start justify-around gap-2 overflow-auto p-2"
         data-selecting={selectedFiles.length > 0}
       >
         {files.map((file) => {
@@ -136,7 +141,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
           return (
             <div
               key={file.id}
-              className="group flex h-min w-40 cursor-pointer flex-col items-center rounded-md p-2 select-none hover:bg-accent/50 aria-selected:bg-accent"
+              className="group flex h-min cursor-pointer flex-col items-center rounded-md p-2 select-none hover:bg-accent/50 aria-selected:bg-accent"
               role="gridcell"
               tabIndex={0}
               aria-selected={selected}
@@ -165,7 +170,10 @@ export const FileGrid = ({ files }: FileGridProps) => {
           );
         })}
       </div>
-      <SelectedFilesIndicator files={selectedFiles} />
+      <SelectedFilesIndicator
+        className="absolute right-1 bottom-1"
+        files={selectedFiles}
+      />
     </div>
   );
 };

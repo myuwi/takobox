@@ -28,8 +28,8 @@ export const Sidebar = () => {
   });
 
   const sidebar = (
-    <div className="flex w-54 shrink-0 flex-col gap-4 py-4">
-      <Link to="/" className="flex h-9 items-center">
+    <div className="flex w-62 shrink-0 flex-col gap-4 p-4">
+      <Link to="/" className="flex h-9 items-center self-start">
         <Logo />
       </Link>
 
@@ -99,7 +99,7 @@ export const Sidebar = () => {
 
       {/* Mobile Sidebar */}
       <Sheet.Root open={openMobile} onOpenChange={setOpenMobile}>
-        <Sheet.Content side="left" className="w-auto px-4 md:hidden">
+        <Sheet.Content side="left" className="w-auto md:hidden">
           {sidebar}
         </Sheet.Content>
       </Sheet.Root>
