@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
@@ -35,15 +35,20 @@ export const Route = createFileRoute("/(app)/(dashboard)/home")({
 
 function RouteComponent() {
   const navigate = Route.useNavigate();
-  const { collection: collectionId } = Route.useSearch();
+  const { collection: collectionId, q } = Route.useSearch();
   const { data: settings } = useQuery(settingsOptions);
   const {
-    data: files,
+    data: rawFiles,
     isPending,
     error,
   } = useQuery(
     !collectionId ? filesOptions : collectionFilesOptions(collectionId),
   );
+  // TODO: Move filtering to the server when pagination is implemented
+  const files = useMemo(() => {
+    return q ? rawFiles?.filter((f) => f.name.includes(q)) : rawFiles;
+  }, [rawFiles, q]);
+
   const { data: collection } = useQuery({
     ...collectionsOptions,
     select: (collections) => collections.find((c) => c.id === collectionId),
@@ -75,6 +80,10 @@ function RouteComponent() {
       resetFileRejections();
     };
   }, [collectionId, resetFileRejections, setSelectedFiles]);
+
+  useEffect(() => {
+    return () => setSelectedFiles([]);
+  }, [q, setSelectedFiles]);
 
   const { open, getInputProps, getRootProps, isDragActive } = useDropzone({
     onDrop: (files) => uploadFiles(files, collectionId),
@@ -152,11 +161,17 @@ function RouteComponent() {
             <FileGrid files={files} />
           ) : (
             <div className="mt-24 flex w-full grow flex-col items-center gap-3 rounded-md p-4">
-              <CloudUpload />
-              <p>Drag and drop or browse files to upload</p>
-              <Button variant="outline" onClick={open}>
-                Browse files
-              </Button>
+              {q ? (
+                <p>No files matching "{q}" were found.</p>
+              ) : (
+                <>
+                  <CloudUpload />
+                  <p>Drag and drop or browse files to upload</p>
+                  <Button variant="outline" onClick={open}>
+                    Browse files
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </div>
