@@ -46,4 +46,4 @@ export const Footer = tw.div`flex flex-col-reverse gap-2 sm:flex-row sm:justify-
 
 export const Title = tw(DialogPrimitive.Title)`text-lg leading-none font-semibold`;
 
-export const Description = tw(DialogPrimitive.Description)`text-muted-foreground text-sm`;
+export const Description = tw(DialogPrimitive.Description)`text-sm text-muted-foreground`;

@@ -6,23 +6,19 @@ import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-export default defineConfig(({ mode }) => {
-  const isProd = mode === "production";
-
-  return {
-    plugins: [
-      devtools(),
-      tsconfigPaths({
-        projects: ["./tsconfig.json"],
-      }),
-      tailwindcss(),
-      tanstackStart({
-        router: {
-          routeToken: "_layout",
-        },
-      }),
-      react(),
-      isProd && nitro({ config: { preset: "bun" } }),
-    ],
-  };
+export default defineConfig({
+  plugins: [
+    devtools(),
+    tsconfigPaths({
+      projects: ["./tsconfig.json"],
+    }),
+    tailwindcss(),
+    tanstackStart({
+      router: {
+        routeToken: "_layout",
+      },
+    }),
+    react(),
+    nitro({ preset: "bun" }),
+  ],
 });

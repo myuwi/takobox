@@ -51,13 +51,13 @@ const appdashboardHomeRoute = appdashboardHomeRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof appdashboardLayoutRouteWithChildren
+  '/': typeof IndexRoute
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
   '/home': typeof appdashboardHomeRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof appdashboardLayoutRouteWithChildren
+  '/': typeof IndexRoute
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
   '/home': typeof appdashboardHomeRoute
@@ -98,15 +98,15 @@ declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/(auth)': {
       id: '/(auth)'
-      path: '/'
-      fullPath: '/'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof authLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(app)': {
       id: '/(app)'
-      path: '/'
-      fullPath: '/'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof appLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -133,8 +133,8 @@ declare module '@tanstack/react-router' {
     }
     '/(app)/(dashboard)': {
       id: '/(app)/(dashboard)'
-      path: '/'
-      fullPath: '/'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof appdashboardLayoutRouteImport
       parentRoute: typeof appLayoutRoute
     }

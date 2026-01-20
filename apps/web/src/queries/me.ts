@@ -9,11 +9,7 @@ const getMe = createServerFn().handler(async () => {
     return null;
   }
 
-  try {
-    return await me();
-  } catch (_) {
-    return null;
-  }
+  return await me();
 });
 
 export const meOptions = queryOptions({
