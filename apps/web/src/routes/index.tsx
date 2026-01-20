@@ -1,9 +1,16 @@
+import { createServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/primitives/Button";
 import { meOptions } from "@/queries/me";
 import { settingsOptions } from "@/queries/settings";
+
+const getRuntimeSettings = createServerFn({ method: "GET" }).handler(() => {
+  return {
+    disableLandingPage: process.env.TAKOBOX_DISABLE_LANDING_PAGE === "true",
+  };
+});
 
 export const Route = createFileRoute("/")({
   component: App,
@@ -13,7 +20,8 @@ export const Route = createFileRoute("/")({
       throw redirect({ to: "/home" });
     }
 
-    if (import.meta.env.TAKOBOX_DISABLE_LANDING_PAGE) {
+    const { disableLandingPage } = await getRuntimeSettings();
+    if (disableLandingPage) {
       throw redirect({ to: "/login" });
     }
   },
