@@ -1,8 +1,6 @@
 export default {
-  plugins: [
-    "@ianvs/prettier-plugin-sort-imports",
-    "prettier-plugin-tailwindcss",
-  ],
+  printWidth: 100,
+  plugins: ["@ianvs/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"],
   importOrder: [
     "<BUILTIN_MODULES>",
     "^react(-dom)?(/.+)?$",
@@ -12,6 +10,6 @@ export default {
     "^@/",
     "^[.]",
   ],
-  tailwindStylesheet: "./src/styles.css",
+  tailwindStylesheet: "./src/index.css",
   tailwindFunctions: ["cva", "tw"],
 };

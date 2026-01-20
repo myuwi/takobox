@@ -37,17 +37,9 @@ function App() {
         <h1 className="text-center text-4xl">
           A <span className="text-primary">simpler</span> file upload service
         </h1>
-        <h2 className="text-base text-zinc-600">
-          Lightweight, self-hostable and blazingly fast.
-        </h2>
+        <h2 className="text-base text-zinc-600">Lightweight, self-hostable and blazingly fast.</h2>
         <div className="flex flex-row gap-4">
-          <Button
-            render={
-              <Link
-                to={settings?.enableAccountCreation ? "/signup" : "/login"}
-              />
-            }
-          >
+          <Button render={<Link to={settings?.enableAccountCreation ? "/signup" : "/login"} />}>
             Get started
           </Button>
         </div>

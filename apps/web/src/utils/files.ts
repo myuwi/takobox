@@ -13,9 +13,7 @@ export const formatBytes = (bytes: number) => {
 };
 
 export const getThumbnailPath = (filename: string) => {
-  const supportsThumbnail = thumbnailExtensions.some((ext) =>
-    filename.endsWith(`.${ext}`),
-  );
+  const supportsThumbnail = thumbnailExtensions.some((ext) => filename.endsWith(`.${ext}`));
 
   if (!supportsThumbnail) return undefined;
 

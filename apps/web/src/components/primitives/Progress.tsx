@@ -9,10 +9,7 @@ export function Progress({
   return (
     <ProgressPrimitive.Root className="relative w-full" {...props}>
       <ProgressPrimitive.Track
-        className={cn(
-          "h-2 w-full overflow-hidden rounded-full bg-accent",
-          className,
-        )}
+        className={cn("h-2 w-full overflow-hidden rounded-full bg-accent", className)}
       >
         <ProgressPrimitive.Indicator className="h-full bg-primary transition-all" />
       </ProgressPrimitive.Track>

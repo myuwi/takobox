@@ -52,9 +52,7 @@ export const useUploads = () => {
         const progress = event.progress ? Math.round(event.progress * 100) : 0;
 
         setUploads((prevUploads) => {
-          return prevUploads?.map((f) =>
-            f.file === file ? { ...f, progress: progress ?? 0 } : f,
-          );
+          return prevUploads?.map((f) => (f.file === file ? { ...f, progress: progress ?? 0 } : f));
         });
       },
     });
@@ -67,9 +65,7 @@ export const useUploads = () => {
   };
 
   const uploadFiles = async (files: File[], collectionId?: string) => {
-    const rejectedFiles = files.filter(
-      (file) => file.size > settings!.maxFileSize,
-    );
+    const rejectedFiles = files.filter((file) => file.size > settings!.maxFileSize);
     if (rejectedFiles.length > 0) {
       return setFileRejections(rejectedFiles);
     }
@@ -78,7 +74,7 @@ export const useUploads = () => {
     // TODO: check quota before upload
 
     for (const file of files) {
-      handleUpload(file, collectionId);
+      void handleUpload(file, collectionId);
     }
   };
 

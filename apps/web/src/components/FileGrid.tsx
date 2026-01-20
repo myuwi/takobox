@@ -1,10 +1,4 @@
-import {
-  useLayoutEffect,
-  useRef,
-  useState,
-  type KeyboardEvent,
-  type MouseEvent,
-} from "react";
+import { useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import { useAtom } from "jotai";
 import { Check, File } from "lucide-react";
 import { selectedFilesAtom } from "@/atoms/selected-files";
@@ -19,23 +13,15 @@ interface SelectedFilesIndicatorProps {
   files: FileDto[];
 }
 
-const SelectedFilesIndicator = ({
-  className,
-  files,
-}: SelectedFilesIndicatorProps) => {
+const SelectedFilesIndicator = ({ className, files }: SelectedFilesIndicatorProps) => {
   if (!files[0]) return null;
 
   const totalBytes = files.reduce((acc, file) => acc + file.size, 0);
-  const identifier =
-    files.length > 1 ? `${files.length} files` : `"${files[0].name}"`;
+  const identifier = files.length > 1 ? `${files.length} files` : `"${files[0].name}"`;
 
   const text = `${identifier} selected (${formatBytes(totalBytes)})`;
 
-  return (
-    <div className={cn("rounded-md bg-accent px-2 py-1", className)}>
-      {text}
-    </div>
-  );
+  return <div className={cn("rounded-md bg-accent px-2 py-1", className)}>{text}</div>;
 };
 
 interface FileThumbnailProps {
@@ -160,20 +146,14 @@ export const FileGrid = ({ files }: FileGridProps) => {
                 </span>
                 <FileContextMenu file={file} onOpen={handleMenuOpen} />
               </div>
-              <span
-                className="line-clamp-1 px-1 text-center break-all"
-                title={file.name}
-              >
+              <span className="line-clamp-1 px-1 text-center break-all" title={file.name}>
                 {file.name}
               </span>
             </div>
           );
         })}
       </div>
-      <SelectedFilesIndicator
-        className="absolute right-1 bottom-1"
-        files={selectedFiles}
-      />
+      <SelectedFilesIndicator className="absolute right-1 bottom-1" files={selectedFiles} />
     </div>
   );
 };

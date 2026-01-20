@@ -26,11 +26,7 @@ export const Content = ({
 }) => {
   return (
     <MenuPrimitive.Portal>
-      <MenuPrimitive.Positioner
-        align={align}
-        sideOffset={sideOffset}
-        className="z-50"
-      >
+      <MenuPrimitive.Positioner align={align} sideOffset={sideOffset} className="z-50">
         <MenuPrimitive.Popup
           className={cn(
             "max-h-(--available-height) min-w-[8rem] origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
@@ -125,10 +121,7 @@ export const GroupLabel = ({
 }) => (
   <MenuPrimitive.GroupLabel
     data-inset={inset}
-    className={cn(
-      "px-2 py-1.5 text-sm font-medium data-[inset]:pl-8",
-      className,
-    )}
+    className={cn("px-2 py-1.5 text-sm font-medium data-[inset]:pl-8", className)}
     {...props}
   />
 );
@@ -137,9 +130,7 @@ export const Separator = tw(MenuPrimitive.Separator)`-mx-1 my-1 h-px bg-border`;
 
 export const Shortcut = tw.span`ml-auto text-xs tracking-widest opacity-60`;
 
-export const Sub = ({
-  ...props
-}: React.ComponentProps<typeof MenuPrimitive.SubmenuRoot>) => {
+export const Sub = ({ ...props }: React.ComponentProps<typeof MenuPrimitive.SubmenuRoot>) => {
   return <MenuPrimitive.SubmenuRoot closeDelay={0} delay={0} {...props} />;
 };
 

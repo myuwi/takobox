@@ -7,9 +7,7 @@ import * as Dialog from "./primitives/Dialog";
 export const ConfirmationDialog = () => {
   const [open, setOpen] = useState(false);
 
-  const [confirmationDialog, setConfirmationDialog] = useAtom(
-    confirmationDialogAtom,
-  );
+  const [confirmationDialog, setConfirmationDialog] = useAtom(confirmationDialogAtom);
 
   const handleConfirm = async () => {
     await confirmationDialog?.callback();
@@ -27,23 +25,15 @@ export const ConfirmationDialog = () => {
   }, [confirmationDialog]);
 
   return (
-    <Dialog.Root
-      open={open}
-      onOpenChange={setOpen}
-      onOpenChangeComplete={handleOpenChangeComplete}
-    >
+    <Dialog.Root open={open} onOpenChange={setOpen} onOpenChangeComplete={handleOpenChangeComplete}>
       <Dialog.Content finalFocus={confirmationDialog?.focusRef}>
         <Dialog.Header>
           <Dialog.Title>{confirmationDialog?.title}</Dialog.Title>
-          <Dialog.Description>
-            {confirmationDialog?.description}
-          </Dialog.Description>
+          <Dialog.Description>{confirmationDialog?.description}</Dialog.Description>
         </Dialog.Header>
 
         <Dialog.Footer>
-          <Dialog.Close render={<Button variant="outline" />}>
-            Cancel
-          </Dialog.Close>
+          <Dialog.Close render={<Button variant="outline" />}>Cancel</Dialog.Close>
           <Button variant="destructive" onClick={handleConfirm}>
             {confirmationDialog?.confirmText ?? "Confirm"}
           </Button>

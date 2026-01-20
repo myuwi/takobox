@@ -4,6 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
 import { CloudUpload, X } from "lucide-react";
 import { useDropzone } from "react-dropzone";
+import * as z from "zod";
 import { selectedFilesAtom } from "@/atoms/selected-files";
 import { FileGrid } from "@/components/FileGrid";
 import { Alert } from "@/components/primitives/Alert";
@@ -11,26 +12,18 @@ import { Button } from "@/components/primitives/Button";
 import { Progress } from "@/components/primitives/Progress";
 import { Spinner } from "@/components/primitives/Spinner";
 import { useUploads } from "@/hooks/useUploads";
-import {
-  collectionFilesOptions,
-  collectionsOptions,
-} from "@/queries/collections";
+import { collectionFilesOptions, collectionsOptions } from "@/queries/collections";
 import { filesOptions } from "@/queries/files";
 import { settingsOptions } from "@/queries/settings";
 import { formatBytes } from "@/utils/files";
 
-interface HomeSearchParams {
-  collection?: string;
-}
+const homeSearchSchema = z.object({
+  collection: z.string().optional().catch(undefined),
+});
 
 export const Route = createFileRoute("/(app)/(dashboard)/home")({
   component: RouteComponent,
-  validateSearch: (search: Record<string, unknown>): HomeSearchParams => {
-    return {
-      collection:
-        search.collection != null ? String(search.collection) : undefined,
-    };
-  },
+  validateSearch: homeSearchSchema,
 });
 
 function RouteComponent() {
@@ -41,9 +34,7 @@ function RouteComponent() {
     data: rawFiles,
     isPending,
     error,
-  } = useQuery(
-    !collectionId ? filesOptions : collectionFilesOptions(collectionId),
-  );
+  } = useQuery(!collectionId ? filesOptions : collectionFilesOptions(collectionId));
   // TODO: Move filtering to the server when pagination is implemented
   const files = useMemo(() => {
     return q ? rawFiles?.filter((f) => f.name.includes(q)) : rawFiles;
@@ -55,19 +46,13 @@ function RouteComponent() {
     enabled: !!collectionId,
   });
 
-  const {
-    uploads,
-    uploadFiles,
-    abortUpload,
-    fileRejections,
-    resetFileRejections,
-  } = useUploads();
+  const { uploads, uploadFiles, abortUpload, fileRejections, resetFileRejections } = useUploads();
 
   const setSelectedFiles = useSetAtom(selectedFilesAtom);
 
   useEffect(() => {
     if (collectionId && error?.status === 404) {
-      navigate({
+      void navigate({
         to: ".",
         search: (prev) => ({ ...prev, collection: undefined }),
       });
@@ -122,18 +107,12 @@ function RouteComponent() {
                   className="size-9 rounded-md object-cover"
                 />
               ) : (
-                <img
-                  src={url}
-                  alt="File thumbnail"
-                  className="size-9 rounded-md object-cover"
-                />
+                <img src={url} alt="File thumbnail" className="size-9 rounded-md object-cover" />
               ))}
             <div className="flex grow flex-col items-center gap-2 rounded-md">
               <div className="flex w-full items-center justify-between gap-4">
                 <span>{file.name}</span>
-                <span>
-                  {progress === 100 ? "Processing..." : `${progress}%`}
-                </span>
+                <span>{progress === 100 ? "Processing..." : `${progress}%`}</span>
               </div>
               <Progress value={progress} />
             </div>

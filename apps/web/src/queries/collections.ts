@@ -31,8 +31,7 @@ export const createCollectionOptions = mutationOptions({
 });
 
 export const renameCollectionOptions = mutationOptions({
-  mutationFn: ({ id, name }: { id: string; name: string }) =>
-    renameCollection(id, name),
+  mutationFn: ({ id, name }: { id: string; name: string }) => renameCollection(id, name),
   onSuccess: async (_, _variables, _mutateResult, context) => {
     await context.client.invalidateQueries({
       queryKey: collectionsOptions.queryKey,
@@ -59,8 +58,7 @@ export const collectionFilesOptions = (id: string) =>
 
 export const addFileToCollectionOptions = mutationOptions({
   mutationKey: ["collections", "files", "add"],
-  mutationFn: ({ id, fileId }: { id: string; fileId: string }) =>
-    addFileToCollection(id, fileId),
+  mutationFn: ({ id, fileId }: { id: string; fileId: string }) => addFileToCollection(id, fileId),
   onSuccess: async (_, variables, _mutateResult, context) => {
     await Promise.all([
       context.client.invalidateQueries({

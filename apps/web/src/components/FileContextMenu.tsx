@@ -18,11 +18,7 @@ import {
   collectionsOptions,
   removeFileFromCollectionOptions,
 } from "@/queries/collections";
-import {
-  deleteFileOptions,
-  fileOptions,
-  renameFileOptions,
-} from "@/queries/files";
+import { deleteFileOptions, fileOptions, renameFileOptions } from "@/queries/files";
 import type { FileDto } from "@/types/FileDto";
 import { copyToClipboard } from "@/utils/clipboard";
 import { stopPropagation } from "@/utils/event";
@@ -52,12 +48,8 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
 
   const { mutateAsync: renameFile } = useMutation(renameFileOptions);
 
-  const { mutateAsync: addToCollection } = useMutation(
-    addFileToCollectionOptions,
-  );
-  const { mutateAsync: removeFromCollection } = useMutation(
-    removeFileFromCollectionOptions,
-  );
+  const { mutateAsync: addToCollection } = useMutation(addFileToCollectionOptions);
+  const { mutateAsync: removeFromCollection } = useMutation(removeFileFromCollectionOptions);
 
   const pendingMutations = useMutationState<{ id: string; fileId: string }>({
     filters: {
@@ -112,9 +104,7 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
 
   const handleDelete = async () => {
     await deleteFile(file.id);
-    setSelectedFiles((selectedFiles) =>
-      selectedFiles.filter((f) => f !== file),
-    );
+    setSelectedFiles((selectedFiles) => selectedFiles.filter((f) => f !== file));
   };
 
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
@@ -157,9 +147,7 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
                   const pending = pendingMutations.some(
                     (m) => m.fileId === file.id && m.id === collection.id,
                   );
-                  const checked = fileCollections.some(
-                    (c) => c.id === collection.id,
-                  );
+                  const checked = fileCollections.some((c) => c.id === collection.id);
 
                   const handleCheckedChange = async (checked: boolean) => {
                     if (pending) return;
@@ -207,10 +195,7 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
             <PencilLine />
             <span>Rename</span>
           </Menu.Item>
-          <Menu.Item
-            onClick={handleRegenerateThumbnail}
-            disabled={!thumbnailPath}
-          >
+          <Menu.Item onClick={handleRegenerateThumbnail} disabled={!thumbnailPath}>
             <RefreshCcw />
             <span>Regenerate thumbnail</span>
           </Menu.Item>

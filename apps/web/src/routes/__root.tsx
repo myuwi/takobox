@@ -2,17 +2,12 @@ import { StrictMode } from "react";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
-import {
-  createRootRouteWithContext,
-  HeadContent,
-  Outlet,
-  Scripts,
-} from "@tanstack/react-router";
+import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Dialogs } from "@/components/Dialogs";
 import { meOptions } from "@/queries/me";
 import { settingsOptions } from "@/queries/settings";
-import css from "../styles.css?url";
+import css from "../index.css?url";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;

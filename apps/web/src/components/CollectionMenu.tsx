@@ -4,10 +4,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
 import { MoreHorizontal, PencilLine, Trash } from "lucide-react";
 import { confirmationDialogAtom, renameDialogAtom } from "@/atoms/dialogs";
-import {
-  deleteCollectionOptions,
-  renameCollectionOptions,
-} from "@/queries/collections";
+import { deleteCollectionOptions, renameCollectionOptions } from "@/queries/collections";
 import type { CollectionDto } from "@/types/CollectionDto";
 import { Button } from "./primitives/Button";
 import * as Menu from "./primitives/Menu";
@@ -23,13 +20,9 @@ export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
   const search = useSearch({ strict: false });
   const navigate = useNavigate();
 
-  const { mutateAsync: renameCollection } = useMutation(
-    renameCollectionOptions,
-  );
+  const { mutateAsync: renameCollection } = useMutation(renameCollectionOptions);
 
-  const { mutateAsync: deleteCollection } = useMutation(
-    deleteCollectionOptions,
-  );
+  const { mutateAsync: deleteCollection } = useMutation(deleteCollectionOptions);
 
   const handleRename = async (name: string) => {
     await renameCollection({ id: collection.id, name });

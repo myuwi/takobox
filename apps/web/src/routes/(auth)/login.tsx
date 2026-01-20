@@ -24,20 +24,13 @@ function Login() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="flex w-full max-w-xs flex-col gap-6"
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className="flex w-full max-w-xs flex-col gap-6">
       <h1 className="text-2xl">Log in</h1>
       <div className="flex flex-col gap-4">
         {error && <Alert>{formatError(error)}</Alert>}
         <Label className="flex flex-col gap-2">
           Username
-          <Input
-            {...register("username", { required: true })}
-            type="text"
-            placeholder="Username"
-          />
+          <Input {...register("username", { required: true })} type="text" placeholder="Username" />
         </Label>
         <Label className="flex flex-col gap-2">
           Password

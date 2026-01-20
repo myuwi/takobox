@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  createFileRoute,
-  Link,
-  Outlet,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
 import { Menu, Search, X } from "lucide-react";
+import * as z from "zod";
 import { sidebarOpenMobileAtom } from "@/atoms/sidebar";
 import { AccountMenu } from "@/components/AccountMenu";
 import { Logo } from "@/components/Logo";
@@ -17,20 +13,16 @@ import { Sidebar } from "@/components/Sidebar";
 import { collectionsOptions } from "@/queries/collections";
 import { meOptions } from "@/queries/me";
 
-interface AppSearchParams {
-  q?: string;
-}
+const appSearchSchema = z.object({
+  q: z.string().optional().catch(undefined),
+});
 
 export const Route = createFileRoute("/(app)/(dashboard)")({
   component: RouteComponent,
   beforeLoad: async ({ context }) => {
     await context.queryClient.prefetchQuery(collectionsOptions);
   },
-  validateSearch: (search: Record<string, unknown>): AppSearchParams => {
-    return {
-      q: search.q != null ? String(search.q) : undefined,
-    };
-  },
+  validateSearch: appSearchSchema,
 });
 
 function RouteComponent() {
@@ -47,7 +39,7 @@ function RouteComponent() {
   const handleSearchChange = (val: string | undefined) => {
     setQuery(val);
 
-    navigate({
+    void navigate({
       to: ".",
       search: (prev) => ({
         ...prev,
@@ -62,12 +54,7 @@ function RouteComponent() {
       <div className="flex w-full flex-col">
         <nav className="flex w-full max-w-screen-xl items-center gap-4 p-4">
           <div className="flex items-center gap-2 md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={toggleSidebar}
-            >
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
               <Menu />
             </Button>
             <Link to="/">

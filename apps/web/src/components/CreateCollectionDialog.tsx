@@ -20,9 +20,7 @@ export const CreateCollectionDialog = () => {
     values: { name: "" },
   });
 
-  const { mutateAsync: createCollection } = useMutation(
-    createCollectionOptions,
-  );
+  const { mutateAsync: createCollection } = useMutation(createCollectionOptions);
 
   const handleCleanup = (open: boolean) => {
     if (!open) {
@@ -48,11 +46,7 @@ export const CreateCollectionDialog = () => {
   const disabled = isError || name === "";
 
   return (
-    <Dialog.Root
-      open={open}
-      onOpenChange={setOpen}
-      onOpenChangeComplete={handleCleanup}
-    >
+    <Dialog.Root open={open} onOpenChange={setOpen} onOpenChangeComplete={handleCleanup}>
       <Dialog.Trigger
         render={
           <Button variant="ghost" size="icon-sm" className="mr-1">
@@ -85,9 +79,7 @@ export const CreateCollectionDialog = () => {
           </div>
 
           <Dialog.Footer>
-            <Dialog.Close render={<Button variant="outline" />}>
-              Cancel
-            </Dialog.Close>
+            <Dialog.Close render={<Button variant="outline" />}>Cancel</Dialog.Close>
             <Button type="submit" disabled={disabled}>
               Create
             </Button>

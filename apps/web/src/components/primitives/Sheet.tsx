@@ -46,10 +46,7 @@ export function Content({
   return (
     <Portal>
       <Backdrop forceRender />
-      <SheetPrimitive.Popup
-        className={cn(sheetVariants({ side }), className)}
-        {...props}
-      >
+      <SheetPrimitive.Popup className={cn(sheetVariants({ side }), className)} {...props}>
         {children}
       </SheetPrimitive.Popup>
     </Portal>
@@ -62,6 +59,4 @@ export const Footer = tw.div`mt-auto flex flex-col gap-2 p-4`;
 
 export const Title = tw(SheetPrimitive.Title)`font-semibold text-foreground`;
 
-export const Description = tw(
-  SheetPrimitive.Description,
-)`text-muted-foreground text-sm`;
+export const Description = tw(SheetPrimitive.Description)`text-muted-foreground text-sm`;

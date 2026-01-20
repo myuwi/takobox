@@ -44,10 +44,6 @@ export const Header = tw.div`flex flex-col gap-4 text-center sm:text-left`;
 
 export const Footer = tw.div`flex flex-col-reverse gap-2 sm:flex-row sm:justify-end`;
 
-export const Title = tw(
-  DialogPrimitive.Title,
-)`text-lg leading-none font-semibold`;
+export const Title = tw(DialogPrimitive.Title)`text-lg leading-none font-semibold`;
 
-export const Description = tw(
-  DialogPrimitive.Description,
-)`text-muted-foreground text-sm`;
+export const Description = tw(DialogPrimitive.Description)`text-muted-foreground text-sm`;

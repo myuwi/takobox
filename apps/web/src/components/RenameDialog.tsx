@@ -50,15 +50,10 @@ export const RenameDialog = () => {
   };
 
   const name = watch("name");
-  const disabled =
-    isError || name === renameDialog?.initialValue || name === "";
+  const disabled = isError || name === renameDialog?.initialValue || name === "";
 
   return (
-    <Dialog.Root
-      open={open}
-      onOpenChange={setOpen}
-      onOpenChangeComplete={handleOpenChangeComplete}
-    >
+    <Dialog.Root open={open} onOpenChange={setOpen} onOpenChangeComplete={handleOpenChangeComplete}>
       <Dialog.Content finalFocus={renameDialog?.focusRef}>
         <form
           className="contents"
@@ -84,9 +79,7 @@ export const RenameDialog = () => {
           </div>
 
           <Dialog.Footer>
-            <Dialog.Close render={<Button variant="outline" />}>
-              Cancel
-            </Dialog.Close>
+            <Dialog.Close render={<Button variant="outline" />}>Cancel</Dialog.Close>
             <Button type="submit" disabled={disabled}>
               Rename
             </Button>

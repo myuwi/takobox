@@ -28,12 +28,7 @@ interface UploadFileMutationArgs {
 }
 
 export const uploadFileOptions = mutationOptions({
-  mutationFn: ({
-    file,
-    collectionId,
-    signal,
-    onUploadProgress,
-  }: UploadFileMutationArgs) => {
+  mutationFn: ({ file, collectionId, signal, onUploadProgress }: UploadFileMutationArgs) => {
     return uploadFile(file, collectionId, onUploadProgress, signal);
   },
   onSuccess: async (_, variables, _mutateResult, context) => {
@@ -51,8 +46,7 @@ export const uploadFileOptions = mutationOptions({
 });
 
 export const renameFileOptions = mutationOptions({
-  mutationFn: ({ id, name }: { id: string; name: string }) =>
-    renameFile(id, name),
+  mutationFn: ({ id, name }: { id: string; name: string }) => renameFile(id, name),
   onSuccess: async (_, _variables, _mutateResult, context) => {
     await Promise.all([
       context.client.invalidateQueries({
@@ -60,8 +54,7 @@ export const renameFileOptions = mutationOptions({
         exact: true,
       }),
       context.client.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey[0] === "collections" && query.queryKey[2] === "files",
+        predicate: (query) => query.queryKey[0] === "collections" && query.queryKey[2] === "files",
       }),
     ]);
   },
@@ -78,8 +71,7 @@ export const deleteFileOptions = mutationOptions({
         exact: true,
       }),
       context.client.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey[0] === "collections" && query.queryKey[2] === "files",
+        predicate: (query) => query.queryKey[0] === "collections" && query.queryKey[2] === "files",
       }),
     ]);
   },
