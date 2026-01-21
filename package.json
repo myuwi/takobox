@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "scripts": {
     "preinstall": "bunx only-allow bun",
+    "prepare": "husky || true",
+    "lint": "bun -F '*' lint",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
     "docker:dev:down": "docker-compose -f docker-compose.dev.yml down"
   },
@@ -12,5 +14,8 @@
   ],
   "trustedDependencies": [
     "@parcel/watcher"
-  ]
+  ],
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
 }

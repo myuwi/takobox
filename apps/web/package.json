@@ -7,7 +7,7 @@
     "build": "vite build",
     "start": "bun .output/server/index.mjs",
     "lint": "conc -r -m 1 bun:lint:*",
-    "lint:oxlint": "oxlint --type-aware --type-check .",
+    "lint:oxlint": "oxlint --type-aware --type-check --deny-warnings .",
     "lint:prettier": "prettier --check ."
   },
   "dependencies": {
