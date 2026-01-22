@@ -17,13 +17,14 @@ use tokio_util::io::ReaderStream;
 use tracing::error;
 
 use crate::{
-    api::{error::Error, state::AppState},
+    error::Error,
     models::{
         collection::Collection,
         file::{File, FileWithCollections},
         session::Session,
     },
     services::thumbnails::{ThumbnailError, generate_thumbnail},
+    state::AppState,
     types::Uid,
 };
 

@@ -8,11 +8,9 @@ use axum::{
 use serde::Deserialize;
 
 use crate::{
-    api::{
-        error::{Error, ResultExt},
-        state::AppState,
-    },
+    error::{Error, ResultExt},
     models::{collection::Collection, session::Session},
+    state::AppState,
     types::Uid,
 };
 

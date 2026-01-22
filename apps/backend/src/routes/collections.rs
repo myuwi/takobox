@@ -9,11 +9,9 @@ use serde::Deserialize;
 
 use super::collection_files;
 use crate::{
-    api::{
-        error::{Error, ResultExt},
-        state::AppState,
-    },
+    error::{Error, ResultExt},
     models::{collection::Collection, session::Session},
+    state::AppState,
     types::Uid,
 };
 

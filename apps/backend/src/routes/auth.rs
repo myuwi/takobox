@@ -5,13 +5,11 @@ use regex::Regex;
 use serde::Deserialize;
 
 use crate::{
-    api::{
-        auth::password::{hash_password, verify_password},
-        error::{Error, ResultExt},
-        middleware::rate_limit::rate_limit,
-        state::AppState,
-    },
+    auth::password::{hash_password, verify_password},
+    error::{Error, ResultExt},
+    middleware::rate_limit::rate_limit,
     models::{session::Session, user::User},
+    state::AppState,
 };
 
 #[derive(Clone, Debug, Deserialize)]

@@ -8,11 +8,7 @@ use axum::{
 use axum_extra::extract::PrivateCookieJar;
 use sqlx::SqlitePool;
 
-use crate::{
-    api::{error::Error, state::AppState},
-    models::session::Session,
-    types::Uid,
-};
+use crate::{error::Error, models::session::Session, state::AppState, types::Uid};
 
 async fn resolve_session(pool: &SqlitePool, jar: PrivateCookieJar) -> Option<Session> {
     let session_id = jar

@@ -13,7 +13,7 @@ mod files;
 mod me;
 mod settings;
 
-use crate::api::{
+use crate::{
     middleware::{
         auth::{auth, require_auth},
         rate_limit::rate_limit,
@@ -30,17 +30,20 @@ async fn fallback(method: Method, uri: Uri) -> Response {
 }
 
 pub fn router(app_state: AppState) -> Router {
-    let protected_routes = Router::new()
+    let public = Router::new()
+        .route("/", get(root))
+        .route("/settings", get(settings::show))
+        .nest("/auth", auth::routes());
+
+    let protected = Router::new()
         .route("/me", get(me::show))
         .nest("/files", files::routes(&app_state))
         .nest("/collections", collections::routes())
         .route_layer(middleware::from_fn(require_auth));
 
     Router::new()
-        .route("/", get(root))
-        .route("/settings", get(settings::show))
-        .nest("/auth", auth::routes())
-        .merge(protected_routes)
+        .merge(public)
+        .merge(protected)
         .layer(middleware::from_fn_with_state(app_state.clone(), auth))
         .fallback(fallback)
         .with_state(app_state)

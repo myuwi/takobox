@@ -1,8 +1,9 @@
 use axum::{Json, extract::State, response::IntoResponse};
 
 use crate::{
-    api::{error::Error, state::AppState},
+    error::Error,
     models::{session::Session, user::User},
+    state::AppState,
 };
 
 pub async fn show(

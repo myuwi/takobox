@@ -4,7 +4,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use crate::api::state::AppState;
+use crate::state::AppState;
 
 pub async fn show(State(AppState { settings, .. }): State<AppState>) -> Response {
     Json(settings).into_response()
