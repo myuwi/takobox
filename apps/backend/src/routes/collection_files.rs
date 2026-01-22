@@ -2,14 +2,13 @@ use axum::{
     Json, Router,
     extract::{Path, State},
     http::StatusCode,
-    response::IntoResponse,
     routing::{delete, get, post},
 };
 use serde::Deserialize;
 
 use crate::{
     error::{Error, ResultExt},
-    models::{collection::Collection, session::Session},
+    models::{collection::Collection, file::File, session::Session},
     state::AppState,
     types::Uid,
 };
@@ -18,7 +17,7 @@ async fn index(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
     Path(collection_id): Path<Uid>,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<Json<Vec<File>>, Error> {
     if !Collection::exists(&pool, session.user_id, &collection_id).await? {
         return Err(Error::NotFound(
             "Collection not found or not owned by user.",
@@ -40,7 +39,7 @@ async fn add(
     session: Session,
     Path(collection_id): Path<Uid>,
     Json(body): Json<CollectionFilesPayload>,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<StatusCode, Error> {
     if !Collection::exists(&pool, session.user_id, &collection_id).await? {
         return Err(Error::NotFound(
             "Collection not found or not owned by user.",
@@ -63,7 +62,7 @@ async fn remove(
     session: Session,
     Path(collection_id): Path<Uid>,
     Json(body): Json<CollectionFilesPayload>,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<StatusCode, Error> {
     if !Collection::exists(&pool, session.user_id, &collection_id).await? {
         return Err(Error::NotFound(
             "Collection not found or not owned by user.",

@@ -31,7 +31,7 @@ use crate::{
 async fn index(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<Json<Vec<File>>, Error> {
     let files = File::get_all_for_user(&pool, session.user_id).await?;
 
     Ok(Json(files))
@@ -41,7 +41,7 @@ async fn show(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
     Path(file_id): Path<Uid>,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<Json<FileWithCollections>, Error> {
     let file = FileWithCollections::get_by_public_id(&pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
@@ -54,7 +54,7 @@ async fn create(
     State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
     mut multipart: Multipart,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<Json<File>, Error> {
     let mut collection_id: Option<Uid> = None;
     let mut file: Option<(String, Bytes)> = None;
 
@@ -160,7 +160,7 @@ async fn rename(
     session: Session,
     Path(file_id): Path<Uid>,
     Json(body): Json<RenameFilePayload>,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<Json<File>, Error> {
     let name = body.name.trim();
 
     if name.is_empty() {
@@ -197,7 +197,7 @@ async fn remove(
     State(AppState { pool, dirs, .. }): State<AppState>,
     session: Session,
     Path(file_id): Path<Uid>,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<StatusCode, Error> {
     let file = File::delete(&pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;

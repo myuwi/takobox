@@ -2,7 +2,6 @@ use axum::{
     Json, Router,
     extract::{Path, State},
     http::StatusCode,
-    response::IntoResponse,
     routing::{delete, get, patch, post},
 };
 use serde::Deserialize;
@@ -18,7 +17,7 @@ use crate::{
 async fn index(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<Json<Vec<Collection>>, Error> {
     let collections = Collection::get_all_for_user(&pool, session.user_id).await?;
 
     Ok(Json(collections))
@@ -33,7 +32,7 @@ async fn create(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
     Json(body): Json<CreateCollectionPayload>,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<Json<Collection>, Error> {
     let name = body.name.trim();
 
     if name.is_empty() {
@@ -61,7 +60,7 @@ async fn rename(
     session: Session,
     Path(collection_id): Path<Uid>,
     Json(body): Json<RenameCollectionPayload>,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<Json<Collection>, Error> {
     let name = body.name.trim();
 
     if name.is_empty() {
@@ -84,7 +83,7 @@ async fn remove(
     State(AppState { pool, .. }): State<AppState>,
     session: Session,
     Path(collection_id): Path<Uid>,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<StatusCode, Error> {
     Collection::delete(&pool, session.user_id, &collection_id)
         .await?
         .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
