@@ -12,7 +12,7 @@ pub const ALPHABET: [char; 62] = [
 #[derive(PartialEq, Eq, Clone, Debug, Default, Serialize, Deserialize, Type)]
 #[sqlx(transparent)]
 #[serde(try_from = "String")]
-pub struct Uid(String);
+pub struct Uid(pub String);
 
 impl Uid {
     pub fn new(length: usize) -> Self {

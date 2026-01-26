@@ -1,9 +1,8 @@
-use tokio::{
-    net::TcpListener,
-    signal::unix::{SignalKind, signal},
+use salvo::{Listener, Server, conn::TcpListener, server::ServerHandle};
+use tokio::signal::{
+    self,
+    unix::{SignalKind, signal},
 };
-use tracing::debug;
-use tracing_subscriber::EnvFilter;
 
 mod env;
 
@@ -11,27 +10,25 @@ use env::Env;
 use takobox::{AppState, Directories, db, models::settings::Settings, router};
 
 fn init_tracing() {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-            format!(
-                "{}=debug,tower_http=debug,axum::rejection=trace",
-                env!("CARGO_CRATE_NAME")
-            )
-            .into()
-        }))
-        .init();
+    tracing_subscriber::fmt().init();
 }
 
-async fn shutdown_signal() {
+async fn shutdown_signal(handle: ServerHandle) {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("Failed to register CTRL+C handler");
+    };
     let mut term = signal(SignalKind::terminate()).expect("Failed to register SIGTERM handler");
     let mut interrupt = signal(SignalKind::interrupt()).expect("Failed to register SIGINT handler");
 
     tokio::select! {
+        _ = ctrl_c => {}
         _ = term.recv() => {},
         _ = interrupt.recv() => {},
     };
 
-    debug!("Shutting down gracefully...");
+    handle.stop_graceful(None);
 }
 
 #[tokio::main]
@@ -54,10 +51,12 @@ async fn main() -> anyhow::Result<()> {
     let app_state = AppState::try_from(env.session_secret, pool, dirs, settings)?;
     let app = router(app_state);
 
-    let listener = TcpListener::bind("0.0.0.0:8000").await?;
-    debug!("Listening on {}", listener.local_addr()?);
-    axum::serve(listener, app)
-        .with_graceful_shutdown(shutdown_signal())
-        .await?;
+    let server = Server::new(TcpListener::new("0.0.0.0:8000").bind().await);
+    let handle = server.handle();
+
+    tokio::spawn(shutdown_signal(handle));
+
+    server.serve(app).await;
+
     Ok(())
 }

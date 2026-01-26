@@ -1,16 +1,16 @@
-use axum::{
-    body::Body,
-    extract::{FromRequestParts, State},
-    http::{Request, request::Parts},
-    middleware::Next,
-    response::Response,
+use std::fmt::Debug;
+
+use salvo::{
+    Depot, Request, Writer,
+    extract::{Extractible, Metadata},
+    handler,
+    http::cookie::{CookieJar, PrivateJar},
 };
-use axum_extra::extract::PrivateCookieJar;
 use sqlx::SqlitePool;
 
 use crate::{error::Error, models::session::Session, state::AppState, types::Uid};
 
-async fn resolve_session(pool: &SqlitePool, jar: PrivateCookieJar) -> Option<Session> {
+async fn resolve_session(pool: &SqlitePool, jar: &PrivateJar<&CookieJar>) -> Option<Session> {
     let session_id = jar
         .get("session")
         .and_then(|c| Uid::try_from(c.value().to_string()).ok())?;
@@ -18,35 +18,31 @@ async fn resolve_session(pool: &SqlitePool, jar: PrivateCookieJar) -> Option<Ses
     Session::get_by_public_id(pool, &session_id).await.ok()
 }
 
-pub async fn auth(
-    State(AppState { pool, .. }): State<AppState>,
-    jar: PrivateCookieJar,
-    mut req: Request<Body>,
-    next: Next,
-) -> Result<Response, Error> {
-    if let Some(session) = resolve_session(&pool, jar).await {
+#[handler]
+pub async fn inject_auth(depot: &mut Depot, req: &mut Request) {
+    let AppState {
+        pool,
+        session_secret,
+        ..
+    } = depot.obtain::<AppState>().unwrap();
+
+    if let Some(session) = resolve_session(pool, &req.cookies().private(session_secret)).await {
         req.extensions_mut().insert(session);
     }
-
-    Ok(next.run(req).await)
 }
 
-pub async fn require_auth(
-    session: Result<Session, Error>,
-    req: Request<Body>,
-    next: Next,
-) -> Result<Response, Error> {
-    session?;
+#[handler]
+pub async fn require_auth(_session: Session) {}
 
-    Ok(next.run(req).await)
-}
+static METADATA: Metadata = Metadata::new("Session");
 
-impl<S: Send + Sync> FromRequestParts<S> for Session {
-    type Rejection = Error;
+impl<'ex> Extractible<'ex> for Session {
+    fn metadata() -> &'static Metadata {
+        &METADATA
+    }
 
-    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
-        parts
-            .extensions
+    async fn extract(req: &'ex mut Request) -> Result<Self, impl Writer + Send + Debug + 'static> {
+        req.extensions()
             .get::<Session>()
             .ok_or(Error::Unauthorized("Unauthorized"))
             .cloned()

@@ -1,4 +1,4 @@
-use axum_extra::extract::cookie::{Cookie, SameSite};
+use salvo::http::cookie::{Cookie, SameSite};
 use sqlx::{FromRow, SqliteExecutor};
 use time::{Duration, OffsetDateTime, UtcDateTime};
 
@@ -24,6 +24,18 @@ impl From<Session> for Cookie<'_> {
             .secure(true)
             .path("/")
             .expires(OffsetDateTime::from_unix_timestamp(session.expires_at).unwrap())
+            .same_site(SameSite::Lax)
+            .build()
+    }
+}
+
+impl Session {
+    pub fn empty_cookie<'c>() -> Cookie<'c> {
+        Cookie::build(("session", ""))
+            .http_only(true)
+            .secure(true)
+            .path("/")
+            .expires(OffsetDateTime::now_utc())
             .same_site(SameSite::Lax)
             .build()
     }

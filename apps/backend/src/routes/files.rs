@@ -1,19 +1,14 @@
 use std::{ffi::OsStr, path::PathBuf};
 
 use anyhow::anyhow;
-use axum::{
-    Json, Router,
-    body::Bytes,
-    extract::{DefaultBodyLimit, Multipart, Path, State},
-    http::StatusCode,
-    response::IntoResponse,
-    routing::{delete, get, patch, post},
+use salvo::{
+    fs::NamedFile,
+    http::header::{self, HeaderValue},
+    oapi::extract::{FormFile, JsonBody, PathParam},
+    prelude::*,
 };
-use axum_extra::response::FileStream;
 use sanitize_filename::is_sanitized;
 use serde::Deserialize;
-use tokio::io::AsyncWriteExt;
-use tokio_util::io::ReaderStream;
 use tracing::error;
 
 use crate::{
@@ -28,70 +23,48 @@ use crate::{
     types::Uid,
 };
 
-async fn index(
-    State(AppState { pool, .. }): State<AppState>,
-    session: Session,
-) -> Result<Json<Vec<File>>, Error> {
-    let files = File::get_all_for_user(&pool, session.user_id).await?;
+#[handler]
+async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<File>>, Error> {
+    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let files = File::get_all_for_user(pool, session.user_id).await?;
 
     Ok(Json(files))
 }
 
+#[handler]
 async fn show(
-    State(AppState { pool, .. }): State<AppState>,
+    depot: &mut Depot,
     session: Session,
-    Path(file_id): Path<Uid>,
+    file_id: PathParam<Uid>,
 ) -> Result<Json<FileWithCollections>, Error> {
-    let file = FileWithCollections::get_by_public_id(&pool, session.user_id, &file_id)
+    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let file = FileWithCollections::get_by_public_id(pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
     Ok(Json(file))
 }
 
+#[derive(Deserialize, Extractible, Debug)]
+#[salvo(extract(default_source(from = "query")))]
+#[serde(rename_all = "camelCase")]
+struct CreateFileSearchParams {
+    collection_id: Option<Uid>,
+}
+
 // TODO: Upload quota per user
+#[handler]
 async fn create(
-    State(AppState { pool, dirs, .. }): State<AppState>,
+    depot: &mut Depot,
     session: Session,
-    mut multipart: Multipart,
+    file: FormFile,
+    query_params: CreateFileSearchParams,
 ) -> Result<Json<File>, Error> {
-    let mut collection_id: Option<Uid> = None;
-    let mut file: Option<(String, Bytes)> = None;
+    let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
+    let CreateFileSearchParams { collection_id } = &query_params;
 
-    while let Some(field) = multipart
-        .next_field()
-        .await
-        .map_err(|e| Error::Internal(e.into()))?
-    {
-        match field.name() {
-            Some("collection") => {
-                collection_id = Some(
-                    field
-                        .text()
-                        .await
-                        .map_err(|_| Error::BadRequest("Bad request"))
-                        .and_then(|text| {
-                            Uid::try_from(text).map_err(|_| Error::BadRequest("Bad request"))
-                        })?,
-                );
-            }
-            Some("file") => {
-                let file_name = field
-                    .file_name()
-                    .map(|s| s.to_owned())
-                    .ok_or(Error::UnprocessableEntity("Missing file name"))?;
-
-                // TODO: Don't read everything into memory?
-                let file_bytes = field.bytes().await.map_err(|e| Error::Internal(e.into()))?;
-
-                file = Some((file_name, file_bytes));
-            }
-            _ => (),
-        }
-    }
-
-    let Some((original_name, file_bytes)) = file else {
-        return Err(Error::UnprocessableEntity("Expected a file."));
+    let Some(original_name) = file.name() else {
+        return Err(Error::UnprocessableEntity("Expected file to have a name."));
     };
 
     // TODO: retry on db collision
@@ -104,7 +77,8 @@ async fn create(
 
     let file_name = file_id.to_string() + &ext;
     let file_path = dirs.uploads_dir().join(&file_name);
-    let file_size = file_bytes.len();
+    let file_size = file.size() as usize;
+    let temp_path = file.path();
 
     let mut transaction = pool.begin().await?;
 
@@ -113,7 +87,7 @@ async fn create(
         session.user_id,
         &file_id,
         &file_name,
-        &original_name,
+        original_name,
         &file_size,
     )
     .await?;
@@ -122,19 +96,14 @@ async fn create(
         Collection::add_file(
             &mut *transaction,
             session.user_id,
-            &collection_id,
+            collection_id,
             &file.public_id,
         )
         .await?
         .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
     }
 
-    let mut file_handle = tokio::fs::File::create_new(&file_path)
-        .await
-        .map_err(|e| Error::Internal(e.into()))?;
-
-    file_handle
-        .write_all(&file_bytes)
+    tokio::fs::copy(temp_path, &file_path)
         .await
         .map_err(|e| Error::Internal(e.into()))?;
 
@@ -155,12 +124,14 @@ pub struct RenameFilePayload {
     pub name: String,
 }
 
+#[handler]
 async fn rename(
-    State(AppState { pool, .. }): State<AppState>,
+    depot: &mut Depot,
     session: Session,
-    Path(file_id): Path<Uid>,
-    Json(body): Json<RenameFilePayload>,
+    file_id: PathParam<Uid>,
+    body: JsonBody<RenameFilePayload>,
 ) -> Result<Json<File>, Error> {
+    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
     let name = body.name.trim();
 
     if name.is_empty() {
@@ -173,7 +144,7 @@ async fn rename(
         ));
     }
 
-    let file = File::get_by_public_id(&pool, session.user_id, &file_id)
+    let file = File::get_by_public_id(pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -186,19 +157,22 @@ async fn rename(
         ));
     }
 
-    let file = File::rename(&pool, session.user_id, &file_id, name)
+    let file = File::rename(pool, session.user_id, &file_id, name)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
     Ok(Json(file))
 }
 
+#[handler]
 async fn remove(
-    State(AppState { pool, dirs, .. }): State<AppState>,
+    depot: &mut Depot,
     session: Session,
-    Path(file_id): Path<Uid>,
+    file_id: PathParam<Uid>,
 ) -> Result<StatusCode, Error> {
-    let file = File::delete(&pool, session.user_id, &file_id)
+    let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
+
+    let file = File::delete(pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -217,30 +191,37 @@ async fn remove(
     Ok(StatusCode::NO_CONTENT)
 }
 
+#[handler]
 async fn download(
-    State(AppState { pool, dirs, .. }): State<AppState>,
+    depot: &mut Depot,
     session: Session,
-    Path(file_id): Path<Uid>,
-) -> Result<impl IntoResponse, Error> {
-    let file = File::get_by_public_id(&pool, session.user_id, &file_id)
+    file_id: PathParam<Uid>,
+) -> Result<NamedFile, Error> {
+    let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
+
+    let file = File::get_by_public_id(pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
     let file_path = dirs.uploads_dir().join(&file.filename);
-    let file_stream = FileStream::<ReaderStream<tokio::fs::File>>::from_path(file_path)
-        .await
-        .map_err(|_| Error::NotFound("File not found or not owned by user."))?
-        .file_name(file.name);
 
-    Ok(file_stream)
+    NamedFile::builder(file_path)
+        .attached_name(file.name)
+        .build()
+        .await
+        .map_err(|e| Error::Internal(e.into()))
 }
 
+#[handler]
 async fn regenerate_thumbnail(
-    State(AppState { pool, dirs, .. }): State<AppState>,
+    depot: &mut Depot,
+    res: &mut Response,
     session: Session,
-    Path(file_id): Path<Uid>,
-) -> Result<impl IntoResponse, Error> {
-    let file = File::get_by_public_id(&pool, session.user_id, &file_id)
+    file_id: PathParam<Uid>,
+) -> Result<StatusCode, Error> {
+    let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
+
+    let file = File::get_by_public_id(pool, session.user_id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -259,24 +240,26 @@ async fn regenerate_thumbnail(
             )),
         })?;
 
-    Ok((
-        StatusCode::CREATED,
-        [("Location", format!("/thumbs/{}", thumb_file_name))],
-    ))
+    res.headers_mut().insert(
+        header::LOCATION,
+        HeaderValue::from_str(&format!("/thumbs/{}", thumb_file_name)).unwrap(),
+    );
+
+    Ok(StatusCode::CREATED)
 }
 
-pub fn routes(state: &AppState) -> Router<AppState> {
+pub fn routes(state: &AppState) -> Router {
     let AppState { settings, .. } = state;
 
     Router::new()
-        .route("/", get(index))
-        .route("/{id}", get(show))
-        .route(
-            "/",
-            post(create).layer(DefaultBodyLimit::max(settings.max_file_size)),
+        .get(index)
+        .push(Router::with_hoop(max_size(settings.max_file_size as u64)).post(create))
+        .push(
+            Router::with_path("{file_id}")
+                .get(show)
+                .patch(rename)
+                .delete(remove)
+                .push(Router::with_path("download").get(download))
+                .push(Router::with_path("regenerate-thumbnail").post(regenerate_thumbnail)),
         )
-        .route("/{id}", patch(rename))
-        .route("/{id}", delete(remove))
-        .route("/{id}/download", get(download))
-        .route("/{id}/regenerate-thumbnail", post(regenerate_thumbnail))
 }

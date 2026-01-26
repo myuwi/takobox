@@ -1,13 +1,12 @@
 use anyhow::ensure;
-use axum::extract::FromRef;
-use axum_extra::extract::cookie::Key;
+use salvo::http::cookie::Key;
 use sqlx::SqlitePool;
 
 use crate::{directories::Directories, models::settings::Settings};
 
 #[derive(Clone)]
 pub struct AppState {
-    pub session_secret: String,
+    pub session_secret: Key,
     pub pool: SqlitePool,
     pub dirs: Directories,
     pub settings: Settings,
@@ -26,16 +25,10 @@ impl AppState {
         );
 
         Ok(Self {
-            session_secret,
+            session_secret: Key::from(session_secret.as_bytes()),
             pool,
             dirs,
             settings,
         })
-    }
-}
-
-impl FromRef<AppState> for Key {
-    fn from_ref(state: &AppState) -> Self {
-        Key::from(state.session_secret.as_bytes())
     }
 }

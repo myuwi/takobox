@@ -1,7 +1,6 @@
-use axum::{Json, Router, extract::State, http::StatusCode, response::IntoResponse, routing::post};
-use axum_extra::extract::{PrivateCookieJar, cookie::Cookie};
 use lazy_static::lazy_static;
 use regex::Regex;
+use salvo::{oapi::extract::JsonBody, prelude::*};
 use serde::Deserialize;
 
 use crate::{
@@ -18,21 +17,30 @@ struct AuthPayload {
     pub password: String,
 }
 
+#[handler]
 async fn login(
-    State(AppState { pool, .. }): State<AppState>,
-    jar: PrivateCookieJar,
-    Json(body): Json<AuthPayload>,
-) -> Result<impl IntoResponse, Error> {
-    let user = User::get_by_username(&pool, &body.username)
+    body: JsonBody<AuthPayload>,
+    depot: &mut Depot,
+    res: &mut Response,
+) -> Result<StatusCode, Error> {
+    let AppState {
+        pool,
+        session_secret,
+        ..
+    } = depot.obtain::<AppState>().unwrap();
+
+    let user = User::get_by_username(pool, &body.username)
         .await?
         .ok_or_else(|| Error::Unauthorized("Invalid username or password"))?;
 
     verify_password(&body.password, &user.password)
         .map_err(|_| Error::Unauthorized("Invalid username or password"))?;
 
-    let session = Session::create(&pool, user.id).await?;
+    let session = Session::create(pool, user.id).await?;
 
-    Ok((StatusCode::OK, jar.add(session)))
+    res.cookies_mut().private_mut(session_secret).add(session);
+
+    Ok(StatusCode::OK)
 }
 
 lazy_static! {
@@ -57,11 +65,19 @@ fn validate_register_body(body: &AuthPayload) -> Result<(), &'static str> {
     Ok(())
 }
 
+#[handler]
 async fn register(
-    State(AppState { pool, settings, .. }): State<AppState>,
-    jar: PrivateCookieJar,
-    Json(body): Json<AuthPayload>,
-) -> Result<impl IntoResponse, Error> {
+    body: JsonBody<AuthPayload>,
+    depot: &mut Depot,
+    res: &mut Response,
+) -> Result<StatusCode, Error> {
+    let AppState {
+        settings,
+        pool,
+        session_secret,
+        ..
+    } = depot.obtain::<AppState>().unwrap();
+
     if !settings.enable_account_creation {
         return Err(Error::Unauthorized(
             "Account creation is currently disabled for this instance.",
@@ -72,30 +88,37 @@ async fn register(
 
     let password_hash = hash_password(&body.password).map_err(|e| Error::Internal(e.into()))?;
 
-    let user = User::create(&pool, &body.username, &password_hash)
+    let user = User::create(pool, &body.username, &password_hash)
         .await
         .map_constraint_err("users.username", |_| {
             Error::Conflict("Username is already taken.")
         })?;
 
-    let session = Session::create(&pool, user.id).await?;
+    let session = Session::create(pool, user.id).await?;
 
-    Ok((StatusCode::CREATED, jar.add(session)))
+    res.cookies_mut().private_mut(session_secret).add(session);
+
+    Ok(StatusCode::CREATED)
 }
 
+#[handler]
 async fn logout(
-    State(AppState { pool, .. }): State<AppState>,
+    depot: &mut Depot,
+    res: &mut Response,
     session: Session,
-    jar: PrivateCookieJar,
-) -> Result<impl IntoResponse, Error> {
-    Session::delete(&pool, session.id).await?;
+) -> Result<StatusCode, Error> {
+    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
 
-    Ok((StatusCode::OK, jar.remove(Cookie::from("session"))))
+    Session::delete(pool, session.id).await?;
+
+    res.cookies_mut().add(Session::empty_cookie());
+
+    Ok(StatusCode::OK)
 }
 
-pub fn routes() -> Router<AppState> {
+pub fn routes() -> Router {
     Router::new()
-        .route("/login", post(login).layer(rate_limit(10_000, 10)))
-        .route("/register", post(register))
-        .route("/logout", post(logout))
+        .push(Router::with_path("/login").hoop(rate_limit(6)).post(login))
+        .push(Router::with_path("/register").post(register))
+        .push(Router::with_path("/logout").post(logout))
 }

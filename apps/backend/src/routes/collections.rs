@@ -1,9 +1,4 @@
-use axum::{
-    Json, Router,
-    extract::{Path, State},
-    http::StatusCode,
-    routing::{delete, get, patch, post},
-};
+use salvo::{oapi::extract::{JsonBody, PathParam}, prelude::*};
 use serde::Deserialize;
 
 use super::collection_files;
@@ -14,11 +9,10 @@ use crate::{
     types::Uid,
 };
 
-async fn index(
-    State(AppState { pool, .. }): State<AppState>,
-    session: Session,
-) -> Result<Json<Vec<Collection>>, Error> {
-    let collections = Collection::get_all_for_user(&pool, session.user_id).await?;
+#[handler]
+async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<Collection>>, Error> {
+    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let collections = Collection::get_all_for_user(pool, session.user_id).await?;
 
     Ok(Json(collections))
 }
@@ -28,11 +22,13 @@ pub struct CreateCollectionPayload {
     pub name: String,
 }
 
+#[handler]
 async fn create(
-    State(AppState { pool, .. }): State<AppState>,
+    depot: &mut Depot,
     session: Session,
-    Json(body): Json<CreateCollectionPayload>,
+    body: JsonBody<CreateCollectionPayload>,
 ) -> Result<Json<Collection>, Error> {
+    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
     let name = body.name.trim();
 
     if name.is_empty() {
@@ -41,7 +37,7 @@ async fn create(
         ));
     }
 
-    let collection = Collection::create(&pool, session.user_id, name)
+    let collection = Collection::create(pool, session.user_id, name)
         .await
         .map_constraint_err("collections.user_id, collections.name", |_| {
             Error::Conflict("A collection with this name already exists. Please try another name.")
@@ -55,12 +51,15 @@ pub struct RenameCollectionPayload {
     pub name: String,
 }
 
+#[handler]
 async fn rename(
-    State(AppState { pool, .. }): State<AppState>,
+    depot: &mut Depot,
     session: Session,
-    Path(collection_id): Path<Uid>,
-    Json(body): Json<RenameCollectionPayload>,
+    collection_id: PathParam<Uid>,
+    body: JsonBody<RenameCollectionPayload>,
 ) -> Result<Json<Collection>, Error> {
+    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+
     let name = body.name.trim();
 
     if name.is_empty() {
@@ -69,7 +68,7 @@ async fn rename(
         ));
     }
 
-    let collection = Collection::rename(&pool, session.user_id, &collection_id, name)
+    let collection = Collection::rename(pool, session.user_id, &collection_id, name)
         .await
         .map_constraint_err("collections.user_id, collections.name", |_| {
             Error::Conflict("A collection with this name already exists. Please try another name.")
@@ -79,23 +78,26 @@ async fn rename(
     Ok(Json(collection))
 }
 
+#[handler]
 async fn remove(
-    State(AppState { pool, .. }): State<AppState>,
+    depot: &mut Depot,
     session: Session,
-    Path(collection_id): Path<Uid>,
+    collection_id: PathParam<Uid>,
 ) -> Result<StatusCode, Error> {
-    Collection::delete(&pool, session.user_id, &collection_id)
+    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+
+    Collection::delete(pool, session.user_id, &collection_id)
         .await?
         .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
 
     Ok(StatusCode::NO_CONTENT)
 }
 
-pub fn routes() -> Router<AppState> {
-    Router::new()
-        .route("/", get(index))
-        .route("/", post(create))
-        .route("/{id}", patch(rename))
-        .route("/{id}", delete(remove))
-        .nest("/{id}/files", collection_files::routes())
+pub fn routes() -> Router {
+    Router::new().get(index).post(create).push(
+        Router::with_path("{collection_id}")
+            .patch(rename)
+            .delete(remove)
+            .push(Router::with_path("files").push(collection_files::routes())),
+    )
 }

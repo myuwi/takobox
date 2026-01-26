@@ -1,8 +1,4 @@
-use axum::{
-    Json,
-    http::{HeaderMap, StatusCode},
-    response::{IntoResponse, Response},
-};
+use salvo::{http::headers::HeaderMap, prelude::*};
 use serde::Serialize;
 use tracing::error;
 
@@ -64,22 +60,23 @@ impl Error {
     }
 }
 
-impl IntoResponse for Error {
-    fn into_response(self) -> Response {
+#[async_trait]
+impl Writer for Error {
+    async fn write(mut self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         match self {
             Self::Sqlx(ref e) => error!("{:?}", e),
             Self::Internal(ref e) => error!("{:?}", e),
             _ => (),
         }
 
-        (
-            self.status_code(),
-            self.headers(),
-            Json(ErrorResponse {
-                message: self.to_string(),
-            }),
-        )
-            .into_response()
+        res.status_code(self.status_code());
+        if let Some(headers) = self.headers() {
+            res.set_headers(headers);
+        }
+
+        res.render(Json(ErrorResponse {
+            message: self.to_string(),
+        }));
     }
 }
 

@@ -1,10 +1,4 @@
-use axum::{
-    http::{Method, StatusCode, Uri},
-    middleware,
-    response::{IntoResponse, Response},
-    routing::{Router, get},
-};
-use tower_http::trace::TraceLayer;
+use salvo::{catcher::Catcher, prelude::*};
 
 mod auth;
 mod collection_files;
@@ -15,38 +9,42 @@ mod settings;
 
 use crate::{
     middleware::{
-        auth::{auth, require_auth},
+        auth::{inject_auth, require_auth},
         rate_limit::rate_limit,
     },
     state::AppState,
 };
 
-async fn root() -> Response {
-    "Hello Takobox API!".into_response()
+#[handler]
+async fn root() -> &'static str {
+    "Hello Takobox API!"
 }
 
-async fn fallback(method: Method, uri: Uri) -> Response {
-    (StatusCode::NOT_FOUND, format!("Cannot {method} {uri}")).into_response()
+#[handler]
+async fn catcher(_req: &Request, _res: &mut Response, ctrl: &mut FlowCtrl) {
+    ctrl.skip_rest();
 }
 
-pub fn router(app_state: AppState) -> Router {
+pub fn router(app_state: AppState) -> Service {
     let public = Router::new()
-        .route("/", get(root))
-        .route("/settings", get(settings::show))
-        .nest("/auth", auth::routes());
+        .get(root)
+        .push(Router::with_path("settings").get(settings::show))
+        .push(Router::with_path("auth").push(auth::routes()));
 
     let protected = Router::new()
-        .route("/me", get(me::show))
-        .nest("/files", files::routes(&app_state))
-        .nest("/collections", collections::routes())
-        .route_layer(middleware::from_fn(require_auth));
+        .hoop(require_auth)
+        .push(Router::with_path("me").get(me::show))
+        .push(Router::with_path("files").push(files::routes(&app_state)))
+        .push(Router::with_path("collections").push(collections::routes()));
 
-    Router::new()
-        .merge(public)
-        .merge(protected)
-        .layer(middleware::from_fn_with_state(app_state.clone(), auth))
-        .fallback(fallback)
-        .with_state(app_state)
-        .layer(rate_limit(500, 120))
-        .layer(TraceLayer::new_for_http())
+    let router = Router::new()
+        .hoop(affix_state::inject(app_state))
+        .hoop(rate_limit(120))
+        .hoop(inject_auth)
+        .push(public)
+        .push(protected);
+
+    Service::new(router)
+        .hoop(Logger::new())
+        .catcher(Catcher::default().hoop(catcher))
 }

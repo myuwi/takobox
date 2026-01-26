@@ -1,46 +1,38 @@
 use std::net::IpAddr;
 
-use axum::{body::Body, response::IntoResponse};
-use governor::{clock::QuantaInstant, middleware::NoOpMiddleware};
-use tower_governor::{
-    GovernorError, GovernorLayer, governor::GovernorConfigBuilder, key_extractor::KeyExtractor,
+use salvo::{
+    Depot, Request,
+    rate_limiter::{CelledQuota, MokaStore, RateIssuer, RateLimiter, SlidingGuard},
 };
-
-use crate::error::Error;
 
 #[derive(Clone, Debug)]
 pub struct IpKeyExtractor;
 
-impl KeyExtractor for IpKeyExtractor {
-    type Key = IpAddr;
+impl RateIssuer for IpKeyExtractor {
+    type Key = String;
 
-    fn extract<T>(&self, req: &axum::http::Request<T>) -> Result<Self::Key, GovernorError> {
+    async fn issue(&self, req: &mut Request, _depot: &Depot) -> Option<Self::Key> {
         req.headers()
             .get("x-forwarded-for")
             .and_then(|hv| hv.to_str().ok())
             .and_then(|s| s.split(',').find_map(|s| s.trim().parse::<IpAddr>().ok()))
-            .ok_or(GovernorError::UnableToExtractKey)
+            .map(|s| s.to_string())
     }
 }
 
 pub fn rate_limit(
-    replenish_ms: u64,
-    burst_size: u32,
-) -> GovernorLayer<IpKeyExtractor, NoOpMiddleware<QuantaInstant>, Body> {
-    let governor_conf = GovernorConfigBuilder::default()
-        .per_millisecond(replenish_ms)
-        .burst_size(burst_size)
-        .key_extractor(IpKeyExtractor)
-        .finish()
-        .unwrap();
-
-    GovernorLayer::new(governor_conf).error_handler(|e| {
-        match e {
-            GovernorError::TooManyRequests { wait_time, .. } => {
-                Error::TooManyRequests(wait_time as usize)
-            }
-            e => Error::Internal(e.into()),
-        }
-        .into_response()
-    })
+    limit_per_minute: usize,
+) -> RateLimiter<
+    SlidingGuard,
+    MokaStore<<IpKeyExtractor as RateIssuer>::Key, SlidingGuard>,
+    IpKeyExtractor,
+    CelledQuota,
+> {
+    RateLimiter::new(
+        SlidingGuard::new(),
+        MokaStore::new(),
+        IpKeyExtractor,
+        CelledQuota::per_minute(limit_per_minute, 6),
+    )
+    .add_headers(true)
 }

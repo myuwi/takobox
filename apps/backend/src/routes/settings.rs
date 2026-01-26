@@ -1,7 +1,10 @@
-use axum::{Json, extract::State};
+use salvo::prelude::*;
 
 use crate::{models::settings::Settings, state::AppState};
 
-pub async fn show(State(AppState { settings, .. }): State<AppState>) -> Json<Settings> {
-    Json(settings)
+#[handler]
+pub async fn show(depot: &mut Depot) -> Result<Json<Settings>, StatusError> {
+    let AppState { settings, .. } = depot.obtain::<AppState>().unwrap();
+
+    Ok(Json(settings.clone()))
 }

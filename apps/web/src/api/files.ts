@@ -26,12 +26,10 @@ export const uploadFile = async (
   signal?: AbortSignal,
 ) => {
   const form = new FormData();
-  if (collectionId) {
-    form.append("collection", collectionId);
-  }
   form.append("file", file);
 
   const { data } = await client.post("files", form, {
+    params: { collectionId },
     onUploadProgress: (event) => progressCallback?.({ file, event }),
     signal,
   });

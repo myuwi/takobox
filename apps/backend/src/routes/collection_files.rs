@@ -1,8 +1,6 @@
-use axum::{
-    Json, Router,
-    extract::{Path, State},
-    http::StatusCode,
-    routing::{delete, get, post},
+use salvo::{
+    oapi::extract::{JsonBody, PathParam},
+    prelude::*,
 };
 use serde::Deserialize;
 
@@ -13,18 +11,20 @@ use crate::{
     types::Uid,
 };
 
+#[handler]
 async fn index(
-    State(AppState { pool, .. }): State<AppState>,
+    depot: &mut Depot,
     session: Session,
-    Path(collection_id): Path<Uid>,
+    collection_id: PathParam<Uid>,
 ) -> Result<Json<Vec<File>>, Error> {
-    if !Collection::exists(&pool, session.user_id, &collection_id).await? {
+    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    if !Collection::exists(pool, session.user_id, &collection_id).await? {
         return Err(Error::NotFound(
             "Collection not found or not owned by user.",
         ));
     }
 
-    let files = Collection::get_files(&pool, session.user_id, &collection_id).await?;
+    let files = Collection::get_files(pool, session.user_id, &collection_id).await?;
 
     Ok(Json(files))
 }
@@ -34,19 +34,22 @@ pub struct CollectionFilesPayload {
     pub id: Uid,
 }
 
+#[handler]
 async fn add(
-    State(AppState { pool, .. }): State<AppState>,
+    depot: &mut Depot,
     session: Session,
-    Path(collection_id): Path<Uid>,
-    Json(body): Json<CollectionFilesPayload>,
+    collection_id: PathParam<Uid>,
+    body: JsonBody<CollectionFilesPayload>,
 ) -> Result<StatusCode, Error> {
-    if !Collection::exists(&pool, session.user_id, &collection_id).await? {
+    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+
+    if !Collection::exists(pool, session.user_id, &collection_id).await? {
         return Err(Error::NotFound(
             "Collection not found or not owned by user.",
         ));
     }
 
-    Collection::add_file(&pool, session.user_id, &collection_id, &body.id)
+    Collection::add_file(pool, session.user_id, &collection_id, &body.id)
         .await
         .map_constraint_err(
             "collection_files.collection_id, collection_files.file_id",
@@ -57,28 +60,28 @@ async fn add(
     Ok(StatusCode::CREATED)
 }
 
+#[handler]
 async fn remove(
-    State(AppState { pool, .. }): State<AppState>,
+    depot: &mut Depot,
     session: Session,
-    Path(collection_id): Path<Uid>,
-    Json(body): Json<CollectionFilesPayload>,
+    collection_id: PathParam<Uid>,
+    body: JsonBody<CollectionFilesPayload>,
 ) -> Result<StatusCode, Error> {
-    if !Collection::exists(&pool, session.user_id, &collection_id).await? {
+    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+
+    if !Collection::exists(pool, session.user_id, &collection_id).await? {
         return Err(Error::NotFound(
             "Collection not found or not owned by user.",
         ));
     }
 
-    Collection::remove_file(&pool, session.user_id, &collection_id, &body.id)
+    Collection::remove_file(pool, session.user_id, &collection_id, &body.id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found in collection."))?;
 
     Ok(StatusCode::NO_CONTENT)
 }
 
-pub fn routes() -> Router<AppState> {
-    Router::new()
-        .route("/", get(index))
-        .route("/", post(add))
-        .route("/", delete(remove))
+pub fn routes() -> Router {
+    Router::new().get(index).post(add).delete(remove)
 }
