@@ -34,5 +34,4 @@ pub fn rate_limit(
         IpKeyExtractor,
         CelledQuota::per_minute(limit_per_minute, 6),
     )
-    .add_headers(true)
 }

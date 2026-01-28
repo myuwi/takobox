@@ -4,7 +4,7 @@ use anyhow::anyhow;
 use salvo::{
     fs::NamedFile,
     http::header::{self, HeaderValue},
-    oapi::extract::{FormFile, JsonBody, PathParam},
+    oapi::extract::{FormFile, JsonBody, PathParam, QueryParam},
     prelude::*,
 };
 use sanitize_filename::is_sanitized;
@@ -23,7 +23,10 @@ use crate::{
     types::Uid,
 };
 
-#[handler]
+/// Get files
+///
+/// Get the files belonging to the current user
+#[endpoint(tags("Files"), status_codes(200))]
 async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<File>>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
     let files = File::get_all_for_user(pool, session.user_id).await?;
@@ -31,7 +34,10 @@ async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<File>>, E
     Ok(Json(files))
 }
 
-#[handler]
+/// Get file
+///
+/// Get a file belonging to the current user
+#[endpoint(tags("Files"), status_codes(200))]
 async fn show(
     depot: &mut Depot,
     session: Session,
@@ -48,20 +54,47 @@ async fn show(
 #[derive(Deserialize, Extractible, Debug)]
 #[salvo(extract(default_source(from = "query")))]
 #[serde(rename_all = "camelCase")]
-struct CreateFileSearchParams {
+struct UploadFileSearchParams {
     collection_id: Option<Uid>,
 }
 
+// TODO: Any way to automate this?
+impl EndpointArgRegister for UploadFileSearchParams {
+    fn register(
+        components: &mut salvo::oapi::Components,
+        operation: &mut salvo::oapi::Operation,
+        _arg: &str,
+    ) {
+        <QueryParam<Uid, false> as EndpointArgRegister>::register(
+            components,
+            operation,
+            "collectionId",
+        );
+    }
+}
+
+// TODO: Fix oapi status code
 // TODO: Upload quota per user
-#[handler]
-async fn create(
+/// Upload file
+///
+/// Upload a file
+#[endpoint(
+    tags("Files"),
+    status_codes(201),
+    responses(
+        (status_code = 201, description = "Response with json format data", body = File)
+    ),
+)]
+async fn upload(
+    res: &mut Response,
     depot: &mut Depot,
     session: Session,
+    // TODO: How to make this required?
     file: FormFile,
-    query_params: CreateFileSearchParams,
+    query_params: UploadFileSearchParams,
 ) -> Result<Json<File>, Error> {
     let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
-    let CreateFileSearchParams { collection_id } = &query_params;
+    let UploadFileSearchParams { collection_id } = &query_params;
 
     let Some(original_name) = file.name() else {
         return Err(Error::UnprocessableEntity("Expected file to have a name."));
@@ -116,15 +149,20 @@ async fn create(
 
     transaction.commit().await?;
 
+    res.status_code(StatusCode::CREATED);
+
     Ok(Json(file))
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct RenameFilePayload {
     pub name: String,
 }
 
-#[handler]
+/// Rename file
+///
+/// Rename a file belonging to the current user
+#[endpoint(tags("Files"), status_codes(200))]
 async fn rename(
     depot: &mut Depot,
     session: Session,
@@ -164,8 +202,11 @@ async fn rename(
     Ok(Json(file))
 }
 
-#[handler]
-async fn remove(
+/// Delete file
+///
+/// Delete a file belonging to the current user
+#[endpoint(tags("Files"), status_codes(204))]
+async fn delete(
     depot: &mut Depot,
     session: Session,
     file_id: PathParam<Uid>,
@@ -191,12 +232,17 @@ async fn remove(
     Ok(StatusCode::NO_CONTENT)
 }
 
-#[handler]
+/// Download file
+///
+/// Download a file belonging to the current user
+#[endpoint(tags("Files"), status_codes(200))]
 async fn download(
+    req: &Request,
+    res: &mut Response,
     depot: &mut Depot,
     session: Session,
     file_id: PathParam<Uid>,
-) -> Result<NamedFile, Error> {
+) -> Result<StatusCode, Error> {
     let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
 
     let file = File::get_by_public_id(pool, session.user_id, &file_id)
@@ -205,14 +251,21 @@ async fn download(
 
     let file_path = dirs.uploads_dir().join(&file.filename);
 
-    NamedFile::builder(file_path)
+    let file = NamedFile::builder(file_path)
         .attached_name(file.name)
         .build()
         .await
-        .map_err(|e| Error::Internal(e.into()))
+        .map_err(|e| Error::Internal(e.into()))?;
+
+    file.send(req.headers(), res).await;
+
+    Ok(StatusCode::OK)
 }
 
-#[handler]
+/// Regenerate thumbnail
+///
+/// Regenerate the thumbnail for a file belonging to the current user
+#[endpoint(tags("Files"), status_codes(201))]
 async fn regenerate_thumbnail(
     depot: &mut Depot,
     res: &mut Response,
@@ -253,12 +306,12 @@ pub fn routes(state: &AppState) -> Router {
 
     Router::new()
         .get(index)
-        .push(Router::with_hoop(max_size(settings.max_file_size as u64)).post(create))
+        .push(Router::with_hoop(max_size(settings.max_file_size as u64)).post(upload))
         .push(
             Router::with_path("{file_id}")
                 .get(show)
                 .patch(rename)
-                .delete(remove)
+                .delete(delete)
                 .push(Router::with_path("download").get(download))
                 .push(Router::with_path("regenerate-thumbnail").post(regenerate_thumbnail)),
         )

@@ -1,4 +1,4 @@
-use salvo::{http::headers::HeaderMap, prelude::*};
+use salvo::{http::headers::HeaderMap, oapi, prelude::*};
 use serde::Serialize;
 use tracing::error;
 
@@ -29,7 +29,23 @@ pub enum Error {
     Internal(#[from] anyhow::Error),
 }
 
-#[derive(Serialize)]
+impl EndpointOutRegister for Error {
+    fn register(components: &mut salvo::oapi::Components, operation: &mut salvo::oapi::Operation) {
+        operation.responses.insert(
+            "4XX",
+            oapi::Response::new("Error response")
+                .add_content("application/json", ErrorResponse::to_schema(components)),
+        );
+
+        operation.responses.insert(
+            "5XX",
+            oapi::Response::new("Server error response")
+                .add_content("application/json", ErrorResponse::to_schema(components)),
+        );
+    }
+}
+
+#[derive(Serialize, ToSchema)]
 struct ErrorResponse {
     message: String,
 }

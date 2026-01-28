@@ -1,4 +1,7 @@
-use salvo::http::cookie::{Cookie, SameSite};
+use salvo::{
+    http::cookie::{Cookie, SameSite},
+    oapi::{Components, EndpointArgRegister, Operation},
+};
 use sqlx::{FromRow, SqliteExecutor};
 use time::{Duration, OffsetDateTime, UtcDateTime};
 
@@ -15,6 +18,10 @@ pub struct Session {
     pub user_id: i64,
     pub created_at: i64,
     pub expires_at: i64,
+}
+
+impl EndpointArgRegister for Session {
+    fn register(_components: &mut Components, _operation: &mut Operation, _arg: &str) {}
 }
 
 impl From<Session> for Cookie<'_> {

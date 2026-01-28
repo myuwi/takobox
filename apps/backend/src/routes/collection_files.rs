@@ -11,7 +11,10 @@ use crate::{
     types::Uid,
 };
 
-#[handler]
+/// Get files
+///
+/// Get the files belonging to the current user
+#[endpoint(tags("Collections"), status_codes(200))]
 async fn index(
     depot: &mut Depot,
     session: Session,
@@ -29,12 +32,15 @@ async fn index(
     Ok(Json(files))
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct CollectionFilesPayload {
     pub id: Uid,
 }
 
-#[handler]
+/// Add file to collection
+///
+/// Add a file to a collection belonging to the current user
+#[endpoint(tags("Collections"), status_codes(201))]
 async fn add(
     depot: &mut Depot,
     session: Session,
@@ -60,7 +66,10 @@ async fn add(
     Ok(StatusCode::CREATED)
 }
 
-#[handler]
+/// Remove file from collection
+///
+/// Remove a file from a collection belonging to the current user
+#[endpoint(tags("Collections"), status_codes(204))]
 async fn remove(
     depot: &mut Depot,
     session: Session,

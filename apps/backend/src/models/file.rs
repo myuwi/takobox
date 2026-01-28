@@ -1,14 +1,16 @@
+use salvo::oapi::ToSchema;
 use serde::Serialize;
 use sqlx::{FromRow, SqliteExecutor};
 
 use super::collection::FileCollection;
 use crate::{serialize::serialize_timestamp, types::Uid};
 
-#[derive(Clone, Debug, Serialize, FromRow)]
+#[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct File {
     #[serde(skip_serializing)]
     pub id: i64,
+    #[salvo(schema(rename = "id"))]
     #[serde(rename(serialize = "id"))]
     pub public_id: Uid,
     #[serde(skip_serializing)]
@@ -16,6 +18,7 @@ pub struct File {
     pub name: String,
     pub filename: String,
     pub size: i64,
+    #[salvo(schema(value_type = String))]
     #[serde(serialize_with = "serialize_timestamp")]
     pub created_at: i64,
 }
@@ -110,7 +113,7 @@ impl File {
     }
 }
 
-#[derive(Clone, Debug, Serialize, FromRow)]
+#[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct FileWithCollections {
     #[serde(flatten)]

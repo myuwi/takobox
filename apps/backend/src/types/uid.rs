@@ -1,4 +1,5 @@
 use nanoid::nanoid;
+use salvo::oapi::ToSchema;
 use serde::{self, Deserialize, Serialize};
 use sqlx::Type;
 
@@ -9,7 +10,7 @@ pub const ALPHABET: [char; 62] = [
     'V', 'W', 'X', 'Y', 'Z',
 ];
 
-#[derive(PartialEq, Eq, Clone, Debug, Default, Serialize, Deserialize, Type)]
+#[derive(PartialEq, Eq, Clone, Debug, Default, Serialize, Deserialize, Type, ToSchema)]
 #[sqlx(transparent)]
 #[serde(try_from = "String")]
 pub struct Uid(pub String);

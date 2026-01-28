@@ -1,4 +1,7 @@
-use salvo::{oapi::extract::{JsonBody, PathParam}, prelude::*};
+use salvo::{
+    oapi::extract::{JsonBody, PathParam},
+    prelude::*,
+};
 use serde::Deserialize;
 
 use super::collection_files;
@@ -9,7 +12,10 @@ use crate::{
     types::Uid,
 };
 
-#[handler]
+/// Get collections
+///
+/// Get the current user's collections
+#[endpoint(tags("Collections"), status_codes(200))]
 async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<Collection>>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
     let collections = Collection::get_all_for_user(pool, session.user_id).await?;
@@ -17,13 +23,24 @@ async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<Collectio
     Ok(Json(collections))
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct CreateCollectionPayload {
     pub name: String,
 }
 
-#[handler]
+// TODO: Correct response struct
+/// Create collection
+///
+/// Create a collection
+#[endpoint(
+    tags("Collections"),
+    status_codes(201),
+    responses(
+        (status_code = 201, description = "Response with json format data", body = Collection)
+    ),
+)]
 async fn create(
+    res: &mut Response,
     depot: &mut Depot,
     session: Session,
     body: JsonBody<CreateCollectionPayload>,
@@ -43,15 +60,20 @@ async fn create(
             Error::Conflict("A collection with this name already exists. Please try another name.")
         })?;
 
+    res.status_code(StatusCode::CREATED);
+
     Ok(Json(collection))
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct RenameCollectionPayload {
     pub name: String,
 }
 
-#[handler]
+/// Rename collection
+///
+/// Rename a collection belonging to the current user
+#[endpoint(tags("Collections"), status_codes(200))]
 async fn rename(
     depot: &mut Depot,
     session: Session,
@@ -78,8 +100,11 @@ async fn rename(
     Ok(Json(collection))
 }
 
-#[handler]
-async fn remove(
+/// Delete collection
+///
+/// Delete a collection belonging to the current user
+#[endpoint(tags("Collections"), status_codes(204))]
+async fn delete(
     depot: &mut Depot,
     session: Session,
     collection_id: PathParam<Uid>,
@@ -97,7 +122,7 @@ pub fn routes() -> Router {
     Router::new().get(index).post(create).push(
         Router::with_path("{collection_id}")
             .patch(rename)
-            .delete(remove)
+            .delete(delete)
             .push(Router::with_path("files").push(collection_files::routes())),
     )
 }

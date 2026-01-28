@@ -1,4 +1,4 @@
-use salvo::{catcher::Catcher, prelude::*};
+use salvo::{catcher::Catcher, oapi::Info, prelude::*};
 
 mod auth;
 mod collection_files;
@@ -37,12 +37,27 @@ pub fn router(app_state: AppState) -> Service {
         .push(Router::with_path("files").push(files::routes(&app_state)))
         .push(Router::with_path("collections").push(collections::routes()));
 
-    let router = Router::new()
+    let router = Router::with_path("api")
         .hoop(affix_state::inject(app_state))
         .hoop(rate_limit(120))
         .hoop(inject_auth)
         .push(public)
         .push(protected);
+
+    let doc = OpenApi::with_info(
+        Info::new("Takobox API Reference", "0.1.0").description("The Takobox API Reference"),
+    )
+    .merge_router(&router);
+
+    let router = router.unshift(
+        Router::new()
+            .push(doc.into_router("/docs/openapi.json"))
+            .push(
+                Scalar::new("/api/docs/openapi.json")
+                    .title("Takobox API Reference")
+                    .into_router("/docs"),
+            ),
+    );
 
     Service::new(router)
         .hoop(Logger::new())

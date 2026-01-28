@@ -34,10 +34,9 @@ pub async fn inject_auth(depot: &mut Depot, req: &mut Request) {
 #[handler]
 pub async fn require_auth(_session: Session) {}
 
-static METADATA: Metadata = Metadata::new("Session");
-
 impl<'ex> Extractible<'ex> for Session {
     fn metadata() -> &'static Metadata {
+        static METADATA: Metadata = Metadata::new("Session");
         &METADATA
     }
 

@@ -6,7 +6,10 @@ use crate::{
     state::AppState,
 };
 
-#[handler]
+/// Get current user
+///
+/// Get information about the currently logged in user
+#[endpoint(tags("Users"), status_codes(200))]
 pub async fn show(depot: &mut Depot, session: Session) -> Result<Json<User>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
 

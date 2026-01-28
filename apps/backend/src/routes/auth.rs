@@ -11,13 +11,16 @@ use crate::{
     state::AppState,
 };
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, ToSchema)]
 struct AuthPayload {
     pub username: String,
     pub password: String,
 }
 
-#[handler]
+/// Login
+///
+/// Log in to a user account
+#[endpoint(tags("Auth"), status_codes(200))]
 async fn login(
     body: JsonBody<AuthPayload>,
     depot: &mut Depot,
@@ -65,7 +68,10 @@ fn validate_register_body(body: &AuthPayload) -> Result<(), &'static str> {
     Ok(())
 }
 
-#[handler]
+/// Register
+///
+/// Register a user account
+#[endpoint(tags("Auth"), status_codes(201))]
 async fn register(
     body: JsonBody<AuthPayload>,
     depot: &mut Depot,
@@ -101,7 +107,10 @@ async fn register(
     Ok(StatusCode::CREATED)
 }
 
-#[handler]
+/// Logout
+///
+/// Log out of a user account, invalidating the login session
+#[endpoint(tags("Auth"), status_codes(200))]
 async fn logout(
     depot: &mut Depot,
     res: &mut Response,
