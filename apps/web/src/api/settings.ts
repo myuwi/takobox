@@ -1,7 +1,7 @@
-import type { Settings } from "@/types/Settings";
+import type { SettingsDto } from "@/types";
 import { client } from "./client";
 
 export const getSettings = async () => {
-  const { data } = await client.get<Settings>("settings");
+  const { data } = await client.get<SettingsDto>("settings");
   return data;
 };

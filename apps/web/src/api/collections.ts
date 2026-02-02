@@ -1,5 +1,4 @@
-import type { CollectionDto } from "@/types/CollectionDto";
-import type { FileDto } from "@/types/FileDto";
+import type { CollectionDto, FileDto } from "@/types";
 import { client } from "./client";
 
 export const getCollections = async () => {

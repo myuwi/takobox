@@ -5,7 +5,7 @@ import { useSetAtom } from "jotai";
 import { MoreHorizontal, PencilLine, Trash } from "lucide-react";
 import { confirmationDialogAtom, renameDialogAtom } from "@/atoms/dialogs";
 import { deleteCollectionOptions, renameCollectionOptions } from "@/queries/collections";
-import type { CollectionDto } from "@/types/CollectionDto";
+import type { CollectionDto } from "@/types";
 import { Button } from "./primitives/Button";
 import * as Menu from "./primitives/Menu";
 

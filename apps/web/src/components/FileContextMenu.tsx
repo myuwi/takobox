@@ -19,7 +19,7 @@ import {
   removeFileFromCollectionOptions,
 } from "@/queries/collections";
 import { deleteFileOptions, fileOptions, renameFileOptions } from "@/queries/files";
-import type { FileDto } from "@/types/FileDto";
+import type { FileDto } from "@/types";
 import { copyToClipboard } from "@/utils/clipboard";
 import { stopPropagation } from "@/utils/event";
 import { getThumbnailPath } from "@/utils/files";

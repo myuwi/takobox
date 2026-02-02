@@ -1,5 +1,5 @@
 import type { AxiosProgressEvent } from "axios";
-import type { FileDto, FileWithCollections } from "@/types/FileDto";
+import type { FileDto, FileWithCollectionsDto } from "@/types";
 import { client } from "./client";
 
 export interface ProgressInfo {
@@ -15,7 +15,7 @@ export const getFiles = async () => {
 };
 
 export const getFile = async (id: string) => {
-  const { data } = await client.get<FileWithCollections>(`files/${id}`);
+  const { data } = await client.get<FileWithCollectionsDto>(`files/${id}`);
   return data;
 };
 

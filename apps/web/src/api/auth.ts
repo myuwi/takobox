@@ -1,5 +1,4 @@
-import type { AuthPayload } from "@/types/AuthPayload";
-import type { User } from "@/types/User";
+import type { AuthPayload, UserDto } from "@/types";
 import { client } from "./client";
 
 export const login = async (payload: AuthPayload) => {
@@ -18,6 +17,6 @@ export const logout = async () => {
 };
 
 export const me = async () => {
-  const { data } = await client.get<User>("me");
+  const { data } = await client.get<UserDto>("me");
   return data;
 };

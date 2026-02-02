@@ -8,7 +8,7 @@ import { Input } from "@/components/primitives/Input";
 import { Label } from "@/components/primitives/Label";
 import { registerOptions } from "@/queries/register";
 import { settingsOptions } from "@/queries/settings";
-import type { AuthPayload } from "@/types/AuthPayload";
+import type { AuthPayload } from "@/types";
 import { formatError } from "@/utils/error";
 
 export const Route = createFileRoute("/(auth)/signup")({

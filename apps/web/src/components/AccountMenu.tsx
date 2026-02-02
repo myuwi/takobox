@@ -3,10 +3,10 @@ import { LogOut, UserIcon } from "lucide-react";
 import { logout } from "@/api/auth";
 import { Button } from "@/components/primitives/Button";
 import * as Menu from "@/components/primitives/Menu";
-import type { User } from "@/types/User";
+import type { UserDto } from "@/types";
 
 interface AccountMenuProps {
-  user: User;
+  user: UserDto;
 }
 
 export const AccountMenu = ({ user }: AccountMenuProps) => {

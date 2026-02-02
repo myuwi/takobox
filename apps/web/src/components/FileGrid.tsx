@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent 
 import { useAtom } from "jotai";
 import { Check, File } from "lucide-react";
 import { selectedFilesAtom } from "@/atoms/selected-files";
-import type { FileDto } from "@/types/FileDto";
+import type { FileDto } from "@/types";
 import { cn } from "@/utils/cn";
 import { stopPropagation } from "@/utils/event";
 import { formatBytes, getThumbnailPath } from "@/utils/files";
