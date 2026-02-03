@@ -26,35 +26,25 @@ impl EndpointArgRegister for Session {
 
 impl From<Session> for Cookie<'_> {
     fn from(session: Session) -> Self {
-        let mut cookie = Cookie::build(("session", session.public_id.to_string()))
+        Cookie::build(("session", session.public_id.to_string()))
             .http_only(true)
+            .secure(cfg!(not(debug_assertions)))
             .path("/")
             .expires(OffsetDateTime::from_unix_timestamp(session.expires_at).unwrap())
             .same_site(SameSite::Lax)
-            .build();
-
-        if cfg!(not(debug_assertions)) {
-            cookie.set_secure(true);
-        }
-
-        cookie
+            .build()
     }
 }
 
 impl Session {
     pub fn empty_cookie<'c>() -> Cookie<'c> {
-        let mut cookie = Cookie::build(("session", ""))
+        Cookie::build(("session", ""))
             .http_only(true)
+            .secure(cfg!(not(debug_assertions)))
             .path("/")
             .expires(OffsetDateTime::now_utc())
             .same_site(SameSite::Lax)
-            .build();
-
-        if cfg!(not(debug_assertions)) {
-            cookie.set_secure(true);
-        }
-
-        cookie
+            .build()
     }
 }
 
