@@ -1,23 +1,24 @@
 {
   "name": "takobox",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "preinstall": "bunx only-allow bun",
     "prepare": "husky || true",
+    "fmt": "bun -F '*' fmt",
     "lint": "bun -F '*' lint",
     "docker": "docker compose -f docker-compose.build.yml up --build",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
     "docker:dev:down": "docker-compose -f docker-compose.dev.yml down"
   },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "trustedDependencies": [
-    "@parcel/watcher"
-  ],
   "devDependencies": {
     "husky": "^9.1.7"
-  }
+  },
+  "trustedDependencies": [
+    "@parcel/watcher"
+  ]
 }

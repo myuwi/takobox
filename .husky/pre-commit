@@ -1,1 +1,2 @@
+bun run fmt
 bun run lint

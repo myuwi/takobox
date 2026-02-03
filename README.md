@@ -24,11 +24,11 @@ Takobox can be configured using the following environment variables.
 
 ### Backend
 
-| Variable                          | Description                                                            | Default              |
-| --------------------------------- | ---------------------------------------------------------------------- | -------------------- |
-| `TAKOBOX_SESSION_SECRET`          | A secret key used sign session tokens. Must be at least 64 bytes long. | unset                |
-| `TAKOBOX_DATA_DIR`                | Directory to store data, such as uploads and thumbnails.               | `takobox_data`       |
-| `TAKOBOX_ENABLE_ACCOUNT_CREATION` | Whether to allow new user accounts to be created.                      | `false`              |
+| Variable                          | Description                                                            | Default            |
+| --------------------------------- | ---------------------------------------------------------------------- | ------------------ |
+| `TAKOBOX_SESSION_SECRET`          | A secret key used sign session tokens. Must be at least 64 bytes long. | unset              |
+| `TAKOBOX_DATA_DIR`                | Directory to store data, such as uploads and thumbnails.               | `takobox_data`     |
+| `TAKOBOX_ENABLE_ACCOUNT_CREATION` | Whether to allow new user accounts to be created.                      | `false`            |
 | `TAKOBOX_MAX_FILE_SIZE`           | Maximum file size in bytes.                                            | `32000000` (32 MB) |
 
 ### Web

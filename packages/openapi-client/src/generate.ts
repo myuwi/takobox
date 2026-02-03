@@ -26,12 +26,8 @@ const { values } = parseArgs({
 assert(values.input, "Input path is not defined.");
 assert(values.output, "Output path is not defined.");
 
-const BLOB = ts.factory.createTypeReferenceNode(
-  ts.factory.createIdentifier("Blob"),
-);
-const FILE = ts.factory.createTypeReferenceNode(
-  ts.factory.createIdentifier("File"),
-);
+const BLOB = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("Blob"));
+const FILE = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("File"));
 
 const transformFileAndBlob = (
   schemaObject: SchemaObject,
@@ -40,18 +36,14 @@ const transformFileAndBlob = (
   if (schemaObject.format === "binary") {
     if (options.path?.endsWith("multipart~1form-data")) {
       return {
-        schema: schemaObject.nullable
-          ? ts.factory.createUnionTypeNode([FILE, NULL])
-          : FILE,
+        schema: schemaObject.nullable ? ts.factory.createUnionTypeNode([FILE, NULL]) : FILE,
         questionToken: true,
       };
     }
 
     if (options.path?.endsWith("application~1octet-stream")) {
       return {
-        schema: schemaObject.nullable
-          ? ts.factory.createUnionTypeNode([BLOB, NULL])
-          : BLOB,
+        schema: schemaObject.nullable ? ts.factory.createUnionTypeNode([BLOB, NULL]) : BLOB,
         questionToken: true,
       };
     }

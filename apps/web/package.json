@@ -6,9 +6,8 @@
     "dev": "vite dev --port 3000 --host",
     "build": "vite build",
     "start": "bun .output/server/index.mjs",
-    "lint": "conc -r -m 1 bun:lint:*",
-    "lint:oxlint": "oxlint --type-aware --type-check --deny-warnings .",
-    "lint:prettier": "prettier --check .",
+    "fmt": "prettier --check .",
+    "lint": "oxlint --type-aware --type-check --deny-warnings .",
     "generate-types": "bunx openapi-client -i http://localhost/docs/openapi.json -o ./src/types/api.gen.ts"
   },
   "dependencies": {
@@ -45,7 +44,6 @@
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
-    "concurrently": "^9.2.1",
     "oxlint": "^1.41.0",
     "oxlint-tsgolint": "^0.11.1",
     "prettier": "^3.8.0",

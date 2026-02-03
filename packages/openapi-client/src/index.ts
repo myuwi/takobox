@@ -28,21 +28,14 @@ const buildUrl = (path: string, params?: Record<string, string>) => {
   return path;
 };
 
-export function createClient<
-  T extends PathsObject,
-  Prefix extends string = string,
->(
+export function createClient<T extends PathsObject, Prefix extends string = string>(
   baseUrl: Prefix,
   options?: Omit<RequestOptions, "baseURL">,
 ): Client<T, Prefix>;
-export function createClient<
-  T extends PathsObject,
-  Prefix extends string = string,
->(instance: AxiosInstance): Client<T, Prefix>;
-export function createClient<
-  T extends PathsObject,
-  Prefix extends string = string,
->(
+export function createClient<T extends PathsObject, Prefix extends string = string>(
+  instance: AxiosInstance,
+): Client<T, Prefix>;
+export function createClient<T extends PathsObject, Prefix extends string = string>(
   baseUrlOrInstance: Prefix | AxiosInstance,
   options?: RequestOptions,
 ): Client<T, Prefix> {
