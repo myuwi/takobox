@@ -37,23 +37,30 @@ pub fn router(app_state: AppState) -> Service {
         .push(Router::with_path("files").push(files::routes(&app_state)))
         .push(Router::with_path("collections").push(collections::routes()));
 
-    let router = Router::with_path("api")
-        .hoop(affix_state::inject(app_state))
-        .hoop(rate_limit(120))
-        .hoop(inject_auth)
-        .push(public)
-        .push(protected);
+    let router = Router::new().push(
+        Router::with_path("api")
+            .hoop(affix_state::inject(app_state))
+            .hoop(rate_limit(120))
+            .hoop(inject_auth)
+            .push(public)
+            .push(protected),
+    );
 
-    let doc = OpenApi::with_info(
+    let mut doc = OpenApi::with_info(
         Info::new("Takobox API Reference", "0.1.0").description("The Takobox API Reference"),
     )
     .merge_router(&router);
 
-    let router = router.unshift(
+    // Remove StatusError from the schemas as it is not used
+    doc.components
+        .schemas
+        .remove("salvo_core.http.errors.status_error.StatusError");
+
+    let router = router.push(
         Router::new()
             .push(doc.into_router("/docs/openapi.json"))
             .push(
-                Scalar::new("/api/docs/openapi.json")
+                Scalar::new("/docs/openapi.json")
                     .title("Takobox API Reference")
                     .into_router("/docs"),
             ),

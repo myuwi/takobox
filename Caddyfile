@@ -6,22 +6,19 @@
 
 {$BASE_URL} {
   route {
-    handle /api/* {
-      reverse_proxy http://takobox_server:8000 {
-        # Remove Set-Cookie "Secure" flag when running in HTTP
-        # header_down Set-Cookie "^(.*); Secure(;.*)?$" "$1$2"
-      }
-    }
+    reverse_proxy /api/* http://takobox_server:8000
+    reverse_proxy /docs* http://takobox_server:8000
+
     file_server {
       root /data/uploads
       pass_thru
     }
-    handle_path /thumbs/* {
-      file_server {
-        root /data/thumbs
-        pass_thru
-      }
+
+    file_server /thumbs/* {
+      root /data/thumbs
+      pass_thru
     }
+
     reverse_proxy http://takobox_web:3000
   }
 }
