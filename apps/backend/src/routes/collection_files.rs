@@ -18,16 +18,16 @@ use crate::{
 async fn index(
     depot: &mut Depot,
     session: Session,
-    collection_id: PathParam<Uid>,
+    id: PathParam<Uid>,
 ) -> Result<Json<Vec<File>>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
-    if !Collection::exists(pool, session.user_id, &collection_id).await? {
+    if !Collection::exists(pool, session.user_id, &id).await? {
         return Err(Error::NotFound(
             "Collection not found or not owned by user.",
         ));
     }
 
-    let files = Collection::get_files(pool, session.user_id, &collection_id).await?;
+    let files = Collection::get_files(pool, session.user_id, &id).await?;
 
     Ok(Json(files))
 }
@@ -44,18 +44,18 @@ pub struct CollectionFilesPayload {
 async fn add(
     depot: &mut Depot,
     session: Session,
-    collection_id: PathParam<Uid>,
+    id: PathParam<Uid>,
     body: JsonBody<CollectionFilesPayload>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
 
-    if !Collection::exists(pool, session.user_id, &collection_id).await? {
+    if !Collection::exists(pool, session.user_id, &id).await? {
         return Err(Error::NotFound(
             "Collection not found or not owned by user.",
         ));
     }
 
-    Collection::add_file(pool, session.user_id, &collection_id, &body.id)
+    Collection::add_file(pool, session.user_id, &id, &body.id)
         .await
         .map_constraint_err(
             "collection_files.collection_id, collection_files.file_id",
@@ -73,18 +73,18 @@ async fn add(
 async fn remove(
     depot: &mut Depot,
     session: Session,
-    collection_id: PathParam<Uid>,
+    id: PathParam<Uid>,
     body: JsonBody<CollectionFilesPayload>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
 
-    if !Collection::exists(pool, session.user_id, &collection_id).await? {
+    if !Collection::exists(pool, session.user_id, &id).await? {
         return Err(Error::NotFound(
             "Collection not found or not owned by user.",
         ));
     }
 
-    Collection::remove_file(pool, session.user_id, &collection_id, &body.id)
+    Collection::remove_file(pool, session.user_id, &id, &body.id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found in collection."))?;
 

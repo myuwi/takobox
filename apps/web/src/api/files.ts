@@ -13,7 +13,7 @@ export const getFiles = async () => {
 };
 
 export const getFile = async (id: string) => {
-  return await client.get("/files/{file_id}", { path: { file_id: id } });
+  return await client.get("/files/{id}", { path: { id } });
 };
 
 export const uploadFile = async (
@@ -33,16 +33,16 @@ export const uploadFile = async (
 };
 
 export const renameFile = async (id: string, name: string) => {
-  return await client.patch("/files/{file_id}", {
-    path: { file_id: id },
+  return await client.patch("/files/{id}", {
+    path: { id },
     json: { name },
   });
 };
 
 export const deleteFile = async (id: string) => {
-  return await client.delete("/files/{file_id}", { path: { file_id: id } });
+  return await client.delete("/files/{id}", { path: { id } });
 };
 
 export const regenerateThumbnail = async (id: string) => {
-  return await client.post("/files/{file_id}/regenerate-thumbnail", { path: { file_id: id } });
+  return await client.post("/files/{id}/regenerate-thumbnail", { path: { id } });
 };

@@ -9,34 +9,34 @@ export const createCollection = async (name: string) => {
 };
 
 export const renameCollection = async (id: string, name: string) => {
-  return await client.patch("/collections/{collection_id}", {
-    path: { collection_id: id },
+  return await client.patch("/collections/{id}", {
+    path: { id },
     json: { name },
   });
 };
 
 export const deleteCollection = async (id: string) => {
-  return await client.delete("/collections/{collection_id}", {
-    path: { collection_id: id },
+  return await client.delete("/collections/{id}", {
+    path: { id },
   });
 };
 
 export const getCollectionFiles = async (id: string) => {
-  return await client.get("/collections/{collection_id}/files", {
-    path: { collection_id: id },
+  return await client.get("/collections/{id}/files", {
+    path: { id },
   });
 };
 
 export const addFileToCollection = async (id: string, fileId: string) => {
-  return await client.post("/collections/{collection_id}/files", {
-    path: { collection_id: id },
+  return await client.post("/collections/{id}/files", {
+    path: { id },
     json: { id: fileId },
   });
 };
 
 export const removeFileFromCollection = async (id: string, fileId: string) => {
-  return await client.delete("/collections/{collection_id}/files", {
-    path: { collection_id: id },
+  return await client.delete("/collections/{id}/files", {
+    path: { id },
     json: { id: fileId },
   });
 };

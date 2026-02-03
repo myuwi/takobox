@@ -77,7 +77,7 @@ pub struct RenameCollectionPayload {
 async fn rename(
     depot: &mut Depot,
     session: Session,
-    collection_id: PathParam<Uid>,
+    id: PathParam<Uid>,
     body: JsonBody<RenameCollectionPayload>,
 ) -> Result<Json<Collection>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
@@ -90,7 +90,7 @@ async fn rename(
         ));
     }
 
-    let collection = Collection::rename(pool, session.user_id, &collection_id, name)
+    let collection = Collection::rename(pool, session.user_id, &id, name)
         .await
         .map_constraint_err("collections.user_id, collections.name", |_| {
             Error::Conflict("A collection with this name already exists. Please try another name.")
@@ -107,11 +107,11 @@ async fn rename(
 async fn delete(
     depot: &mut Depot,
     session: Session,
-    collection_id: PathParam<Uid>,
+    id: PathParam<Uid>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
 
-    Collection::delete(pool, session.user_id, &collection_id)
+    Collection::delete(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
 
@@ -120,7 +120,7 @@ async fn delete(
 
 pub fn routes() -> Router {
     Router::new().get(index).post(create).push(
-        Router::with_path("{collection_id}")
+        Router::with_path("{id}")
             .patch(rename)
             .delete(delete)
             .push(Router::with_path("files").push(collection_files::routes())),

@@ -41,10 +41,10 @@ async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<File>>, E
 async fn show(
     depot: &mut Depot,
     session: Session,
-    file_id: PathParam<Uid>,
+    id: PathParam<Uid>,
 ) -> Result<Json<FileWithCollections>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
-    let file = FileWithCollections::get_by_public_id(pool, session.user_id, &file_id)
+    let file = FileWithCollections::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -166,7 +166,7 @@ pub struct RenameFilePayload {
 async fn rename(
     depot: &mut Depot,
     session: Session,
-    file_id: PathParam<Uid>,
+    id: PathParam<Uid>,
     body: JsonBody<RenameFilePayload>,
 ) -> Result<Json<File>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
@@ -182,7 +182,7 @@ async fn rename(
         ));
     }
 
-    let file = File::get_by_public_id(pool, session.user_id, &file_id)
+    let file = File::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -195,7 +195,7 @@ async fn rename(
         ));
     }
 
-    let file = File::rename(pool, session.user_id, &file_id, name)
+    let file = File::rename(pool, session.user_id, &id, name)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -209,11 +209,11 @@ async fn rename(
 async fn delete(
     depot: &mut Depot,
     session: Session,
-    file_id: PathParam<Uid>,
+    id: PathParam<Uid>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
 
-    let file = File::delete(pool, session.user_id, &file_id)
+    let file = File::delete(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -241,11 +241,11 @@ async fn download(
     res: &mut Response,
     depot: &mut Depot,
     session: Session,
-    file_id: PathParam<Uid>,
+    id: PathParam<Uid>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
 
-    let file = File::get_by_public_id(pool, session.user_id, &file_id)
+    let file = File::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -270,11 +270,11 @@ async fn regenerate_thumbnail(
     depot: &mut Depot,
     res: &mut Response,
     session: Session,
-    file_id: PathParam<Uid>,
+    id: PathParam<Uid>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
 
-    let file = File::get_by_public_id(pool, session.user_id, &file_id)
+    let file = File::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -308,7 +308,7 @@ pub fn routes(state: &AppState) -> Router {
         .get(index)
         .push(Router::with_hoop(max_size(settings.max_file_size as u64)).post(upload))
         .push(
-            Router::with_path("{file_id}")
+            Router::with_path("{id}")
                 .get(show)
                 .patch(rename)
                 .delete(delete)

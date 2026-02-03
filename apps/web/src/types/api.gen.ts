@@ -83,7 +83,7 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/api/collections/{collection_id}": {
+    "/api/collections/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -107,7 +107,7 @@ export type paths = {
         patch: operations["takobox.routes.collections.rename"];
         trace?: never;
     };
-    "/api/collections/{collection_id}/files": {
+    "/api/collections/{id}/files": {
         parameters: {
             query?: never;
             header?: never;
@@ -159,7 +159,7 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/api/files/{file_id}": {
+    "/api/files/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -187,7 +187,7 @@ export type paths = {
         patch: operations["takobox.routes.files.rename"];
         trace?: never;
     };
-    "/api/files/{file_id}/download": {
+    "/api/files/{id}/download": {
         parameters: {
             query?: never;
             header?: never;
@@ -207,7 +207,7 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/api/files/{file_id}/regenerate-thumbnail": {
+    "/api/files/{id}/regenerate-thumbnail": {
         parameters: {
             query?: never;
             header?: never;
@@ -541,8 +541,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Get parameter `collection_id` from request url path. */
-                collection_id: components["schemas"]["takobox.types.uid.Uid"];
+                /** @description Get parameter `id` from request url path. */
+                id: components["schemas"]["takobox.types.uid.Uid"];
             };
             cookie?: never;
         };
@@ -580,8 +580,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Get parameter `collection_id` from request url path. */
-                collection_id: components["schemas"]["takobox.types.uid.Uid"];
+                /** @description Get parameter `id` from request url path. */
+                id: components["schemas"]["takobox.types.uid.Uid"];
             };
             cookie?: never;
         };
@@ -626,8 +626,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Get parameter `collection_id` from request url path. */
-                collection_id: components["schemas"]["takobox.types.uid.Uid"];
+                /** @description Get parameter `id` from request url path. */
+                id: components["schemas"]["takobox.types.uid.Uid"];
             };
             cookie?: never;
         };
@@ -667,8 +667,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Get parameter `collection_id` from request url path. */
-                collection_id: components["schemas"]["takobox.types.uid.Uid"];
+                /** @description Get parameter `id` from request url path. */
+                id: components["schemas"]["takobox.types.uid.Uid"];
             };
             cookie?: never;
         };
@@ -711,8 +711,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Get parameter `collection_id` from request url path. */
-                collection_id: components["schemas"]["takobox.types.uid.Uid"];
+                /** @description Get parameter `id` from request url path. */
+                id: components["schemas"]["takobox.types.uid.Uid"];
             };
             cookie?: never;
         };
@@ -842,8 +842,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Get parameter `file_id` from request url path. */
-                file_id: components["schemas"]["takobox.types.uid.Uid"];
+                /** @description Get parameter `id` from request url path. */
+                id: components["schemas"]["takobox.types.uid.Uid"];
             };
             cookie?: never;
         };
@@ -883,8 +883,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Get parameter `file_id` from request url path. */
-                file_id: components["schemas"]["takobox.types.uid.Uid"];
+                /** @description Get parameter `id` from request url path. */
+                id: components["schemas"]["takobox.types.uid.Uid"];
             };
             cookie?: never;
         };
@@ -922,8 +922,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Get parameter `file_id` from request url path. */
-                file_id: components["schemas"]["takobox.types.uid.Uid"];
+                /** @description Get parameter `id` from request url path. */
+                id: components["schemas"]["takobox.types.uid.Uid"];
             };
             cookie?: never;
         };
@@ -968,8 +968,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Get parameter `file_id` from request url path. */
-                file_id: components["schemas"]["takobox.types.uid.Uid"];
+                /** @description Get parameter `id` from request url path. */
+                id: components["schemas"]["takobox.types.uid.Uid"];
             };
             cookie?: never;
         };
@@ -1007,8 +1007,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Get parameter `file_id` from request url path. */
-                file_id: components["schemas"]["takobox.types.uid.Uid"];
+                /** @description Get parameter `id` from request url path. */
+                id: components["schemas"]["takobox.types.uid.Uid"];
             };
             cookie?: never;
         };
