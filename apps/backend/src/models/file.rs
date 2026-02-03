@@ -3,7 +3,7 @@ use serde::Serialize;
 use sqlx::{FromRow, SqliteExecutor};
 
 use super::collection::FileCollection;
-use crate::{serialize::serialize_timestamp, types::Uid};
+use crate::{serialize::serialize_timestamp, types::NanoId};
 
 #[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
 #[serde(rename_all = "camelCase")]
@@ -12,7 +12,7 @@ pub struct File {
     pub id: i64,
     #[salvo(schema(rename = "id"))]
     #[serde(rename(serialize = "id"))]
-    pub public_id: Uid,
+    pub public_id: NanoId,
     #[serde(skip_serializing)]
     pub user_id: i64,
     pub name: String,
@@ -41,7 +41,7 @@ impl File {
     pub async fn get_by_public_id(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
-        id: &Uid,
+        id: &NanoId,
     ) -> Result<Option<File>, sqlx::Error> {
         sqlx::query_as(
             "select * from files
@@ -56,7 +56,7 @@ impl File {
     pub async fn create(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
-        id: &Uid,
+        id: &NanoId,
         file_name: &str,
         original_name: &str,
         size: &usize,
@@ -80,7 +80,7 @@ impl File {
     pub async fn rename(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
-        id: &Uid,
+        id: &NanoId,
         name: &str,
     ) -> Result<Option<File>, sqlx::Error> {
         sqlx::query_as(
@@ -99,7 +99,7 @@ impl File {
     pub async fn delete(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
-        id: &Uid,
+        id: &NanoId,
     ) -> Result<Option<File>, sqlx::Error> {
         sqlx::query_as(
             "delete from files 
@@ -127,7 +127,7 @@ impl FileWithCollections {
     pub async fn get_by_public_id(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
-        id: &Uid,
+        id: &NanoId,
     ) -> Result<Option<FileWithCollections>, sqlx::Error> {
         sqlx::query_as(
             r#"select 

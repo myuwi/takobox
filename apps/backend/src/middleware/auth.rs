@@ -8,12 +8,12 @@ use salvo::{
 };
 use sqlx::SqlitePool;
 
-use crate::{error::Error, models::session::Session, state::AppState, types::Uid};
+use crate::{error::Error, models::session::Session, state::AppState, types::NanoId};
 
 async fn resolve_session(pool: &SqlitePool, jar: &PrivateJar<&CookieJar>) -> Option<Session> {
     let session_id = jar
         .get("session")
-        .and_then(|c| Uid::try_from(c.value().to_string()).ok())?;
+        .and_then(|c| NanoId::try_from(c.value().to_string()).ok())?;
 
     Session::get_by_public_id(pool, &session_id).await.ok()
 }

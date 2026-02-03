@@ -271,30 +271,22 @@ export type paths = {
 export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
-        "salvo_core.http.errors.status_error.StatusError": {
-            brief: string;
-            cause?: string;
-            /** Format: uint16 */
-            code: number;
-            detail: string;
-            name: string;
-        };
         "takobox.error.ErrorResponse": {
             message: string;
         };
         "takobox.models.collection.Collection": {
             createdAt: string;
-            id: components["schemas"]["takobox.types.uid.Uid"];
+            id: components["schemas"]["takobox.types.nanoid.NanoId"];
             name: string;
         };
         "takobox.models.collection.FileCollection": {
-            id: components["schemas"]["takobox.types.uid.Uid"];
+            id: components["schemas"]["takobox.types.nanoid.NanoId"];
             name: string;
         };
         "takobox.models.file.File": {
             createdAt: string;
             filename: string;
-            id: components["schemas"]["takobox.types.uid.Uid"];
+            id: components["schemas"]["takobox.types.nanoid.NanoId"];
             name: string;
             /** Format: int64 */
             size: number;
@@ -308,7 +300,7 @@ export type components = {
         };
         "takobox.models.user.User": {
             createdAt: string;
-            id: components["schemas"]["takobox.types.uid.Uid"];
+            id: components["schemas"]["takobox.types.nanoid.NanoId"];
             username: string;
         };
         "takobox.routes.auth.AuthPayload": {
@@ -316,7 +308,7 @@ export type components = {
             username: string;
         };
         "takobox.routes.collection_files.CollectionFilesPayload": {
-            id: components["schemas"]["takobox.types.uid.Uid"];
+            id: components["schemas"]["takobox.types.nanoid.NanoId"];
         };
         "takobox.routes.collections.CreateCollectionPayload": {
             name: string;
@@ -327,7 +319,7 @@ export type components = {
         "takobox.routes.files.RenameFilePayload": {
             name: string;
         };
-        "takobox.types.uid.Uid": string;
+        "takobox.types.nanoid.NanoId": string;
     };
     responses: never;
     parameters: never;
@@ -542,7 +534,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Get parameter `id` from request url path. */
-                id: components["schemas"]["takobox.types.uid.Uid"];
+                id: components["schemas"]["takobox.types.nanoid.NanoId"];
             };
             cookie?: never;
         };
@@ -581,7 +573,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Get parameter `id` from request url path. */
-                id: components["schemas"]["takobox.types.uid.Uid"];
+                id: components["schemas"]["takobox.types.nanoid.NanoId"];
             };
             cookie?: never;
         };
@@ -627,7 +619,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Get parameter `id` from request url path. */
-                id: components["schemas"]["takobox.types.uid.Uid"];
+                id: components["schemas"]["takobox.types.nanoid.NanoId"];
             };
             cookie?: never;
         };
@@ -668,7 +660,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Get parameter `id` from request url path. */
-                id: components["schemas"]["takobox.types.uid.Uid"];
+                id: components["schemas"]["takobox.types.nanoid.NanoId"];
             };
             cookie?: never;
         };
@@ -712,7 +704,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Get parameter `id` from request url path. */
-                id: components["schemas"]["takobox.types.uid.Uid"];
+                id: components["schemas"]["takobox.types.nanoid.NanoId"];
             };
             cookie?: never;
         };
@@ -792,7 +784,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Get parameter `collectionId` from request url query. */
-                collectionId?: components["schemas"]["takobox.types.uid.Uid"];
+                collectionId?: components["schemas"]["takobox.types.nanoid.NanoId"];
             };
             header?: never;
             path?: never;
@@ -843,7 +835,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Get parameter `id` from request url path. */
-                id: components["schemas"]["takobox.types.uid.Uid"];
+                id: components["schemas"]["takobox.types.nanoid.NanoId"];
             };
             cookie?: never;
         };
@@ -884,7 +876,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Get parameter `id` from request url path. */
-                id: components["schemas"]["takobox.types.uid.Uid"];
+                id: components["schemas"]["takobox.types.nanoid.NanoId"];
             };
             cookie?: never;
         };
@@ -923,7 +915,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Get parameter `id` from request url path. */
-                id: components["schemas"]["takobox.types.uid.Uid"];
+                id: components["schemas"]["takobox.types.nanoid.NanoId"];
             };
             cookie?: never;
         };
@@ -969,7 +961,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Get parameter `id` from request url path. */
-                id: components["schemas"]["takobox.types.uid.Uid"];
+                id: components["schemas"]["takobox.types.nanoid.NanoId"];
             };
             cookie?: never;
         };
@@ -1008,7 +1000,7 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Get parameter `id` from request url path. */
-                id: components["schemas"]["takobox.types.uid.Uid"];
+                id: components["schemas"]["takobox.types.nanoid.NanoId"];
             };
             cookie?: never;
         };

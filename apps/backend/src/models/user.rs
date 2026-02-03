@@ -2,7 +2,7 @@ use salvo::oapi::ToSchema;
 use serde::Serialize;
 use sqlx::{FromRow, SqliteExecutor};
 
-use crate::{serialize::serialize_timestamp, types::Uid};
+use crate::{serialize::serialize_timestamp, types::NanoId};
 
 #[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
 #[serde(rename_all = "camelCase")]
@@ -11,7 +11,7 @@ pub struct User {
     pub id: i64,
     #[salvo(schema(rename = "id"))]
     #[serde(rename(serialize = "id"))]
-    pub public_id: Uid,
+    pub public_id: NanoId,
     pub username: String,
     #[serde(skip_serializing)]
     pub password: String,
@@ -26,7 +26,7 @@ impl User {
         username: &str,
         password_hash: &str,
     ) -> Result<User, sqlx::Error> {
-        let id = Uid::new(6);
+        let id = NanoId::new(6);
 
         sqlx::query_as(
             "insert into users (public_id, username, password) values ($1, $2, $3) returning *",

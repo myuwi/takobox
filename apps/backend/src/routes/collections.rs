@@ -9,7 +9,7 @@ use crate::{
     error::{Error, ResultExt},
     models::{collection::Collection, session::Session},
     state::AppState,
-    types::Uid,
+    types::NanoId,
 };
 
 /// Get collections
@@ -77,7 +77,7 @@ pub struct RenameCollectionPayload {
 async fn rename(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<Uid>,
+    id: PathParam<NanoId>,
     body: JsonBody<RenameCollectionPayload>,
 ) -> Result<Json<Collection>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
@@ -107,7 +107,7 @@ async fn rename(
 async fn delete(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<Uid>,
+    id: PathParam<NanoId>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
 

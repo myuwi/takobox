@@ -8,7 +8,7 @@ use crate::{
     error::{Error, ResultExt},
     models::{collection::Collection, file::File, session::Session},
     state::AppState,
-    types::Uid,
+    types::NanoId,
 };
 
 /// Get files
@@ -18,7 +18,7 @@ use crate::{
 async fn index(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<Uid>,
+    id: PathParam<NanoId>,
 ) -> Result<Json<Vec<File>>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
     if !Collection::exists(pool, session.user_id, &id).await? {
@@ -34,7 +34,7 @@ async fn index(
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct CollectionFilesPayload {
-    pub id: Uid,
+    pub id: NanoId,
 }
 
 /// Add file to collection
@@ -44,7 +44,7 @@ pub struct CollectionFilesPayload {
 async fn add(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<Uid>,
+    id: PathParam<NanoId>,
     body: JsonBody<CollectionFilesPayload>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
@@ -73,7 +73,7 @@ async fn add(
 async fn remove(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<Uid>,
+    id: PathParam<NanoId>,
     body: JsonBody<CollectionFilesPayload>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();

@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, SqliteExecutor, sqlite::SqliteRow};
 
 use super::file::File;
-use crate::{serialize::serialize_timestamp, types::Uid};
+use crate::{serialize::serialize_timestamp, types::NanoId};
 
 #[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
 #[serde(rename_all = "camelCase")]
@@ -12,7 +12,7 @@ pub struct Collection {
     pub id: i64,
     #[salvo(schema(rename = "id"))]
     #[serde(rename(serialize = "id"))]
-    pub public_id: Uid,
+    pub public_id: NanoId,
     #[serde(skip_serializing)]
     pub user_id: i64,
     pub name: String,
@@ -27,7 +27,7 @@ pub struct FileCollection {
     pub id: i64,
     #[salvo(schema(rename = "id"))]
     #[serde(rename(serialize = "id"))]
-    pub public_id: Uid,
+    pub public_id: NanoId,
     pub name: String,
 }
 
@@ -49,7 +49,7 @@ impl Collection {
     pub async fn exists(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
-        id: &Uid,
+        id: &NanoId,
     ) -> Result<bool, sqlx::Error> {
         sqlx::query_scalar(
             "select count(*) > 0 from collections
@@ -66,7 +66,7 @@ impl Collection {
         user_id: i64,
         name: &str,
     ) -> Result<Collection, sqlx::Error> {
-        let id = Uid::new(6);
+        let id = NanoId::new(6);
 
         sqlx::query_as(
             "insert into collections (public_id, user_id, name)
@@ -83,7 +83,7 @@ impl Collection {
     pub async fn rename(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
-        collection_id: &Uid,
+        collection_id: &NanoId,
         name: &str,
     ) -> Result<Option<Collection>, sqlx::Error> {
         sqlx::query_as(
@@ -102,7 +102,7 @@ impl Collection {
     pub async fn delete(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
-        collection_id: &Uid,
+        collection_id: &NanoId,
     ) -> Result<Option<Collection>, sqlx::Error> {
         sqlx::query_as(
             "delete from collections
@@ -118,7 +118,7 @@ impl Collection {
     pub async fn get_files(
         conn: impl SqliteExecutor<'_> + Copy,
         user_id: i64,
-        collection_id: &Uid,
+        collection_id: &NanoId,
     ) -> Result<Vec<File>, sqlx::Error> {
         sqlx::query_as(
             "select f.* from collection_files cf
@@ -136,8 +136,8 @@ impl Collection {
     pub async fn add_file(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
-        collection_id: &Uid,
-        file_id: &Uid,
+        collection_id: &NanoId,
+        file_id: &NanoId,
     ) -> Result<Option<SqliteRow>, sqlx::Error> {
         sqlx::query(
             "insert into collection_files (collection_id, file_id)
@@ -159,8 +159,8 @@ impl Collection {
     pub async fn remove_file(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
-        collection_id: &Uid,
-        file_id: &Uid,
+        collection_id: &NanoId,
+        file_id: &NanoId,
     ) -> Result<Option<SqliteRow>, sqlx::Error> {
         sqlx::query(
             "delete from collection_files

@@ -1,2 +1,2 @@
-mod uid;
-pub use uid::Uid;
+mod nanoid;
+pub use nanoid::NanoId;

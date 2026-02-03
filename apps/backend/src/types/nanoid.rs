@@ -13,33 +13,33 @@ pub const ALPHABET: [char; 62] = [
 #[derive(PartialEq, Eq, Clone, Debug, Default, Serialize, Deserialize, Type, ToSchema)]
 #[sqlx(transparent)]
 #[serde(try_from = "String")]
-pub struct Uid(pub String);
+pub struct NanoId(String);
 
-impl Uid {
+impl NanoId {
     pub fn new(length: usize) -> Self {
         Self(nanoid!(length, &ALPHABET))
     }
 }
 
-impl std::fmt::Display for Uid {
+impl std::fmt::Display for NanoId {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl TryFrom<String> for Uid {
+impl TryFrom<String> for NanoId {
     type Error = &'static str;
 
     fn try_from(s: String) -> Result<Self, Self::Error> {
         if s.chars().any(|c| !c.is_ascii_alphanumeric()) {
-            return Err("Uid should only contain ascii alphanumeric characters.");
+            return Err("NanoId should only contain ascii alphanumeric characters.");
         }
         Ok(Self(s))
     }
 }
 
-impl From<Uid> for String {
-    fn from(id: Uid) -> Self {
+impl From<NanoId> for String {
+    fn from(id: NanoId) -> Self {
         id.0
     }
 }

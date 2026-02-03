@@ -20,7 +20,7 @@ use crate::{
     },
     services::thumbnails::{ThumbnailError, generate_thumbnail},
     state::AppState,
-    types::Uid,
+    types::NanoId,
 };
 
 /// Get files
@@ -41,7 +41,7 @@ async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<File>>, E
 async fn show(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<Uid>,
+    id: PathParam<NanoId>,
 ) -> Result<Json<FileWithCollections>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
     let file = FileWithCollections::get_by_public_id(pool, session.user_id, &id)
@@ -55,7 +55,7 @@ async fn show(
 #[salvo(extract(default_source(from = "query")))]
 #[serde(rename_all = "camelCase")]
 struct UploadFileSearchParams {
-    collection_id: Option<Uid>,
+    collection_id: Option<NanoId>,
 }
 
 // TODO: Any way to automate this?
@@ -65,7 +65,7 @@ impl EndpointArgRegister for UploadFileSearchParams {
         operation: &mut salvo::oapi::Operation,
         _arg: &str,
     ) {
-        <QueryParam<Uid, false> as EndpointArgRegister>::register(
+        <QueryParam<NanoId, false> as EndpointArgRegister>::register(
             components,
             operation,
             "collectionId",
@@ -101,7 +101,7 @@ async fn upload(
     };
 
     // TODO: retry on db collision
-    let file_id = Uid::new(6);
+    let file_id = NanoId::new(6);
     let ext = std::path::Path::new(&original_name)
         .extension()
         .and_then(OsStr::to_str)
@@ -166,7 +166,7 @@ pub struct RenameFilePayload {
 async fn rename(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<Uid>,
+    id: PathParam<NanoId>,
     body: JsonBody<RenameFilePayload>,
 ) -> Result<Json<File>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
@@ -209,7 +209,7 @@ async fn rename(
 async fn delete(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<Uid>,
+    id: PathParam<NanoId>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
 
@@ -241,7 +241,7 @@ async fn download(
     res: &mut Response,
     depot: &mut Depot,
     session: Session,
-    id: PathParam<Uid>,
+    id: PathParam<NanoId>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
 
@@ -270,7 +270,7 @@ async fn regenerate_thumbnail(
     depot: &mut Depot,
     res: &mut Response,
     session: Session,
-    id: PathParam<Uid>,
+    id: PathParam<NanoId>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
 
