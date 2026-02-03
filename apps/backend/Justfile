@@ -2,7 +2,7 @@ list:
   @just --list
 
 dev-deps:
-  cargo install watchexec-cli sqlx-cli
+  cargo install bacon sqlx-cli
 
 dev:
-  watchexec -r -w Cargo.toml -w src 'cargo run'
+  bacon -j run-long
