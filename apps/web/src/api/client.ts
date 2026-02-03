@@ -1,11 +1,13 @@
 import { createServerOnlyFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
+import { createClient } from "@takobox/openapi-client";
 import axios, { type AxiosError } from "axios";
+import type { paths } from "@/types/api.gen";
 import { isServer } from "@/utils/env";
 
 // TODO: Remove session cookie and redirect to login page on 401
 
-export const client = axios.create({
+const axiosInstance = axios.create({
   // Firefox doesn't support upload progress on fetch; hence xhr.
   adapter: isServer ? "fetch" : "xhr",
   baseURL: isServer ? process.env.TAKOBOX_INTERNAL_API_URL : "/api",
@@ -16,7 +18,7 @@ const getServerHeaders = createServerOnlyFn(() =>
 );
 
 if (isServer) {
-  client.interceptors.request.use((config) => {
+  axiosInstance.interceptors.request.use((config) => {
     config.headers.set(getServerHeaders());
     return config;
   });
@@ -27,3 +29,5 @@ declare module "@tanstack/react-query" {
     defaultError: AxiosError;
   }
 }
+
+export const client = createClient<paths, "/api">(axiosInstance);

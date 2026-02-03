@@ -1,5 +1,4 @@
 import type { AxiosProgressEvent } from "axios";
-import type { FileDto, FileWithCollectionsDto } from "@/types";
 import { client } from "./client";
 
 export interface ProgressInfo {
@@ -10,13 +9,11 @@ export interface ProgressInfo {
 export type ProgressCallback = (info: ProgressInfo) => void;
 
 export const getFiles = async () => {
-  const { data } = await client.get<FileDto[]>("files");
-  return data;
+  return await client.get("/files");
 };
 
 export const getFile = async (id: string) => {
-  const { data } = await client.get<FileWithCollectionsDto>(`files/${id}`);
-  return data;
+  return await client.get("/files/{file_id}", { path: { file_id: id } });
 };
 
 export const uploadFile = async (
@@ -25,28 +22,27 @@ export const uploadFile = async (
   progressCallback?: ProgressCallback,
   signal?: AbortSignal,
 ) => {
-  const form = new FormData();
-  form.append("file", file);
-
-  const { data } = await client.post("files", form, {
-    params: { collectionId },
-    onUploadProgress: (event) => progressCallback?.({ file, event }),
-    signal,
-  });
-  return data;
+  return await client.post(
+    "/files",
+    { form: { file }, query: { collectionId } },
+    {
+      onUploadProgress: (event) => progressCallback?.({ file, event }),
+      signal,
+    },
+  );
 };
 
 export const renameFile = async (id: string, name: string) => {
-  const { data } = await client.patch(`files/${id}`, { name });
-  return data;
+  return await client.patch("/files/{file_id}", {
+    path: { file_id: id },
+    json: { name },
+  });
 };
 
 export const deleteFile = async (id: string) => {
-  const { data } = await client.delete(`files/${id}`);
-  return data;
+  return await client.delete("/files/{file_id}", { path: { file_id: id } });
 };
 
 export const regenerateThumbnail = async (id: string) => {
-  const { data } = await client.post(`files/${id}/regenerate-thumbnail`);
-  return data;
+  return await client.post("/files/{file_id}/regenerate-thumbnail", { path: { file_id: id } });
 };

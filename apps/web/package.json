@@ -9,7 +9,7 @@
     "lint": "conc -r -m 1 bun:lint:*",
     "lint:oxlint": "oxlint --type-aware --type-check --deny-warnings .",
     "lint:prettier": "prettier --check .",
-    "generate-types": "bunx openapi-typescript http://localhost/api/docs/openapi.json -o ./src/types/api.gen.ts"
+    "generate-types": "bunx openapi-client -i http://localhost/api/docs/openapi.json -o ./src/types/api.gen.ts"
   },
   "dependencies": {
     "@base-ui-components/react": "^1.0.0-rc.0",

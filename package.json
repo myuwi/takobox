@@ -10,7 +10,8 @@
     "docker:dev:down": "docker-compose -f docker-compose.dev.yml down"
   },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "trustedDependencies": [
     "@parcel/watcher"

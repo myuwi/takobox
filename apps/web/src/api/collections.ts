@@ -1,39 +1,42 @@
-import type { CollectionDto, FileDto } from "@/types";
 import { client } from "./client";
 
 export const getCollections = async () => {
-  const { data } = await client.get<CollectionDto[]>("collections");
-  return data;
+  return await client.get("/collections");
 };
 
 export const createCollection = async (name: string) => {
-  const { data } = await client.post("collections", { name });
-  return data;
+  return await client.post("/collections", { json: { name } });
 };
 
 export const renameCollection = async (id: string, name: string) => {
-  const { data } = await client.patch(`collections/${id}`, { name });
-  return data;
+  return await client.patch("/collections/{collection_id}", {
+    path: { collection_id: id },
+    json: { name },
+  });
 };
 
 export const deleteCollection = async (id: string) => {
-  const { data } = await client.delete(`collections/${id}`);
-  return data;
+  return await client.delete("/collections/{collection_id}", {
+    path: { collection_id: id },
+  });
 };
 
 export const getCollectionFiles = async (id: string) => {
-  const { data } = await client.get<FileDto[]>(`collections/${id}/files`);
-  return data;
+  return await client.get("/collections/{collection_id}/files", {
+    path: { collection_id: id },
+  });
 };
 
 export const addFileToCollection = async (id: string, fileId: string) => {
-  const { data } = await client.post(`collections/${id}/files`, { id: fileId });
-  return data;
+  return await client.post("/collections/{collection_id}/files", {
+    path: { collection_id: id },
+    json: { id: fileId },
+  });
 };
 
 export const removeFileFromCollection = async (id: string, fileId: string) => {
-  const { data } = await client.delete(`collections/${id}/files`, {
-    data: { id: fileId },
+  return await client.delete("/collections/{collection_id}/files", {
+    path: { collection_id: id },
+    json: { id: fileId },
   });
-  return data;
 };
