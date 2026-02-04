@@ -14,9 +14,11 @@
       pass_thru
     }
 
-    file_server /thumbs/* {
-      root /data/thumbs
-      pass_thru
+    handle_path /thumbs/* {
+      file_server {
+        root /data/thumbs
+        pass_thru
+      }
     }
 
     reverse_proxy http://takobox_web:3000
