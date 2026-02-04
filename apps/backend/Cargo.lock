@@ -3664,7 +3664,6 @@ dependencies = [
  "anyhow",
  "argon2",
  "figment",
- "lazy_static",
  "nanoid",
  "regex",
  "salvo",

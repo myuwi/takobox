@@ -1,4 +1,5 @@
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
+
 use regex::Regex;
 use salvo::{oapi::extract::JsonBody, prelude::*};
 use serde::Deserialize;
@@ -46,9 +47,8 @@ async fn login(
     Ok(StatusCode::OK)
 }
 
-lazy_static! {
-    static ref VALID_USERNAME_REGEX: Regex = Regex::new(r"^[a-z0-9_-]+$").unwrap();
-}
+static VALID_USERNAME_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^[a-z0-9_-]+$").unwrap());
 
 fn validate_register_body(body: &AuthPayload) -> Result<(), &'static str> {
     if !VALID_USERNAME_REGEX.is_match(&body.username) {
