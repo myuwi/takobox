@@ -1,7 +1,7 @@
 {
   "name": "@takobox/openapi-client",
   "bin": {
-    "openapi-client": "./src/generate.ts"
+    "openapi-client": "./bin/index.ts"
   },
   "type": "module",
   "main": "./src/index.ts",

@@ -55,7 +55,7 @@
     "packages/openapi-client": {
       "name": "@takobox/openapi-client",
       "bin": {
-        "openapi-client": "./src/generate.ts",
+        "openapi-client": "./bin/index.ts",
       },
       "dependencies": {
         "axios": "^1.13.2",
