@@ -5,13 +5,13 @@ export const getCollections = async () => {
 };
 
 export const createCollection = async (name: string) => {
-  return await client.post("/collections", { json: { name } });
+  return await client.post("/collections", { body: { name } });
 };
 
 export const renameCollection = async (id: string, name: string) => {
   return await client.patch("/collections/{id}", {
     path: { id },
-    json: { name },
+    body: { name },
   });
 };
 
@@ -30,13 +30,13 @@ export const getCollectionFiles = async (id: string) => {
 export const addFileToCollection = async (id: string, fileId: string) => {
   return await client.post("/collections/{id}/files", {
     path: { id },
-    json: { id: fileId },
+    body: { id: fileId },
   });
 };
 
 export const removeFileFromCollection = async (id: string, fileId: string) => {
   return await client.delete("/collections/{id}/files", {
     path: { id },
-    json: { id: fileId },
+    body: { id: fileId },
   });
 };

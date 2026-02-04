@@ -1,3 +1,4 @@
+import { typedForm } from "@takobox/openapi-client";
 import type { AxiosProgressEvent } from "axios";
 import { client } from "./client";
 
@@ -24,7 +25,7 @@ export const uploadFile = async (
 ) => {
   return await client.post(
     "/files",
-    { form: { file }, query: { collectionId } },
+    { query: { collectionId }, body: typedForm({ file }) },
     {
       onUploadProgress: (event) => progressCallback?.({ file, event }),
       signal,
@@ -35,7 +36,7 @@ export const uploadFile = async (
 export const renameFile = async (id: string, name: string) => {
   return await client.patch("/files/{id}", {
     path: { id },
-    json: { name },
+    body: { name },
   });
 };
 

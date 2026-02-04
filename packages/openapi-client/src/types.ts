@@ -1,11 +1,11 @@
 import type { AxiosRequestConfig } from "axios";
 import type { HasRequiredKeys, RemovePrefix, Simplify } from "type-fest";
+import type { TypedFormData } from "./typed-form";
 
 export interface Parameters {
   path?: Record<string, any>;
   query?: Record<string, any>;
-  json?: Record<string, any>;
-  form?: Record<string, any | any[]>;
+  body?: Record<string, any> | TypedFormData<any>;
   header?: any;
   cookie?: any;
 }
@@ -32,11 +32,11 @@ export type RequestOptions = AxiosRequestConfig;
 export type RequestOpts<Body, Params> = {
   [K in keyof Params as Params[K] extends never | undefined ? never : K]: Params[K];
 } & (Body extends { content: { "application/json": infer JsonBody } }
-  ? { json: JsonBody }
+  ? { body: JsonBody }
   : Body extends {
         content: { "multipart/form-data": infer FormBody };
       }
-    ? { form: FormBody }
+    ? { body: TypedFormData<FormBody extends object ? FormBody : never> }
     : {});
 
 export type SuccessResponse<R> =
