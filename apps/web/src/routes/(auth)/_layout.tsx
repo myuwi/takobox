@@ -4,13 +4,13 @@ import { Button } from "@/components/primitives/Button";
 import { meOptions } from "@/queries/me";
 
 export const Route = createFileRoute("/(auth)")({
-  component: Layout,
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient.fetchQuery(meOptions);
     if (user) {
       throw redirect({ to: "/home" });
     }
   },
+  component: Layout,
 });
 
 function Layout() {

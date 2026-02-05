@@ -13,7 +13,6 @@ const getRuntimeSettings = createServerFn({ method: "GET" }).handler(() => {
 });
 
 export const Route = createFileRoute("/")({
-  component: App,
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient.fetchQuery(meOptions);
     if (user) {
@@ -25,6 +24,7 @@ export const Route = createFileRoute("/")({
       throw redirect({ to: "/login" });
     }
   },
+  component: App,
 });
 
 function App() {

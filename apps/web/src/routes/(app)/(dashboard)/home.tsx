@@ -22,8 +22,8 @@ const homeSearchSchema = z.object({
 });
 
 export const Route = createFileRoute("/(app)/(dashboard)/home")({
-  component: RouteComponent,
   validateSearch: homeSearchSchema,
+  component: RouteComponent,
 });
 
 function RouteComponent() {

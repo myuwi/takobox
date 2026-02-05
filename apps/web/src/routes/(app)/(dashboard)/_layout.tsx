@@ -18,11 +18,11 @@ const appSearchSchema = z.object({
 });
 
 export const Route = createFileRoute("/(app)/(dashboard)")({
-  component: RouteComponent,
+  validateSearch: appSearchSchema,
   beforeLoad: async ({ context }) => {
     await context.queryClient.prefetchQuery(collectionsOptions);
   },
-  validateSearch: appSearchSchema,
+  component: RouteComponent,
 });
 
 function RouteComponent() {
