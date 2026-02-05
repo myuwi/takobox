@@ -2,13 +2,6 @@ import { typedForm } from "@takobox/openapi-client";
 import type { AxiosProgressEvent } from "axios";
 import { client } from "./client";
 
-export interface ProgressInfo {
-  file: File;
-  event: AxiosProgressEvent;
-}
-
-export type ProgressCallback = (info: ProgressInfo) => void;
-
 export const getFiles = async () => {
   return await client.get("/files");
 };
@@ -20,17 +13,15 @@ export const getFile = async (id: string) => {
 export const uploadFile = async (
   file: File,
   collectionId?: string,
-  progressCallback?: ProgressCallback,
+  onUploadProgress?: (event: AxiosProgressEvent) => void,
   signal?: AbortSignal,
 ) => {
-  return await client.post(
-    "/files",
-    { query: { collectionId }, body: typedForm({ file }) },
-    {
-      onUploadProgress: (event) => progressCallback?.({ file, event }),
-      signal,
-    },
-  );
+  return await client.post("/files", {
+    query: { collectionId },
+    body: typedForm({ file }),
+    onUploadProgress,
+    signal,
+  });
 };
 
 export const renameFile = async (id: string, name: string) => {

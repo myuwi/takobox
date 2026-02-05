@@ -1,12 +1,7 @@
 import axios, { type AxiosInstance } from "axios";
-import type { Client, Parameters, PathsObject, RequestOptions } from "./types";
+import type { Client, PathsObject, InternalRequestOptions, ClientRequestOptions } from "./types";
 
-type FetcherFn = (
-  method: string,
-  path: string,
-  opts?: Parameters,
-  fetcherOpts?: RequestOptions,
-) => void;
+type FetcherFn = (method: string, path: string, opts?: InternalRequestOptions) => void;
 
 const createProxy = (fetcher: FetcherFn) => {
   return new Proxy(() => {}, {
@@ -30,30 +25,31 @@ const buildUrl = (path: string, params?: Record<string, string>) => {
 
 export function createClient<T extends PathsObject, Prefix extends string = string>(
   baseUrl: Prefix,
-  options?: Omit<RequestOptions, "baseURL">,
+  options?: Omit<ClientRequestOptions, "baseURL">,
 ): Client<T, Prefix>;
 export function createClient<T extends PathsObject, Prefix extends string = string>(
   instance: AxiosInstance,
 ): Client<T, Prefix>;
 export function createClient<T extends PathsObject, Prefix extends string = string>(
   baseUrlOrInstance: Prefix | AxiosInstance,
-  options?: RequestOptions,
+  options?: ClientRequestOptions,
 ): Client<T, Prefix> {
   const axiosInstance =
-    typeof baseUrlOrInstance !== "string"
-      ? baseUrlOrInstance
-      : axios.create({ baseURL: baseUrlOrInstance, ...options });
+    typeof baseUrlOrInstance === "string"
+      ? axios.create({ baseURL: baseUrlOrInstance, ...options })
+      : baseUrlOrInstance;
 
-  return createProxy(async (method, path, args = {}, axiosOpts) => {
-    const url = buildUrl(path, args.path);
+  return createProxy(async (method, url, opts = {}) => {
+    const { path, body, query, header, cookie: _cookie, ...axiosOpts } = opts;
+    url = buildUrl(url, path);
 
     // TODO: support args.cookie?
     const res = await axiosInstance.request({
       method,
       url,
-      data: args.body,
-      params: args.query,
-      headers: args.header,
+      data: body,
+      params: query,
+      headers: header,
       ...axiosOpts,
     });
 

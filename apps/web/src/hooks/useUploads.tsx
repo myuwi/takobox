@@ -48,7 +48,7 @@ export const useUploads = () => {
       file,
       collectionId,
       signal: abortController.signal,
-      onUploadProgress: ({ file, event }) => {
+      onUploadProgress: (event) => {
         const progress = event.progress ? Math.round(event.progress * 100) : 0;
 
         setUploads((prevUploads) => {

@@ -1,12 +1,6 @@
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
-import {
-  deleteFile,
-  getFile,
-  getFiles,
-  renameFile,
-  uploadFile,
-  type ProgressCallback,
-} from "@/api/files";
+import type { AxiosProgressEvent } from "axios";
+import { deleteFile, getFile, getFiles, renameFile, uploadFile } from "@/api/files";
 import { collectionFilesOptions } from "./collections";
 
 export const filesOptions = queryOptions({
@@ -23,12 +17,12 @@ export const fileOptions = (id: string) =>
 interface UploadFileMutationArgs {
   file: File;
   collectionId?: string;
+  onUploadProgress?: (event: AxiosProgressEvent) => void;
   signal?: AbortSignal;
-  onUploadProgress?: ProgressCallback;
 }
 
 export const uploadFileOptions = mutationOptions({
-  mutationFn: ({ file, collectionId, signal, onUploadProgress }: UploadFileMutationArgs) => {
+  mutationFn: ({ file, collectionId, onUploadProgress, signal }: UploadFileMutationArgs) => {
     return uploadFile(file, collectionId, onUploadProgress, signal);
   },
   onSuccess: async (_, variables, _mutateResult, context) => {

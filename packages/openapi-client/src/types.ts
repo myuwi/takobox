@@ -27,16 +27,21 @@ export type HttpMethod = "get" | "put" | "post" | "delete" | "options" | "head" 
 // prettier-ignore
 export type SuccessfulStatusCode = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 226;
 
-export type RequestOptions = AxiosRequestConfig;
+export type ClientRequestOptions = Omit<
+  AxiosRequestConfig,
+  "url" | "baseURL" | "method" | "headers" | "params" | "data"
+>;
 
-export type RequestOpts<Body, Params> = {
+export type InternalRequestOptions = ClientRequestOptions & Parameters;
+
+export type RequestOptions<Body, Params> = ClientRequestOptions & {
   [K in keyof Params as Params[K] extends never | undefined ? never : K]: Params[K];
-} & (Body extends { content: { "application/json": infer JsonBody } }
-  ? { body: JsonBody }
-  : Body extends {
-        content: { "multipart/form-data": infer FormBody };
-      }
-    ? { body: TypedFormData<FormBody extends object ? FormBody : never> }
+} & (Body extends { content: infer C }
+    ? C extends { "application/json": infer JsonBody }
+      ? { body: JsonBody }
+      : C extends { "multipart/form-data": infer FormBody }
+        ? { body: TypedFormData<FormBody extends object ? FormBody : never> }
+        : {}
     : {});
 
 export type SuccessResponse<R> =
@@ -62,12 +67,13 @@ export type PathsWithMethod<Paths extends {}, M extends string> = {
 export type ClientMethod<Paths extends PathsObject, Method extends string> = <
   P extends PathsWithMethod<Paths, Method>,
   O extends Paths[P] extends { [M in Method]: any } ? Required<Paths[P][Method]> : never,
-  Opts extends RequestOpts<O["requestBody"] extends never ? {} : O["requestBody"], O["parameters"]>,
+  Opts extends RequestOptions<
+    O["requestBody"] extends never ? {} : O["requestBody"],
+    O["parameters"]
+  >,
 >(
   url: P,
-  ...opts: HasRequiredKeys<Opts> extends true
-    ? [opts: Opts, fetcherOpts?: RequestOptions]
-    : [opts?: Opts, fetcherOpts?: RequestOptions]
+  ...opts: HasRequiredKeys<Opts> extends true ? [opts: Opts] : [opts?: Opts]
 ) => Promise<O extends { responses: infer R } ? SuccessResponse<R> : never>;
 
 type ClientImpl<Paths extends PathsObject> = {
