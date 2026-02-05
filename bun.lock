@@ -6,6 +6,8 @@
       "name": "takobox",
       "devDependencies": {
         "husky": "^9.1.7",
+        "oxlint": "^1.43.0",
+        "oxlint-tsgolint": "^0.11.4",
       },
     },
     "apps/web": {
@@ -46,8 +48,6 @@
         "@types/react": "^19.2.9",
         "@types/react-dom": "^19.2.3",
         "@vitejs/plugin-react": "^5.1.2",
-        "oxlint": "^1.43.0",
-        "oxlint-tsgolint": "^0.11.4",
         "prettier": "^3.8.0",
         "prettier-plugin-tailwindcss": "^0.7.2",
         "typescript": "^5.9.3",

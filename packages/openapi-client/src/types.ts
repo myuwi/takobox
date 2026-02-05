@@ -35,7 +35,7 @@ export type ClientRequestOptions = Omit<
 export type InternalRequestOptions = ClientRequestOptions & Parameters;
 
 export type RequestOptions<Body, Params> = ClientRequestOptions & {
-  [K in keyof Params as Params[K] extends never | undefined ? never : K]: Params[K];
+  [K in keyof Params as Params[K] extends never ? never : K]: Params[K];
 } & (Body extends { content: infer C }
     ? C extends { "application/json": infer JsonBody }
       ? { body: JsonBody }

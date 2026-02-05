@@ -10,13 +10,15 @@
     "preinstall": "bunx only-allow bun",
     "prepare": "husky || true",
     "fmt": "bun -F '*' fmt",
-    "lint": "bun -F '*' lint",
+    "lint": "oxlint --type-aware --type-check --deny-warnings --report-unused-disable-directives",
     "docker": "docker compose -f docker-compose.build.yml up --build",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
     "docker:dev:down": "docker-compose -f docker-compose.dev.yml down"
   },
   "devDependencies": {
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "oxlint": "^1.43.0",
+    "oxlint-tsgolint": "^0.11.4"
   },
   "trustedDependencies": [
     "@parcel/watcher"
