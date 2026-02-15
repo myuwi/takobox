@@ -1,0 +1,17 @@
+{
+  "name": "@takobox/merge-ignore-paths",
+  "bin": {
+    "merge-ignore-paths": "./bin/merge-ignore-paths.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "ignore-walk": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/ignore-walk": "^4.0.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

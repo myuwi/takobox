@@ -1,5 +1,7 @@
+import base from "../../prettier.config.js";
+
 export default {
-  printWidth: 100,
+  ...base,
   plugins: ["@ianvs/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"],
   importOrder: [
     "<BUILTIN_MODULES>",
