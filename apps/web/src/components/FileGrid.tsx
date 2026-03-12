@@ -73,7 +73,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
   };
 
   return (
-    <div className="relative w-full grow" onClick={handleGridClick}>
+    <div className="relative w-full grow" onClick={handleGridClick} role="presentation">
       <div
         className="group/grid absolute inset-0 grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] content-start justify-around gap-2 overflow-auto p-2"
         data-selecting={selectedFiles.length > 0}
@@ -117,7 +117,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
             }
           };
 
-          const handleCheckboxClick = (e: MouseEvent<HTMLSpanElement>) => {
+          const handleCheckboxClick = (e: MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             handleSelect(true);
           };
@@ -137,13 +137,15 @@ export const FileGrid = ({ files }: FileGridProps) => {
             >
               <div className="relative w-full">
                 <FileThumbnail file={file} />
-                <span
-                  className="invisible absolute top-0.5 left-0.5 rounded-sm bg-accent p-0.5 inset-ring inset-ring-primary-foreground group-hover:visible group-aria-selected:visible group-aria-selected:bg-primary-foreground group-aria-selected:text-white group-data-[selecting=true]/grid:visible"
+                <button
+                  type="button"
+                  aria-label="Select file"
+                  className="invisible absolute top-0.5 left-0.5 cursor-pointer rounded-sm bg-accent p-0.5 inset-ring inset-ring-primary-foreground group-hover:visible group-aria-selected:visible group-aria-selected:bg-primary-foreground group-aria-selected:text-white group-data-[selecting=true]/grid:visible"
                   onClick={handleCheckboxClick}
                   onDoubleClick={stopPropagation}
                 >
                   <Check className="size-4 group-not-aria-selected:invisible" />
-                </span>
+                </button>
                 <FileContextMenu file={file} onOpen={handleMenuOpen} />
               </div>
               <span className="line-clamp-1 px-1 text-center break-all" title={file.name}>
