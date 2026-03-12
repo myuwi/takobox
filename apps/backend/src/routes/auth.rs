@@ -128,6 +128,10 @@ async fn logout(
 pub fn routes() -> Router {
     Router::new()
         .push(Router::with_path("/login").hoop(rate_limit(6)).post(login))
-        .push(Router::with_path("/register").post(register))
+        .push(
+            Router::with_path("/register")
+                .hoop(rate_limit(6))
+                .post(register),
+        )
         .push(Router::with_path("/logout").post(logout))
 }
