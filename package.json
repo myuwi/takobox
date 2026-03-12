@@ -2,15 +2,15 @@
   "name": "takobox",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
+  "type": "module",
   "scripts": {
     "preinstall": "bunx only-allow bun",
     "prepare": "husky || true",
-    "fmt": "prettier --ignore-path $(bun merge-ignore-paths) --check .",
+    "fmt": "oxfmt .",
     "lint": "oxlint --type-aware --type-check --deny-warnings --report-unused-disable-directives",
     "docker": "docker compose -f docker-compose.build.yml up --build",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
@@ -18,9 +18,9 @@
   },
   "devDependencies": {
     "husky": "^9.1.7",
+    "oxfmt": "^0.40.0",
     "oxlint": "^1.55.0",
-    "oxlint-tsgolint": "^0.16.0",
-    "prettier": "^3.8.1"
+    "oxlint-tsgolint": "^0.16.0"
   },
   "trustedDependencies": [
     "@parcel/watcher"

@@ -1,0 +1,44 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "ignorePatterns": ["**/*.gen.ts"],
+  "overrides": [
+    {
+      "files": ["apps/web/**"],
+      "options": {
+        "sortImports": {
+          "newlinesBetween": false,
+          "customGroups": [
+            { "groupName": "bun", "elementNamePattern": ["bun", "bun:*"] },
+            { "groupName": "react", "elementNamePattern": ["react", "react-dom"] },
+            {
+              "groupName": "tanstack-start",
+              "elementNamePattern": ["@tanstack/react-start", "@tanstack/react-start/**"]
+            },
+            { "groupName": "tanstack", "elementNamePattern": ["@tanstack/**"] }
+          ],
+          "groups": [
+            ["side_effect"],
+            ["builtin", "bun"],
+            ["react"],
+            ["tanstack-start"],
+            ["tanstack"],
+            ["external"],
+            ["internal", "subpath"],
+            ["style"],
+            ["unknown"]
+          ]
+        },
+        "sortTailwindcss": {
+          "stylesheet": "./apps/web/src/index.css",
+          "functions": ["cva", "tw"]
+        }
+      }
+    },
+    {
+      "files": ["**/Cargo.toml"],
+      "options": {
+        "printWidth": 200
+      }
+    }
+  ]
+}
