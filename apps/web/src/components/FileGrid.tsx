@@ -1,12 +1,13 @@
 import { useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import { useAtom } from "jotai";
-import { Check, File } from "lucide-react";
+import { File } from "lucide-react";
 import { selectedFilesAtom } from "@/atoms/selected-files";
 import type { FileDto } from "@/types";
 import { cn } from "@/utils/cn";
 import { stopPropagation } from "@/utils/event";
 import { formatBytes, getThumbnailPath } from "@/utils/files";
 import { FileContextMenu } from "./FileContextMenu";
+import { Checkbox } from "./primitives/Checkbox";
 
 interface SelectedFilesIndicatorProps {
   className?: string;
@@ -117,8 +118,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
             }
           };
 
-          const handleCheckboxClick = (e: MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation();
+          const handleCheckboxChange = () => {
             handleSelect(true);
           };
 
@@ -137,15 +137,13 @@ export const FileGrid = ({ files }: FileGridProps) => {
             >
               <div className="relative w-full">
                 <FileThumbnail file={file} />
-                <button
-                  type="button"
-                  aria-label="Select file"
-                  className="invisible absolute top-0.5 left-0.5 cursor-pointer rounded-sm bg-accent p-0.5 inset-ring inset-ring-primary-foreground group-hover:visible group-aria-selected:visible group-aria-selected:bg-primary-foreground group-aria-selected:text-white group-data-[selecting=true]/grid:visible"
-                  onClick={handleCheckboxClick}
+                <Checkbox
+                  checked={selected}
+                  onClick={stopPropagation}
                   onDoubleClick={stopPropagation}
-                >
-                  <Check className="size-4 group-not-aria-selected:invisible" />
-                </button>
+                  onCheckedChange={handleCheckboxChange}
+                  className="invisible absolute top-0.5 left-0.5 cursor-pointer group-hover:visible group-data-[selecting=true]/grid:visible data-checked:visible"
+                />
                 <FileContextMenu file={file} onOpen={handleMenuOpen} />
               </div>
               <span className="line-clamp-1 px-1 text-center break-all" title={file.name}>

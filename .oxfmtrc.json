@@ -30,7 +30,7 @@
         },
         "sortTailwindcss": {
           "stylesheet": "./apps/web/src/index.css",
-          "functions": ["cva", "tw"]
+          "functions": ["cn", "cva", "tw"]
         }
       }
     },
