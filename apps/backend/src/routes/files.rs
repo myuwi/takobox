@@ -7,7 +7,6 @@ use salvo::{
     oapi::extract::{FormFile, JsonBody, PathParam, QueryParam},
     prelude::*,
 };
-use sanitize_filename::is_sanitized;
 use serde::Deserialize;
 use tracing::error;
 
@@ -20,7 +19,7 @@ use crate::{
     },
     services::thumbnails::{ThumbnailError, generate_thumbnail},
     state::AppState,
-    types::NanoId,
+    types::{FileName, NanoId},
 };
 
 /// Get files
@@ -172,32 +171,18 @@ async fn rename(
     body: JsonBody<RenameFilePayload>,
 ) -> Result<Json<File>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
-    let name = body.name.trim();
 
-    if name.is_empty() {
-        return Err(Error::UnprocessableEntity("File name must not be empty."));
-    }
-
-    if !is_sanitized(name) {
-        return Err(Error::UnprocessableEntity(
-            "File name contains invalid characters.",
-        ));
-    }
+    let name = FileName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
 
     let file = File::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
-    let old_ext = std::path::Path::new(&file.filename).extension();
-    let new_ext = std::path::Path::new(&name).extension();
+    let new_name = file
+        .parse_rename(name)
+        .map_err(Error::UnprocessableEntity)?;
 
-    if old_ext != new_ext {
-        return Err(Error::UnprocessableEntity(
-            "New file extension much match the old one.",
-        ));
-    }
-
-    let file = File::rename(pool, session.user_id, &id, name)
+    let file = File::rename(pool, session.user_id, &id, new_name)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 

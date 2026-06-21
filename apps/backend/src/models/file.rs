@@ -1,9 +1,14 @@
+use std::{ffi::OsStr, path::Path};
+
 use salvo::oapi::ToSchema;
 use serde::Serialize;
 use sqlx::{FromRow, SqliteExecutor};
 
 use super::collection::FileCollection;
-use crate::{serialize::serialize_timestamp, types::NanoId};
+use crate::{
+    serialize::serialize_timestamp,
+    types::{FileName, NanoId},
+};
 
 #[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
 #[salvo(schema(name = File))]
@@ -22,6 +27,28 @@ pub struct File {
     #[salvo(schema(value_type = String))]
     #[serde(serialize_with = "serialize_timestamp")]
     pub created_at: i64,
+}
+
+impl File {
+    pub fn parse_rename(&self, new: FileName) -> Result<RenameTo, &'static str> {
+        fn extension(name: &str) -> Option<&str> {
+            Path::new(name).extension().and_then(OsStr::to_str)
+        }
+
+        if extension(new.as_ref()) != extension(&self.filename) {
+            return Err("New file extension must match the old one.");
+        }
+
+        Ok(RenameTo(new))
+    }
+}
+
+pub struct RenameTo(FileName);
+
+impl AsRef<str> for RenameTo {
+    fn as_ref(&self) -> &str {
+        self.0.as_ref()
+    }
 }
 
 impl File {
@@ -82,7 +109,7 @@ impl File {
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
         id: &NanoId,
-        name: &str,
+        name: RenameTo,
     ) -> Result<Option<File>, sqlx::Error> {
         sqlx::query_as(
             "update files
@@ -90,7 +117,7 @@ impl File {
             where public_id = $2 and user_id = $3
             returning *",
         )
-        .bind(name)
+        .bind(name.as_ref())
         .bind(id)
         .bind(user_id)
         .fetch_optional(conn)
