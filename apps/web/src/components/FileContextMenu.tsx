@@ -10,7 +10,8 @@ import {
   RefreshCcw,
   Trash,
 } from "lucide-react";
-import { regenerateThumbnail } from "@/api/files";
+import type { File } from "@takobox/sdk";
+import { client } from "@/api/client";
 import { confirmationDialogAtom, renameDialogAtom } from "@/atoms/dialogs";
 import { selectedFilesAtom } from "@/atoms/selected-files";
 import {
@@ -19,7 +20,6 @@ import {
   removeFileFromCollectionOptions,
 } from "@/queries/collections";
 import { deleteFileOptions, fileOptions, renameFileOptions } from "@/queries/files";
-import type { FileDto } from "@/types";
 import { copyToClipboard } from "@/utils/clipboard";
 import { stopPropagation } from "@/utils/event";
 import { getThumbnailPath } from "@/utils/files";
@@ -27,7 +27,7 @@ import { Button } from "./primitives/Button";
 import * as Menu from "./primitives/Menu";
 
 interface FileContextMenuProps {
-  file: FileDto;
+  file: File;
   onOpen: () => void;
 }
 
@@ -89,7 +89,7 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
 
   const handleRegenerateThumbnail = async () => {
     if (!thumbnailPath) return;
-    await regenerateThumbnail(file.id);
+    await client.files.regenerateThumbnail({ path: { id: file.id } });
     await fetch(thumbnailPath, { cache: "reload" });
     document.body
       .querySelectorAll<HTMLImageElement>(`img[src="${thumbnailPath}"]`)

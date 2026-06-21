@@ -6,12 +6,12 @@ WORKDIR /app
 # cache deps
 COPY package.json bun.lock ./
 COPY apps/web/package.json ./apps/web/
-COPY packages/openapi-client/package.json ./packages/openapi-client/
+COPY packages/sdk/package.json ./packages/sdk/
 RUN bun i --frozen-lockfile
 
 # build source
 COPY apps/web ./apps/web
-COPY packages/openapi-client/ ./packages/openapi-client
+COPY packages/sdk/ ./packages/sdk
 RUN bun --cwd=apps/web run build
 
 # run the app

@@ -1,19 +1,19 @@
 import { useNavigate } from "@tanstack/react-router";
 import { LogOut, UserIcon } from "lucide-react";
-import { logout } from "@/api/auth";
+import type { User } from "@takobox/sdk";
+import { client } from "@/api/client";
 import { Button } from "@/components/primitives/Button";
 import * as Menu from "@/components/primitives/Menu";
-import type { UserDto } from "@/types";
 
 interface AccountMenuProps {
-  user: UserDto;
+  user: User;
 }
 
 export const AccountMenu = ({ user }: AccountMenuProps) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await logout();
+    await client.auth.logout();
     await navigate({
       to: "/",
       reloadDocument: true,

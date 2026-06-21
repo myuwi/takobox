@@ -26,7 +26,7 @@ use crate::{
 /// Get files
 ///
 /// Get the files belonging to the current user
-#[endpoint(tags("Files"), status_codes(200))]
+#[endpoint(operation_id = "files.list", tags("Files"), status_codes(200))]
 async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<File>>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
     let files = File::get_all_for_user(pool, session.user_id).await?;
@@ -37,7 +37,7 @@ async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<File>>, E
 /// Get file
 ///
 /// Get a file belonging to the current user
-#[endpoint(tags("Files"), status_codes(200))]
+#[endpoint(operation_id = "files.get", tags("Files"), status_codes(200))]
 async fn show(
     depot: &mut Depot,
     session: Session,
@@ -79,6 +79,7 @@ impl EndpointArgRegister for UploadFileSearchParams {
 ///
 /// Upload a file
 #[endpoint(
+    operation_id = "files.upload",
     tags("Files"),
     status_codes(201),
     responses(
@@ -155,6 +156,7 @@ async fn upload(
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
+#[salvo(schema(name = RenameFilePayload))]
 pub struct RenameFilePayload {
     pub name: String,
 }
@@ -162,7 +164,7 @@ pub struct RenameFilePayload {
 /// Rename file
 ///
 /// Rename a file belonging to the current user
-#[endpoint(tags("Files"), status_codes(200))]
+#[endpoint(operation_id = "files.rename", tags("Files"), status_codes(200))]
 async fn rename(
     depot: &mut Depot,
     session: Session,
@@ -205,7 +207,7 @@ async fn rename(
 /// Delete file
 ///
 /// Delete a file belonging to the current user
-#[endpoint(tags("Files"), status_codes(204))]
+#[endpoint(operation_id = "files.delete", tags("Files"), status_codes(204))]
 async fn delete(
     depot: &mut Depot,
     session: Session,
@@ -235,7 +237,7 @@ async fn delete(
 /// Download file
 ///
 /// Download a file belonging to the current user
-#[endpoint(tags("Files"), status_codes(200))]
+#[endpoint(operation_id = "files.download", tags("Files"), status_codes(200))]
 async fn download(
     req: &Request,
     res: &mut Response,
@@ -265,7 +267,11 @@ async fn download(
 /// Regenerate thumbnail
 ///
 /// Regenerate the thumbnail for a file belonging to the current user
-#[endpoint(tags("Files"), status_codes(201))]
+#[endpoint(
+    operation_id = "files.regenerateThumbnail",
+    tags("Files"),
+    status_codes(201)
+)]
 async fn regenerate_thumbnail(
     depot: &mut Depot,
     res: &mut Response,

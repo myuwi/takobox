@@ -11,6 +11,7 @@ pub const ALPHABET: [char; 62] = [
 ];
 
 #[derive(PartialEq, Eq, Clone, Debug, Default, Serialize, Deserialize, Type, ToSchema)]
+#[salvo(schema(name = NanoId))]
 #[sqlx(transparent)]
 #[serde(try_from = "String")]
 pub struct NanoId(String);

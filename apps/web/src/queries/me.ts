@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getCookie } from "@tanstack/react-start/server";
 import { queryOptions } from "@tanstack/react-query";
-import { me } from "@/api/auth";
+import { client } from "@/api/client";
 
 const getMe = createServerFn().handler(async () => {
   const session = getCookie("session");
@@ -10,7 +10,8 @@ const getMe = createServerFn().handler(async () => {
   }
 
   try {
-    return await me();
+    const { data } = await client.me.get();
+    return data;
   } catch (_) {
     return null;
   }

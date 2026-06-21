@@ -1,18 +1,13 @@
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
-import {
-  addFileToCollection,
-  createCollection,
-  deleteCollection,
-  getCollectionFiles,
-  getCollections,
-  removeFileFromCollection,
-  renameCollection,
-} from "@/api/collections";
+import { client } from "@/api/client";
 import { fileOptions } from "./files";
 
 export const collectionsOptions = queryOptions({
   queryKey: ["collections"],
-  queryFn: getCollections,
+  queryFn: async () => {
+    const { data } = await client.collections.list();
+    return data;
+  },
 });
 
 const collectionOptions = (collectionId: string) =>
@@ -22,7 +17,7 @@ const collectionOptions = (collectionId: string) =>
   });
 
 export const createCollectionOptions = mutationOptions({
-  mutationFn: createCollection,
+  mutationFn: (name: string) => client.collections.create({ body: { name } }),
   onSuccess: async (_, _variables, _mutateResult, context) => {
     await context.client.invalidateQueries({
       queryKey: collectionsOptions.queryKey,
@@ -31,7 +26,8 @@ export const createCollectionOptions = mutationOptions({
 });
 
 export const renameCollectionOptions = mutationOptions({
-  mutationFn: ({ id, name }: { id: string; name: string }) => renameCollection(id, name),
+  mutationFn: ({ id, name }: { id: string; name: string }) =>
+    client.collections.rename({ path: { id }, body: { name } }),
   onSuccess: async (_, _variables, _mutateResult, context) => {
     await context.client.invalidateQueries({
       queryKey: collectionsOptions.queryKey,
@@ -40,7 +36,7 @@ export const renameCollectionOptions = mutationOptions({
 });
 
 export const deleteCollectionOptions = mutationOptions({
-  mutationFn: deleteCollection,
+  mutationFn: (id: string) => client.collections.delete({ path: { id } }),
   onSuccess: async (_, collectionId, _mutateResult, context) => {
     context.client.removeQueries(collectionOptions(collectionId));
 
@@ -53,12 +49,21 @@ export const deleteCollectionOptions = mutationOptions({
 export const collectionFilesOptions = (id: string) =>
   queryOptions({
     queryKey: ["collections", id, "files"],
-    queryFn: () => getCollectionFiles(id),
+    queryFn: async () => {
+      const { data } = await client.collections.files.list({
+        path: { id },
+      });
+      return data;
+    },
   });
 
 export const addFileToCollectionOptions = mutationOptions({
   mutationKey: ["collections", "files", "add"],
-  mutationFn: ({ id, fileId }: { id: string; fileId: string }) => addFileToCollection(id, fileId),
+  mutationFn: ({ id, fileId }: { id: string; fileId: string }) =>
+    client.collections.files.add({
+      path: { id },
+      body: { id: fileId },
+    }),
   onSuccess: async (_, variables, _mutateResult, context) => {
     await Promise.all([
       context.client.invalidateQueries({
@@ -74,7 +79,10 @@ export const addFileToCollectionOptions = mutationOptions({
 export const removeFileFromCollectionOptions = mutationOptions({
   mutationKey: ["collections", "files", "remove"],
   mutationFn: ({ id, fileId }: { id: string; fileId: string }) =>
-    removeFileFromCollection(id, fileId),
+    client.collections.files.remove({
+      path: { id },
+      body: { id: fileId },
+    }),
   onSuccess: async (_, variables, _mutateResult, context) => {
     await Promise.all([
       context.client.invalidateQueries({

@@ -1,8 +1,8 @@
 import { useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import { useAtom } from "jotai";
 import { File } from "lucide-react";
+import type { File as FileModel } from "@takobox/sdk";
 import { selectedFilesAtom } from "@/atoms/selected-files";
-import type { FileDto } from "@/types";
 import { cn } from "@/utils/cn";
 import { stopPropagation } from "@/utils/event";
 import { formatBytes, getThumbnailPath } from "@/utils/files";
@@ -11,7 +11,7 @@ import { Checkbox } from "./primitives/Checkbox";
 
 interface SelectedFilesIndicatorProps {
   className?: string;
-  files: FileDto[];
+  files: FileModel[];
 }
 
 const SelectedFilesIndicator = ({ className, files }: SelectedFilesIndicatorProps) => {
@@ -26,7 +26,7 @@ const SelectedFilesIndicator = ({ className, files }: SelectedFilesIndicatorProp
 };
 
 interface FileThumbnailProps {
-  file: FileDto;
+  file: FileModel;
 }
 
 const FileThumbnail = ({ file }: FileThumbnailProps) => {
@@ -61,7 +61,7 @@ const FileThumbnail = ({ file }: FileThumbnailProps) => {
 };
 
 interface FileGridProps {
-  files: FileDto[];
+  files: FileModel[];
 }
 
 export const FileGrid = ({ files }: FileGridProps) => {

@@ -1,4 +1,8 @@
-use salvo::{catcher::Catcher, oapi::Info, prelude::*};
+use salvo::{
+    catcher::Catcher,
+    oapi::{Info, Server},
+    prelude::*,
+};
 
 mod auth;
 mod collection_files;
@@ -37,34 +41,35 @@ pub fn router(app_state: AppState) -> Service {
         .push(Router::with_path("files").push(files::routes(&app_state)))
         .push(Router::with_path("collections").push(collections::routes()));
 
-    let router = Router::new().push(
-        Router::with_path("api")
-            .hoop(affix_state::inject(app_state))
-            .hoop(rate_limit(120))
-            .hoop(inject_auth)
-            .push(public)
-            .push(protected),
-    );
+    let api_router = Router::new()
+        .hoop(affix_state::inject(app_state))
+        .hoop(rate_limit(120))
+        .hoop(inject_auth)
+        .push(public)
+        .push(protected);
 
     let mut doc = OpenApi::with_info(
         Info::new("Takobox API Reference", "0.1.0").description("The Takobox API Reference"),
     )
-    .merge_router(&router);
+    .merge_router(&api_router);
+    doc.servers.insert(Server::new("/api"));
 
     // Remove StatusError from the schemas as it is not used
     doc.components
         .schemas
         .remove("salvo_core.http.errors.status_error.StatusError");
 
-    let router = router.push(
-        Router::new()
-            .push(doc.into_router("/docs/openapi.json"))
-            .push(
-                Scalar::new("/docs/openapi.json")
-                    .title("Takobox API Reference")
-                    .into_router("/docs"),
-            ),
-    );
+    let router = Router::new()
+        .push(Router::with_path("api").push(api_router))
+        .push(
+            Router::new()
+                .push(doc.into_router("/docs/openapi.json"))
+                .push(
+                    Scalar::new("/docs/openapi.json")
+                        .title("Takobox API Reference")
+                        .into_router("/docs"),
+                ),
+        );
 
     Service::new(router)
         .hoop(Logger::new())

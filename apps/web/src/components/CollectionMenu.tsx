@@ -3,14 +3,14 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
 import { MoreHorizontal, PencilLine, Trash } from "lucide-react";
+import type { Collection } from "@takobox/sdk";
 import { confirmationDialogAtom, renameDialogAtom } from "@/atoms/dialogs";
 import { deleteCollectionOptions, renameCollectionOptions } from "@/queries/collections";
-import type { CollectionDto } from "@/types";
 import { Button } from "./primitives/Button";
 import * as Menu from "./primitives/Menu";
 
 interface CollectionMenuProps {
-  collection: CollectionDto;
+  collection: Collection;
 }
 
 export const CollectionMenu = ({ collection }: CollectionMenuProps) => {

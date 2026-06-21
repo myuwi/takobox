@@ -2,13 +2,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
+import type { AuthCredentials } from "@takobox/sdk";
 import { Alert } from "@/components/primitives/Alert";
 import { Button } from "@/components/primitives/Button";
 import { Input } from "@/components/primitives/Input";
 import { Label } from "@/components/primitives/Label";
 import { registerOptions } from "@/queries/register";
 import { settingsOptions } from "@/queries/settings";
-import type { AuthPayload } from "@/types";
 import { formatError } from "@/utils/error";
 
 export const Route = createFileRoute("/(auth)/signup")({
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/(auth)/signup")({
 
 function SignUp() {
   const { data: settings } = useQuery(settingsOptions);
-  const { register, handleSubmit } = useForm<AuthPayload>();
+  const { register, handleSubmit } = useForm<AuthCredentials>();
   const navigate = useNavigate();
   const { mutateAsync: registerMutation, error } = useMutation(registerOptions);
 
@@ -37,7 +37,7 @@ function SignUp() {
     );
   }
 
-  const onSubmit = async (values: AuthPayload) => {
+  const onSubmit = async (values: AuthCredentials) => {
     await registerMutation(values);
     await navigate({ to: "/" });
   };

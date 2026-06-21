@@ -14,7 +14,11 @@ use crate::{
 /// Get files
 ///
 /// Get the files belonging to the current user
-#[endpoint(tags("Collections"), status_codes(200))]
+#[endpoint(
+    operation_id = "collections.files.list",
+    tags("Collections"),
+    status_codes(200)
+)]
 async fn index(
     depot: &mut Depot,
     session: Session,
@@ -33,6 +37,7 @@ async fn index(
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
+#[salvo(schema(name = CollectionFilesPayload))]
 pub struct CollectionFilesPayload {
     pub id: NanoId,
 }
@@ -40,7 +45,11 @@ pub struct CollectionFilesPayload {
 /// Add file to collection
 ///
 /// Add a file to a collection belonging to the current user
-#[endpoint(tags("Collections"), status_codes(201))]
+#[endpoint(
+    operation_id = "collections.files.add",
+    tags("Collections"),
+    status_codes(201)
+)]
 async fn add(
     depot: &mut Depot,
     session: Session,
@@ -69,7 +78,11 @@ async fn add(
 /// Remove file from collection
 ///
 /// Remove a file from a collection belonging to the current user
-#[endpoint(tags("Collections"), status_codes(204))]
+#[endpoint(
+    operation_id = "collections.files.remove",
+    tags("Collections"),
+    status_codes(204)
+)]
 async fn remove(
     depot: &mut Depot,
     session: Session,

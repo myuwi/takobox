@@ -1,8 +1,7 @@
 import { createServerOnlyFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
-import { createClient } from "@takobox/openapi-client";
 import axios, { type AxiosError } from "axios";
-import type { paths } from "@/types/api.gen";
+import { createTakoboxClient, type ErrorResponse } from "@takobox/sdk";
 import { isServer } from "@/utils/env";
 
 // TODO: Remove session cookie and redirect to login page on 401
@@ -26,8 +25,10 @@ if (isServer) {
 
 declare module "@tanstack/react-query" {
   interface Register {
-    defaultError: AxiosError;
+    defaultError: AxiosError<ErrorResponse>;
   }
 }
 
-export const client = createClient<paths, "/api">(axiosInstance);
+export const client = createTakoboxClient({
+  axios: axiosInstance,
+});

@@ -1,17 +1,23 @@
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import type { AxiosProgressEvent } from "axios";
-import { deleteFile, getFile, getFiles, renameFile, uploadFile } from "@/api/files";
+import { client } from "@/api/client";
 import { collectionFilesOptions } from "./collections";
 
 export const filesOptions = queryOptions({
   queryKey: ["files"],
-  queryFn: getFiles,
+  queryFn: async () => {
+    const { data } = await client.files.list();
+    return data;
+  },
 });
 
 export const fileOptions = (id: string) =>
   queryOptions({
     queryKey: ["files", id],
-    queryFn: () => getFile(id),
+    queryFn: async () => {
+      const { data } = await client.files.get({ path: { id } });
+      return data;
+    },
   });
 
 interface UploadFileMutationArgs {
@@ -23,7 +29,12 @@ interface UploadFileMutationArgs {
 
 export const uploadFileOptions = mutationOptions({
   mutationFn: ({ file, collectionId, onUploadProgress, signal }: UploadFileMutationArgs) => {
-    return uploadFile(file, collectionId, onUploadProgress, signal);
+    return client.files.upload({
+      body: { file },
+      query: { collectionId },
+      onUploadProgress,
+      signal,
+    });
   },
   onSuccess: async (_, variables, _mutateResult, context) => {
     await Promise.all([
@@ -40,7 +51,8 @@ export const uploadFileOptions = mutationOptions({
 });
 
 export const renameFileOptions = mutationOptions({
-  mutationFn: ({ id, name }: { id: string; name: string }) => renameFile(id, name),
+  mutationFn: ({ id, name }: { id: string; name: string }) =>
+    client.files.rename({ path: { id }, body: { name } }),
   onSuccess: async (_, _variables, _mutateResult, context) => {
     await Promise.all([
       context.client.invalidateQueries({
@@ -55,7 +67,7 @@ export const renameFileOptions = mutationOptions({
 });
 
 export const deleteFileOptions = mutationOptions({
-  mutationFn: deleteFile,
+  mutationFn: (id: string) => client.files.delete({ path: { id } }),
   onSuccess: async (_, fileId, _mutateResult, context) => {
     context.client.removeQueries(fileOptions(fileId));
 

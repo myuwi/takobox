@@ -1,4 +1,4 @@
 import { atom } from "jotai";
-import type { FileDto } from "@/types";
+import type { File } from "@takobox/sdk";
 
-export const selectedFilesAtom = atom<FileDto[]>([]);
+export const selectedFilesAtom = atom<File[]>([]);

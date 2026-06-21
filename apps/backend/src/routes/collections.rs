@@ -15,7 +15,11 @@ use crate::{
 /// Get collections
 ///
 /// Get the current user's collections
-#[endpoint(tags("Collections"), status_codes(200))]
+#[endpoint(
+    operation_id = "collections.list",
+    tags("Collections"),
+    status_codes(200)
+)]
 async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<Collection>>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
     let collections = Collection::get_all_for_user(pool, session.user_id).await?;
@@ -24,6 +28,7 @@ async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<Collectio
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
+#[salvo(schema(name = CreateCollectionPayload))]
 pub struct CreateCollectionPayload {
     pub name: String,
 }
@@ -33,6 +38,7 @@ pub struct CreateCollectionPayload {
 ///
 /// Create a collection
 #[endpoint(
+    operation_id = "collections.create",
     tags("Collections"),
     status_codes(201),
     responses(
@@ -66,6 +72,7 @@ async fn create(
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
+#[salvo(schema(name = RenameCollectionPayload))]
 pub struct RenameCollectionPayload {
     pub name: String,
 }
@@ -73,7 +80,11 @@ pub struct RenameCollectionPayload {
 /// Rename collection
 ///
 /// Rename a collection belonging to the current user
-#[endpoint(tags("Collections"), status_codes(200))]
+#[endpoint(
+    operation_id = "collections.rename",
+    tags("Collections"),
+    status_codes(200)
+)]
 async fn rename(
     depot: &mut Depot,
     session: Session,
@@ -103,7 +114,11 @@ async fn rename(
 /// Delete collection
 ///
 /// Delete a collection belonging to the current user
-#[endpoint(tags("Collections"), status_codes(204))]
+#[endpoint(
+    operation_id = "collections.delete",
+    tags("Collections"),
+    status_codes(204)
+)]
 async fn delete(
     depot: &mut Depot,
     session: Session,

@@ -6,6 +6,7 @@ use super::collection::FileCollection;
 use crate::{serialize::serialize_timestamp, types::NanoId};
 
 #[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
+#[salvo(schema(name = File))]
 #[serde(rename_all = "camelCase")]
 pub struct File {
     #[serde(skip_serializing)]
@@ -114,6 +115,7 @@ impl File {
 }
 
 #[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
+#[salvo(schema(name = FileWithCollections))]
 #[serde(rename_all = "camelCase")]
 pub struct FileWithCollections {
     #[serde(flatten)]

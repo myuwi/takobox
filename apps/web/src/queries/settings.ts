@@ -1,7 +1,10 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getSettings } from "@/api/settings";
+import { client } from "@/api/client";
 
 export const settingsOptions = queryOptions({
   queryKey: ["settings"],
-  queryFn: getSettings,
+  queryFn: async () => {
+    const { data } = await client.settings.get();
+    return data;
+  },
 });

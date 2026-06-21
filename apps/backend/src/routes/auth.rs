@@ -13,7 +13,8 @@ use crate::{
 };
 
 #[derive(Clone, Debug, Deserialize, ToSchema)]
-struct AuthPayload {
+#[salvo(schema(name = AuthCredentials))]
+struct AuthCredentials {
     pub username: String,
     pub password: String,
 }
@@ -21,9 +22,9 @@ struct AuthPayload {
 /// Login
 ///
 /// Log in to a user account
-#[endpoint(tags("Auth"), status_codes(200))]
+#[endpoint(operation_id = "auth.login", tags("Auth"), status_codes(200))]
 async fn login(
-    body: JsonBody<AuthPayload>,
+    body: JsonBody<AuthCredentials>,
     depot: &mut Depot,
     res: &mut Response,
 ) -> Result<StatusCode, Error> {
@@ -50,7 +51,7 @@ async fn login(
 static VALID_USERNAME_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[a-z0-9_-]+$").unwrap());
 
-fn validate_register_body(body: &AuthPayload) -> Result<(), &'static str> {
+fn validate_register_body(body: &AuthCredentials) -> Result<(), &'static str> {
     if !VALID_USERNAME_REGEX.is_match(&body.username) {
         return Err(
             "Username may only contain lowercase letters (a-z), numbers (0-9), underscores (_), and hyphens (-).",
@@ -71,9 +72,9 @@ fn validate_register_body(body: &AuthPayload) -> Result<(), &'static str> {
 /// Register
 ///
 /// Register a user account
-#[endpoint(tags("Auth"), status_codes(201))]
+#[endpoint(operation_id = "auth.register", tags("Auth"), status_codes(201))]
 async fn register(
-    body: JsonBody<AuthPayload>,
+    body: JsonBody<AuthCredentials>,
     depot: &mut Depot,
     res: &mut Response,
 ) -> Result<StatusCode, Error> {
@@ -110,7 +111,7 @@ async fn register(
 /// Logout
 ///
 /// Log out of a user account, invalidating the login session
-#[endpoint(tags("Auth"), status_codes(200))]
+#[endpoint(operation_id = "auth.logout", tags("Auth"), status_codes(200))]
 async fn logout(
     depot: &mut Depot,
     res: &mut Response,

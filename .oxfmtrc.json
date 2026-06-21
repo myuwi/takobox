@@ -14,7 +14,8 @@
               "groupName": "tanstack-start",
               "elementNamePattern": ["@tanstack/react-start", "@tanstack/react-start/**"]
             },
-            { "groupName": "tanstack", "elementNamePattern": ["@tanstack/**"] }
+            { "groupName": "tanstack", "elementNamePattern": ["@tanstack/**"] },
+            { "groupName": "workspace", "elementNamePattern": ["@takobox/**"] }
           ],
           "groups": [
             ["side_effect"],
@@ -23,6 +24,7 @@
             ["tanstack-start"],
             ["tanstack"],
             ["external"],
+            ["workspace"],
             ["internal", "subpath"],
             ["style"],
             ["unknown"]

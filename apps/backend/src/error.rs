@@ -46,6 +46,7 @@ impl EndpointOutRegister for Error {
 }
 
 #[derive(Serialize, ToSchema)]
+#[salvo(schema(name = ErrorResponse))]
 struct ErrorResponse {
     message: String,
 }

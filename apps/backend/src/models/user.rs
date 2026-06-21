@@ -5,6 +5,7 @@ use sqlx::{FromRow, SqliteExecutor};
 use crate::{serialize::serialize_timestamp, types::NanoId};
 
 #[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
+#[salvo(schema(name = User))]
 #[serde(rename_all = "camelCase")]
 pub struct User {
     #[serde(skip_serializing)]
