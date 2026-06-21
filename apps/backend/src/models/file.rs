@@ -86,7 +86,7 @@ impl File {
         user_id: i64,
         id: &NanoId,
         file_name: &str,
-        original_name: &str,
+        name: &FileName,
         size: &usize,
     ) -> Result<File, sqlx::Error> {
         let file_size = *size as i64;
@@ -99,7 +99,7 @@ impl File {
         .bind(id)
         .bind(user_id)
         .bind(file_name)
-        .bind(original_name)
+        .bind(name.as_ref())
         .bind(file_size)
         .fetch_one(conn)
         .await

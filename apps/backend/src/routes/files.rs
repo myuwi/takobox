@@ -100,9 +100,11 @@ async fn upload(
         return Err(Error::UnprocessableEntity("Expected file to have a name."));
     };
 
+    let name = FileName::try_from(original_name.to_owned()).map_err(Error::UnprocessableEntity)?;
+
     // TODO: retry on db collision
     let file_id = NanoId::new(6);
-    let ext = std::path::Path::new(&original_name)
+    let ext = std::path::Path::new(name.as_ref())
         .extension()
         .and_then(OsStr::to_str)
         .map(|p| ".".to_string() + p)
@@ -120,7 +122,7 @@ async fn upload(
         session.user_id,
         &file_id,
         &file_name,
-        original_name,
+        &name,
         &file_size,
     )
     .await?;
