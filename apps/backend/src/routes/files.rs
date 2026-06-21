@@ -14,12 +14,12 @@ use crate::{
     error::Error,
     models::{
         collection::Collection,
-        file::{File, FileWithCollections},
+        file::{File, FileName, FileWithCollections},
         session::Session,
     },
     services::thumbnails::{ThumbnailError, generate_thumbnail},
     state::AppState,
-    types::{FileName, NanoId},
+    types::NanoId,
 };
 
 /// Get files
