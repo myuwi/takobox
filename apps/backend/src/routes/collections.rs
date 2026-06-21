@@ -7,7 +7,10 @@ use serde::Deserialize;
 use super::collection_files;
 use crate::{
     error::{Error, ResultExt},
-    models::{collection::Collection, session::Session},
+    models::{
+        collection::{Collection, CollectionName},
+        session::Session,
+    },
     state::AppState,
     types::NanoId,
 };
@@ -52,15 +55,10 @@ async fn create(
     body: JsonBody<CreateCollectionPayload>,
 ) -> Result<Json<Collection>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
-    let name = body.name.trim();
 
-    if name.is_empty() {
-        return Err(Error::UnprocessableEntity(
-            "Collection name must not be empty.",
-        ));
-    }
+    let name = CollectionName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
 
-    let collection = Collection::create(pool, session.user_id, name)
+    let collection = Collection::create(pool, session.user_id, &name)
         .await
         .map_constraint_err("collections.user_id, collections.name", |_| {
             Error::Conflict("A collection with this name already exists. Please try another name.")
@@ -93,15 +91,9 @@ async fn rename(
 ) -> Result<Json<Collection>, Error> {
     let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
 
-    let name = body.name.trim();
+    let name = CollectionName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
 
-    if name.is_empty() {
-        return Err(Error::UnprocessableEntity(
-            "Collection name must not be empty",
-        ));
-    }
-
-    let collection = Collection::rename(pool, session.user_id, &id, name)
+    let collection = Collection::rename(pool, session.user_id, &id, &name)
         .await
         .map_constraint_err("collections.user_id, collections.name", |_| {
             Error::Conflict("A collection with this name already exists. Please try another name.")

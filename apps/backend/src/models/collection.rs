@@ -5,6 +5,29 @@ use sqlx::{FromRow, SqliteExecutor, sqlite::SqliteRow};
 use super::file::File;
 use crate::{serialize::serialize_timestamp, types::NanoId};
 
+#[derive(Clone, Debug)]
+pub struct CollectionName(String);
+
+impl AsRef<str> for CollectionName {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl TryFrom<String> for CollectionName {
+    type Error = &'static str;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        let trimmed = s.trim();
+
+        if trimmed.is_empty() {
+            return Err("Collection name must not be empty.");
+        }
+
+        Ok(Self(trimmed.to_owned()))
+    }
+}
+
 #[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
 #[salvo(schema(name = Collection))]
 #[serde(rename_all = "camelCase")]
@@ -66,7 +89,7 @@ impl Collection {
     pub async fn create(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
-        name: &str,
+        name: &CollectionName,
     ) -> Result<Collection, sqlx::Error> {
         let id = NanoId::new(6);
 
@@ -77,7 +100,7 @@ impl Collection {
         )
         .bind(id)
         .bind(user_id)
-        .bind(name)
+        .bind(name.as_ref())
         .fetch_one(conn)
         .await
     }
@@ -86,7 +109,7 @@ impl Collection {
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
         collection_id: &NanoId,
-        name: &str,
+        name: &CollectionName,
     ) -> Result<Option<Collection>, sqlx::Error> {
         sqlx::query_as(
             "update collections
@@ -94,7 +117,7 @@ impl Collection {
             where public_id = $2 and user_id = $3
             returning *",
         )
-        .bind(name)
+        .bind(name.as_ref())
         .bind(collection_id)
         .bind(user_id)
         .fetch_optional(conn)
