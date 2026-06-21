@@ -1,8 +1,41 @@
+use std::sync::LazyLock;
+
+use regex::Regex;
 use salvo::oapi::ToSchema;
 use serde::Serialize;
 use sqlx::{FromRow, SqliteExecutor};
 
 use crate::{serialize::serialize_timestamp, types::NanoId};
+
+static VALID_USERNAME_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^[a-z0-9_-]+$").unwrap());
+
+#[derive(Clone, Debug)]
+pub struct Username(String);
+
+impl AsRef<str> for Username {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl TryFrom<String> for Username {
+    type Error = &'static str;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        if !VALID_USERNAME_REGEX.is_match(&s) {
+            return Err(
+                "Username may only contain lowercase letters (a-z), numbers (0-9), underscores (_), and hyphens (-).",
+            );
+        }
+
+        if !(4..=32).contains(&s.len()) {
+            return Err("Username must be between 4 and 32 characters");
+        }
+
+        Ok(Self(s))
+    }
+}
 
 #[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
 #[salvo(schema(name = User))]
@@ -24,7 +57,7 @@ pub struct User {
 impl User {
     pub async fn create(
         conn: impl SqliteExecutor<'_>,
-        username: &str,
+        username: &Username,
         password_hash: &str,
     ) -> Result<User, sqlx::Error> {
         let id = NanoId::new(6);
@@ -33,7 +66,7 @@ impl User {
             "insert into users (public_id, username, password) values ($1, $2, $3) returning *",
         )
         .bind(id)
-        .bind(username)
+        .bind(username.as_ref())
         .bind(password_hash)
         .fetch_one(conn)
         .await

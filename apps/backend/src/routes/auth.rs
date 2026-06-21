@@ -1,14 +1,14 @@
-use std::sync::LazyLock;
-
-use regex::Regex;
 use salvo::{oapi::extract::JsonBody, prelude::*};
 use serde::Deserialize;
 
 use crate::{
-    auth::password::{hash_password, verify_password},
+    auth::password::{Password, hash_password, verify_password},
     error::{Error, ResultExt},
     middleware::rate_limit::rate_limit,
-    models::{session::Session, user::User},
+    models::{
+        session::Session,
+        user::{User, Username},
+    },
     state::AppState,
 };
 
@@ -48,27 +48,6 @@ async fn login(
     Ok(StatusCode::OK)
 }
 
-static VALID_USERNAME_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^[a-z0-9_-]+$").unwrap());
-
-fn validate_register_body(body: &AuthCredentials) -> Result<(), &'static str> {
-    if !VALID_USERNAME_REGEX.is_match(&body.username) {
-        return Err(
-            "Username may only contain lowercase letters (a-z), numbers (0-9), underscores (_), and hyphens (-).",
-        );
-    }
-
-    if !(4..=32).contains(&body.username.len()) {
-        return Err("Username must be between 4 and 32 characters");
-    }
-
-    if !(6..=64).contains(&body.password.len()) {
-        return Err("Password must be between 6 and 64 characters");
-    }
-
-    Ok(())
-}
-
 /// Register
 ///
 /// Register a user account
@@ -91,11 +70,12 @@ async fn register(
         ));
     }
 
-    validate_register_body(&body).map_err(Error::UnprocessableEntity)?;
+    let username = Username::try_from(body.username.clone()).map_err(Error::UnprocessableEntity)?;
+    let password = Password::try_from(body.password.clone()).map_err(Error::UnprocessableEntity)?;
 
-    let password_hash = hash_password(&body.password).map_err(|e| Error::Internal(e.into()))?;
+    let password_hash = hash_password(&password).map_err(|e| Error::Internal(e.into()))?;
 
-    let user = User::create(pool, &body.username, &password_hash)
+    let user = User::create(pool, &username, &password_hash)
         .await
         .map_constraint_err("users.username", |_| {
             Error::Conflict("Username is already taken.")
