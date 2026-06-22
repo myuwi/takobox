@@ -8,11 +8,11 @@ use sqlx::{FromRow, SqliteExecutor};
 use super::collection::FileCollection;
 use crate::{serialize::serialize_timestamp, types::NanoId};
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct FileName(String);
 
-impl AsRef<str> for FileName {
-    fn as_ref(&self) -> &str {
+impl FileName {
+    pub fn as_str(&self) -> &str {
         &self.0
     }
 }
@@ -60,7 +60,7 @@ impl File {
             Path::new(name).extension().and_then(OsStr::to_str)
         }
 
-        if extension(new.as_ref()) != extension(&self.filename) {
+        if extension(new.as_str()) != extension(&self.filename) {
             return Err("New file extension must match the old one.");
         }
 
@@ -70,9 +70,9 @@ impl File {
 
 pub struct RenameTo(FileName);
 
-impl AsRef<str> for RenameTo {
-    fn as_ref(&self) -> &str {
-        self.0.as_ref()
+impl RenameTo {
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
     }
 }
 
@@ -124,7 +124,7 @@ impl File {
         .bind(id)
         .bind(user_id)
         .bind(file_name)
-        .bind(name.as_ref())
+        .bind(name.as_str())
         .bind(file_size)
         .fetch_one(conn)
         .await
@@ -142,7 +142,7 @@ impl File {
             where public_id = $2 and user_id = $3
             returning *",
         )
-        .bind(name.as_ref())
+        .bind(name.as_str())
         .bind(id)
         .bind(user_id)
         .fetch_optional(conn)

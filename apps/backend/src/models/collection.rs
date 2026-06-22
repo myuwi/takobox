@@ -5,11 +5,11 @@ use sqlx::{FromRow, SqliteExecutor, sqlite::SqliteRow};
 use super::file::File;
 use crate::{serialize::serialize_timestamp, types::NanoId};
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct CollectionName(String);
 
-impl AsRef<str> for CollectionName {
-    fn as_ref(&self) -> &str {
+impl CollectionName {
+    pub fn as_str(&self) -> &str {
         &self.0
     }
 }
@@ -100,7 +100,7 @@ impl Collection {
         )
         .bind(id)
         .bind(user_id)
-        .bind(name.as_ref())
+        .bind(name.as_str())
         .fetch_one(conn)
         .await
     }
@@ -117,7 +117,7 @@ impl Collection {
             where public_id = $2 and user_id = $3
             returning *",
         )
-        .bind(name.as_ref())
+        .bind(name.as_str())
         .bind(collection_id)
         .bind(user_id)
         .fetch_optional(conn)

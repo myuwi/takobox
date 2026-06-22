@@ -10,11 +10,11 @@ use crate::{serialize::serialize_timestamp, types::NanoId};
 static VALID_USERNAME_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[a-z0-9_-]+$").unwrap());
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Username(String);
 
-impl AsRef<str> for Username {
-    fn as_ref(&self) -> &str {
+impl Username {
+    pub fn as_str(&self) -> &str {
         &self.0
     }
 }
@@ -66,7 +66,7 @@ impl User {
             "insert into users (public_id, username, password) values ($1, $2, $3) returning *",
         )
         .bind(id)
-        .bind(username.as_ref())
+        .bind(username.as_str())
         .bind(password_hash)
         .fetch_one(conn)
         .await

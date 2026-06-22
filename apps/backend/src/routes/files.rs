@@ -104,7 +104,7 @@ async fn upload(
 
     // TODO: retry on db collision
     let file_id = NanoId::new(6);
-    let ext = std::path::Path::new(name.as_ref())
+    let ext = std::path::Path::new(name.as_str())
         .extension()
         .and_then(OsStr::to_str)
         .map(|p| ".".to_string() + p)

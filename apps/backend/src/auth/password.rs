@@ -11,8 +11,8 @@ impl std::fmt::Debug for Password {
     }
 }
 
-impl AsRef<str> for Password {
-    fn as_ref(&self) -> &str {
+impl Password {
+    pub fn as_str(&self) -> &str {
         &self.0
     }
 }
@@ -32,7 +32,7 @@ impl TryFrom<String> for Password {
 pub fn hash_password(password: &Password) -> Result<String, argon2::password_hash::Error> {
     let salt = SaltString::generate(&mut OsRng);
     Argon2::default()
-        .hash_password(password.as_ref().as_bytes(), &salt)
+        .hash_password(password.as_str().as_bytes(), &salt)
         .map(|v| v.to_string())
 }
 
