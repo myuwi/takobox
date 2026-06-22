@@ -1,0 +1,17 @@
+pre-commit:
+  parallel: true
+  commands:
+    fmt:
+      run: bun run fmt
+    lint:
+      run: bun run lint
+    rust-fmt:
+      root: "apps/backend/"
+      run: cargo +nightly fmt --check
+
+pre-push:
+  parallel: true
+  commands:
+    rust-clippy:
+      root: "apps/backend/"
+      run: cargo clippy --all-targets -- -D warnings
