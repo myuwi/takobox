@@ -1,13 +1,53 @@
-import { useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
-import { useAtom } from "jotai";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+  type RefObject,
+} from "react";
 import { File } from "lucide-react";
 import type { File as FileModel } from "@takobox/sdk";
-import { selectedFilesAtom } from "@/atoms/selected-files";
 import { cn } from "@/utils/cn";
 import { stopPropagation } from "@/utils/event";
 import { formatBytes, getThumbnailPath } from "@/utils/files";
 import { FileContextMenu } from "./FileContextMenu";
 import { Checkbox } from "./primitives/Checkbox";
+
+const chunk = <T,>(items: T[], size: number): T[][] => {
+  if (size < 1) return [items];
+
+  const rows: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    rows.push(items.slice(i, i + size));
+  }
+
+  return rows;
+};
+
+const useColumnCount = (ref: RefObject<HTMLElement | null>) => {
+  const [columns, setColumns] = useState(1);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    const measure = () => {
+      const template = getComputedStyle(element).gridTemplateColumns;
+      setColumns(template === "none" ? 1 : template.split(" ").length);
+    };
+
+    measure();
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [ref]);
+
+  return columns;
+};
 
 interface SelectedFilesIndicatorProps {
   className?: string;
@@ -65,93 +105,273 @@ interface FileGridProps {
 }
 
 export const FileGrid = ({ files }: FileGridProps) => {
-  const [selectedFiles, setSelectedFiles] = useAtom(selectedFilesAtom);
+  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
+  const [activeFileId, setActiveFileId] = useState<string | null>(() => files[0]?.id ?? null);
+  const [openMenuFileId, setOpenMenuFileId] = useState<string | null>(null);
 
-  const handleGridClick = (e: MouseEvent<HTMLDivElement>) => {
-    if (!e.ctrlKey && !e.shiftKey) {
-      setSelectedFiles([]);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const cellRefs = useRef(new Map<string, HTMLDivElement>());
+  const activeFileIdRef = useRef(activeFileId);
+  const anchorFileIdRef = useRef<string | null>(null);
+  const focusedFileIdRef = useRef<string | null>(null);
+
+  const columns = useColumnCount(gridRef);
+  const rows = chunk(files, columns);
+  const activeIndex = Math.max(
+    files.findIndex((file) => file.id === activeFileId),
+    0,
+  );
+  const selectedFileIdSet = new Set(selectedFileIds);
+  const selectedFiles = files.filter((file) => selectedFileIdSet.has(file.id));
+
+  useLayoutEffect(() => {
+    if (gridRef.current?.contains(document.activeElement)) return;
+    if (!focusedFileIdRef.current) return;
+
+    const focusedCell = cellRefs.current.get(focusedFileIdRef.current);
+    if (!focusedCell) {
+      focusedFileIdRef.current = null;
+      return;
+    }
+
+    focusedCell.focus();
+  }, [columns, files]);
+
+  const activeCellRef: RefObject<HTMLElement | null> = {
+    get current() {
+      const fileId = activeFileIdRef.current;
+      const cell = fileId ? cellRefs.current.get(fileId) : undefined;
+
+      return cell?.isConnected ? cell : gridRef.current;
+    },
+  };
+
+  const activateFile = (fileId: string | null) => {
+    activeFileIdRef.current = fileId;
+    setActiveFileId(fileId);
+  };
+
+  const openFile = (file: FileModel) => window.open(`/${file.filename}`);
+
+  const selectSingle = (index: number) => {
+    const file = files[index];
+    if (!file) return;
+    setSelectedFileIds([file.id]);
+    anchorFileIdRef.current = file.id;
+  };
+
+  const toggle = (index: number) => {
+    const file = files[index];
+    if (!file) return;
+    setSelectedFileIds((selectedFileIds) =>
+      selectedFileIds.includes(file.id)
+        ? selectedFileIds.filter((id) => id !== file.id)
+        : [...selectedFileIds, file.id],
+    );
+    anchorFileIdRef.current = file.id;
+  };
+
+  const selectRange = (index: number) => {
+    let anchorIndex = files.findIndex((file) => file.id === anchorFileIdRef.current);
+    if (anchorIndex < 0) {
+      anchorIndex = activeIndex;
+      anchorFileIdRef.current = files[activeIndex]?.id ?? null;
+    }
+
+    const start = Math.min(anchorIndex, index);
+    const end = Math.max(anchorIndex, index);
+    setSelectedFileIds(files.slice(start, end + 1).map((file) => file.id));
+  };
+
+  const handleBackgroundClick = (e: MouseEvent<HTMLDivElement>) => {
+    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+      setSelectedFileIds([]);
     }
   };
 
+  const handleCellClick = (e: MouseEvent<HTMLDivElement>, index: number) => {
+    e.stopPropagation();
+    activateFile(files[index]?.id ?? null);
+    if (e.shiftKey) selectRange(index);
+    else if (e.ctrlKey || e.metaKey) toggle(index);
+    else selectSingle(index);
+  };
+
+  const handleMenuOpenChange = (index: number, open: boolean) => {
+    const file = files[index];
+    if (!file) return;
+
+    if (open) {
+      activateFile(file.id);
+      selectSingle(index);
+      setOpenMenuFileId(file.id);
+    } else {
+      setOpenMenuFileId((openFileId) => (openFileId === file.id ? null : openFileId));
+    }
+  };
+
+  const handleFileDelete = (index: number) => {
+    const file = files[index];
+    if (!file) return;
+
+    setSelectedFileIds((selectedFileIds) => selectedFileIds.filter((fileId) => fileId !== file.id));
+    activateFile(files[index + 1]?.id ?? files[index - 1]?.id ?? null);
+  };
+
+  const handleKeyDownCapture = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (!gridRef.current?.contains(e.target as Node)) return;
+
+    const target = e.target as HTMLElement;
+    const gridCell = target.closest<HTMLElement>("[role=gridcell]");
+    const isArrowKey =
+      e.key === "ArrowRight" ||
+      e.key === "ArrowLeft" ||
+      e.key === "ArrowDown" ||
+      e.key === "ArrowUp";
+    const isNestedControl = target !== gridCell;
+
+    if (!gridCell || (isNestedControl && !isArrowKey)) return;
+
+    const last = files.length - 1;
+    if (last < 0) return;
+
+    let next = activeIndex;
+
+    switch (e.key) {
+      case "ArrowRight":
+        next = Math.min(activeIndex + 1, last);
+        break;
+      case "ArrowLeft":
+        next = Math.max(activeIndex - 1, 0);
+        break;
+      case "ArrowDown":
+        next = Math.min(activeIndex + columns, last);
+        break;
+      case "ArrowUp":
+        next = Math.max(activeIndex - columns, 0);
+        break;
+      case "Home":
+        next = e.ctrlKey ? 0 : activeIndex - (activeIndex % columns);
+        break;
+      case "End":
+        next = e.ctrlKey
+          ? last
+          : Math.min(activeIndex - (activeIndex % columns) + columns - 1, last);
+        break;
+      case " ":
+        e.preventDefault();
+        if (e.ctrlKey || e.metaKey) toggle(activeIndex);
+        else selectSingle(activeIndex);
+        return;
+      case "Enter": {
+        const file = files[activeIndex];
+        if (file) openFile(file);
+        return;
+      }
+      case "Escape":
+        setSelectedFileIds([]);
+        return;
+      default:
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+          e.preventDefault();
+          setSelectedFileIds(files.map((file) => file.id));
+        }
+        return;
+    }
+
+    e.preventDefault();
+    if (isNestedControl) e.stopPropagation();
+
+    const nextFileId = files[next]?.id;
+    if (!nextFileId) return;
+
+    activateFile(nextFileId);
+    cellRefs.current.get(nextFileId)?.focus();
+    if (e.shiftKey) selectRange(next);
+  };
+
   return (
-    <div className="relative w-full grow" onClick={handleGridClick} role="presentation">
+    <div className="relative w-full grow" onClick={handleBackgroundClick} role="presentation">
       <div
+        ref={gridRef}
+        role="grid"
+        tabIndex={-1}
+        aria-multiselectable
+        aria-label="Files"
         className="group/grid absolute inset-0 grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] content-start justify-around gap-2 overflow-auto p-2"
         data-selecting={selectedFiles.length > 0}
+        onKeyDownCapture={handleKeyDownCapture}
+        onBlurCapture={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            focusedFileIdRef.current = null;
+          }
+        }}
       >
-        {files.map((file) => {
-          const selected = selectedFiles.includes(file);
+        {rows.map((row, r) => (
+          <div role="row" className="contents" key={r}>
+            {row.map((file, c) => {
+              const index = r * columns + c;
+              const selected = selectedFileIdSet.has(file.id);
 
-          const handleOpen = () => window.open(`/${file.filename}`);
-
-          const handleSelect = (ctrlKey: boolean) => {
-            if (ctrlKey) {
-              if (selected) {
-                setSelectedFiles(selectedFiles.filter((f) => f !== file));
-              } else {
-                setSelectedFiles([...selectedFiles, file]);
-              }
-            } else {
-              setSelectedFiles([file]);
-            }
-          };
-
-          const handleClick = (e: MouseEvent<HTMLDivElement>) => {
-            e.stopPropagation();
-            handleSelect(e.ctrlKey);
-          };
-
-          const handleDoubleClick = () => handleOpen();
-
-          const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-            e.stopPropagation();
-            switch (e.key) {
-              case " ":
-                handleSelect(e.ctrlKey);
-                break;
-              case "Enter":
-                handleOpen();
-                break;
-              case "Escape":
-                setSelectedFiles([]);
-                break;
-            }
-          };
-
-          const handleCheckboxChange = () => {
-            handleSelect(true);
-          };
-
-          const handleMenuOpen = () => setSelectedFiles([file]);
-
-          return (
-            <div
-              key={file.id}
-              className="group flex h-min cursor-pointer flex-col items-center rounded-md p-2 select-none hover:bg-accent/50 aria-selected:bg-accent"
-              role="gridcell"
-              tabIndex={0}
-              aria-selected={selected}
-              onClick={handleClick}
-              onDoubleClick={handleDoubleClick}
-              onKeyDown={handleKeyDown}
-            >
-              <div className="relative w-full">
-                <FileThumbnail file={file} />
-                <Checkbox
-                  checked={selected}
-                  onClick={stopPropagation}
-                  onDoubleClick={stopPropagation}
-                  onCheckedChange={handleCheckboxChange}
-                  className="invisible absolute top-0.5 left-0.5 cursor-pointer group-hover:visible group-data-[selecting=true]/grid:visible data-checked:visible"
-                />
-                <FileContextMenu file={file} onOpen={handleMenuOpen} />
-              </div>
-              <span className="line-clamp-1 px-1 text-center break-all" title={file.name}>
-                {file.name}
-              </span>
-            </div>
-          );
-        })}
+              return (
+                <div
+                  key={file.id}
+                  ref={(el) => {
+                    if (el) {
+                      cellRefs.current.set(file.id, el);
+                    } else {
+                      cellRefs.current.delete(file.id);
+                    }
+                  }}
+                  className="group flex h-min cursor-pointer flex-col items-center rounded-md p-2 select-none hover:bg-accent/50 aria-selected:bg-accent"
+                  role="gridcell"
+                  tabIndex={index === activeIndex ? 0 : -1}
+                  aria-label={file.name}
+                  aria-selected={selected}
+                  onFocus={() => {
+                    focusedFileIdRef.current = file.id;
+                    activateFile(file.id);
+                  }}
+                  onClick={(e) => handleCellClick(e, index)}
+                  onDoubleClick={() => openFile(file)}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    handleMenuOpenChange(index, true);
+                  }}
+                >
+                  <div className="relative w-full">
+                    <FileThumbnail file={file} />
+                    <span
+                      role="presentation"
+                      className="invisible absolute top-0.5 left-0.5 group-focus-within:visible group-hover:visible group-aria-selected:visible group-data-[selecting=true]/grid:visible"
+                      onClick={stopPropagation}
+                      onDoubleClick={stopPropagation}
+                    >
+                      <Checkbox
+                        aria-label={`Select ${file.name}`}
+                        tabIndex={index === activeIndex ? 0 : -1}
+                        checked={selected}
+                        onCheckedChange={() => toggle(index)}
+                        className="cursor-pointer"
+                      />
+                    </span>
+                    <FileContextMenu
+                      file={file}
+                      open={openMenuFileId === file.id}
+                      onOpenChange={(open) => handleMenuOpenChange(index, open)}
+                      focusRef={activeCellRef}
+                      triggerTabIndex={index === activeIndex ? 0 : -1}
+                      onDeleted={() => handleFileDelete(index)}
+                    />
+                  </div>
+                  <span className="line-clamp-1 px-1 text-center break-all" title={file.name}>
+                    {file.name}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ))}
       </div>
       <SelectedFilesIndicator className="absolute right-1 bottom-1" files={selectedFiles} />
     </div>

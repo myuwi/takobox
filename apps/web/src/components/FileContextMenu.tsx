@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, type RefObject } from "react";
 import { useMutation, useMutationState, useQuery } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 import {
@@ -13,7 +13,6 @@ import {
 import type { File } from "@takobox/sdk";
 import { client } from "@/api/client";
 import { confirmationDialogAtom, renameDialogAtom } from "@/atoms/dialogs";
-import { selectedFilesAtom } from "@/atoms/selected-files";
 import {
   addFileToCollectionOptions,
   collectionsOptions,
@@ -28,13 +27,22 @@ import * as Menu from "./primitives/Menu";
 
 interface FileContextMenuProps {
   file: File;
-  onOpen: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  focusRef?: RefObject<HTMLElement | null>;
+  triggerTabIndex: number;
+  onDeleted: () => void;
 }
 
-export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
-  const [open, setOpen] = useState(false);
+export const FileContextMenu = ({
+  file,
+  open,
+  onOpenChange,
+  focusRef,
+  triggerTabIndex,
+  onDeleted,
+}: FileContextMenuProps) => {
   const { data: collections } = useQuery(collectionsOptions);
-  const setSelectedFiles = useSetAtom(selectedFilesAtom);
   const { mutateAsync: deleteFile } = useMutation(deleteFileOptions);
 
   const setConfirmDialog = useSetAtom(confirmationDialogAtom);
@@ -68,12 +76,7 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
     select: (data) => data.state.variables as any,
   });
 
-  const handleOpenChange = (open: boolean) => {
-    if (open) {
-      onOpen();
-    }
-    setOpen(open);
-  };
+  const openingDialogRef = useRef(false);
 
   const downloadUrl = `/api/files/${file.id}/download`;
   const thumbnailPath = getThumbnailPath(file.filename);
@@ -104,28 +107,36 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
 
   const handleDelete = async () => {
     await deleteFile(file.id);
-    setSelectedFiles((selectedFiles) => selectedFiles.filter((f) => f !== file));
+    onDeleted();
   };
 
-  const menuTriggerRef = useRef<HTMLButtonElement>(null);
-
   return (
-    <Menu.Root open={open} onOpenChange={handleOpenChange} modal={false}>
+    <Menu.Root open={open} onOpenChange={onOpenChange} modal={false}>
       <Menu.Trigger
         render={
           <Button
             variant="ghost"
             size="icon-sm"
-            className="invisible absolute right-0 bottom-0 group-hover:visible group-aria-selected:visible hover:bg-muted data-popup-open:bg-muted"
+            tabIndex={triggerTabIndex}
+            aria-label={`Actions for ${file.name}`}
+            className="invisible absolute right-0 bottom-0 group-focus-within:visible group-hover:visible group-aria-selected:visible hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:visible data-popup-open:bg-muted"
             onClick={stopPropagation}
             onDoubleClick={stopPropagation}
           >
             <EllipsisVertical className="size-4" />
           </Button>
         }
-        ref={menuTriggerRef}
       />
-      <Menu.Content align="end">
+      <Menu.Content
+        align="start"
+        finalFocus={() => {
+          if (openingDialogRef.current) {
+            openingDialogRef.current = false;
+            return false;
+          }
+          return focusRef?.current ?? false;
+        }}
+      >
         <Menu.Group>
           <Menu.Item render={<a href={downloadUrl} />}>
             <Download />
@@ -180,17 +191,16 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
             </Menu.SubContent>
           </Menu.Sub>
           <Menu.Item
-            // Use a timeout to get around focus fuckery
-            onClick={() =>
-              setTimeout(() => {
-                setRenameDialog({
-                  title: "Rename file",
-                  placeholder: "File name",
-                  initialValue: file.name,
-                  callback: handleRename,
-                });
-              }, 0)
-            }
+            onClick={() => {
+              openingDialogRef.current = true;
+              setRenameDialog({
+                title: "Rename file",
+                placeholder: "File name",
+                initialValue: file.name,
+                callback: handleRename,
+                focusRef,
+              });
+            }}
           >
             <PencilLine />
             <span>Rename</span>
@@ -201,16 +211,16 @@ export const FileContextMenu = ({ file, onOpen }: FileContextMenuProps) => {
           </Menu.Item>
           <Menu.Item
             variant="destructive"
-            onClick={() =>
-              setTimeout(() => {
-                setConfirmDialog({
-                  title: "Delete file?",
-                  description: `Are you sure you want to delete the file "${file.name}"? This cannot be undone.`,
-                  confirmText: "Delete File",
-                  callback: handleDelete,
-                });
-              }, 0)
-            }
+            onClick={() => {
+              openingDialogRef.current = true;
+              setConfirmDialog({
+                title: "Delete file?",
+                description: `Are you sure you want to delete the file "${file.name}"? This cannot be undone.`,
+                confirmText: "Delete File",
+                callback: handleDelete,
+                focusRef,
+              });
+            }}
           >
             <Trash />
             <span>Delete</span>

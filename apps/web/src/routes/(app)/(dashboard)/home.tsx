@@ -1,11 +1,9 @@
 import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useSetAtom } from "jotai";
 import { CloudUpload, X } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import * as z from "zod";
-import { selectedFilesAtom } from "@/atoms/selected-files";
 import { FileGrid } from "@/components/FileGrid";
 import { Alert } from "@/components/primitives/Alert";
 import { Button } from "@/components/primitives/Button";
@@ -48,8 +46,6 @@ function RouteComponent() {
 
   const { uploads, uploadFiles, abortUpload, fileRejections, resetFileRejections } = useUploads();
 
-  const setSelectedFiles = useSetAtom(selectedFilesAtom);
-
   useEffect(() => {
     if (collectionId && error?.status === 404) {
       void navigate({
@@ -60,15 +56,8 @@ function RouteComponent() {
   }, [collectionId, error?.status, navigate]);
 
   useEffect(() => {
-    return () => {
-      setSelectedFiles([]);
-      resetFileRejections();
-    };
-  }, [collectionId, resetFileRejections, setSelectedFiles]);
-
-  useEffect(() => {
-    return () => setSelectedFiles([]);
-  }, [q, setSelectedFiles]);
+    return () => resetFileRejections();
+  }, [collectionId, resetFileRejections]);
 
   const { open, getInputProps, getRootProps, isDragActive } = useDropzone({
     onDrop: (files) => uploadFiles(files, collectionId),
@@ -137,7 +126,7 @@ function RouteComponent() {
         >
           <input {...getInputProps()} />
           {files && files.length > 0 ? (
-            <FileGrid files={files} />
+            <FileGrid key={JSON.stringify([collectionId, q])} files={files} />
           ) : (
             <div className="mt-24 flex w-full grow flex-col items-center gap-3 rounded-md p-4">
               {q ? (
