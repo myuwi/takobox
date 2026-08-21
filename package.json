@@ -9,13 +9,16 @@
   "type": "module",
   "scripts": {
     "preinstall": "bunx only-allow bun",
+    "dev": "concurrently -k \"bun:dev:*\"",
+    "dev:web": "bun run --cwd apps/web dev",
+    "dev:server": "just --justfile apps/backend/Justfile dev --headless",
+    "dev:caddy": "docker compose --project-name takobox-dev -f docker-compose.dev.yml up",
     "fmt": "oxfmt . --check",
     "lint": "oxlint --type-aware --type-check --deny-warnings --report-unused-disable-directives",
-    "docker": "docker compose -f docker-compose.build.yml up --build",
-    "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
-    "docker:dev:down": "docker-compose -f docker-compose.dev.yml down"
+    "docker": "docker compose -f docker-compose.build.yml up --build"
   },
   "devDependencies": {
+    "concurrently": "^10.0.5",
     "lefthook": "^2.1.9",
     "oxfmt": "^0.40.0",
     "oxlint": "^1.55.0",

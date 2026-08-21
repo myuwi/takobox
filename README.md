@@ -18,6 +18,23 @@
 - Tailwind CSS - CSS Framework
 - SQLite - Database
 
+## Development
+
+Install the development dependencies:
+
+```sh
+bun install
+just --justfile apps/backend/Justfile dev-deps
+```
+
+Then start the web app, backend, and Caddy proxy together:
+
+```sh
+bun dev
+```
+
+Takobox is available at <http://localhost>. Press Ctrl+C to stop the development stack.
+
 ## Configuration
 
 Takobox can be configured using the following environment variables.

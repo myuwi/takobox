@@ -4,5 +4,5 @@ list:
 dev-deps:
   cargo install bacon sqlx-cli
 
-dev:
-  bacon -j run-long
+dev *args:
+  bacon {{args}} -j run-long
