@@ -1,25 +1,25 @@
 {
-  servers {
-    trusted_proxies static private_ranges
-  }
+	servers {
+		trusted_proxies static private_ranges
+	}
 }
 
 {$BASE_URL} {
-  route {
-    reverse_proxy /api/* http://takobox_server:8000
-    reverse_proxy /docs* http://takobox_server:8000
+	route {
+		reverse_proxy /api/* http://takobox_server:8000
+		reverse_proxy /docs* http://takobox_server:8000
 
-    handle_path /thumbs/* {
-      file_server {
-        root /data/thumbs
-      }
-    }
+		handle_path /thumbs/* {
+			file_server {
+				root /srv/takobox/thumbs
+			}
+		}
 
-    file_server {
-      root /data/uploads
-      pass_thru
-    }
+		file_server {
+			root /srv/takobox/uploads
+			pass_thru
+		}
 
-    reverse_proxy http://takobox_web:3000
-  }
+		reverse_proxy http://takobox_web:3000
+	}
 }

@@ -29,7 +29,7 @@ services:
       - BASE_URL=":80"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./takobox_data:/data:ro
+      - ./takobox_data:/srv/takobox:ro
     ports:
       - 8080:80
     restart: unless-stopped

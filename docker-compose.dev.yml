@@ -3,7 +3,7 @@ services:
     image: caddy:2-alpine
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./takobox_data:/data:ro
+      - ./takobox_data:/srv/takobox:ro
     ports:
       - 80:80
     extra_hosts:

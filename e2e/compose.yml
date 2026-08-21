@@ -44,7 +44,7 @@ services:
       BASE_URL: ":80"
     volumes:
       - ../Caddyfile:/etc/caddy/Caddyfile:ro
-      - e2e-data:/data:ro
+      - e2e-data:/srv/takobox:ro
     ports:
       - "127.0.0.1:8081:80"
     depends_on:
