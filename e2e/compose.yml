@@ -1,0 +1,57 @@
+services:
+  takobox_web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    environment:
+      TAKOBOX_INTERNAL_API_URL: http://takobox_server:8000/api
+      TAKOBOX_DISABLE_LANDING_PAGE: "true"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/robots.txt"]
+      interval: 2s
+      timeout: 3s
+      retries: 12
+
+  takobox_server:
+    build:
+      context: ..
+      dockerfile: apps/backend/Dockerfile
+    environment:
+      TAKOBOX_SESSION_SECRET: e2e-only-session-secret-that-is-long-enough-to-sign-test-session-tokens-safely
+      TAKOBOX_DATA_DIR: /takobox_data
+      TAKOBOX_ENABLE_ACCOUNT_CREATION: "true"
+    volumes:
+      - e2e-data:/takobox_data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "-O",
+          "/dev/null",
+          "--header",
+          "X-Forwarded-For: 127.0.0.1",
+          "http://127.0.0.1:8000/api/settings",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 12
+
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      BASE_URL: ":80"
+    volumes:
+      - ../Caddyfile:/etc/caddy/Caddyfile:ro
+      - e2e-data:/data:ro
+    ports:
+      - "127.0.0.1:8081:80"
+    depends_on:
+      takobox_web:
+        condition: service_healthy
+      takobox_server:
+        condition: service_healthy
+
+volumes:
+  e2e-data:

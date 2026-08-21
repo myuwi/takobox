@@ -1,0 +1,17 @@
+{
+  "name": "@takobox/e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "install:browsers": "playwright install chromium",
+    "stack": "bash stack.sh",
+    "test": "bun run typecheck && playwright test",
+    "test:ui": "bun run typecheck && playwright test --ui",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "26.2.0",
+    "typescript": "5.9.3"
+  }
+}

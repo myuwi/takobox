@@ -13,6 +13,9 @@
     "dev:web": "bun run --cwd apps/web dev",
     "dev:server": "just --justfile apps/backend/Justfile dev --headless",
     "dev:caddy": "docker compose --project-name takobox-dev -f docker-compose.dev.yml up",
+    "test:e2e": "bun run --cwd e2e test",
+    "test:e2e:ui": "bun run --cwd e2e test:ui",
+    "test:e2e:install": "bun install --cwd e2e --frozen-lockfile && bun run --cwd e2e install:browsers",
     "fmt": "oxfmt . --check",
     "lint": "oxlint --type-aware --type-check --deny-warnings --report-unused-disable-directives",
     "docker": "docker compose -f docker-compose.build.yml up --build"

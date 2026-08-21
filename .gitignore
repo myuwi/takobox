@@ -1,3 +1,4 @@
 node_modules
 /takobox_data
+/e2e/.artifacts
 .env

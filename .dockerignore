@@ -17,6 +17,7 @@
 **/dist
 **/dist-ssr
 **/takobox_data
+e2e
 
 # Bun
 **/node_modules
