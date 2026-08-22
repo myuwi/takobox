@@ -223,19 +223,13 @@ export const FileGrid = ({ files }: FileGridProps) => {
 
     const target = e.target as HTMLElement;
     const gridCell = target.closest<HTMLElement>("[role=gridcell]");
-    const isArrowKey =
-      e.key === "ArrowRight" ||
-      e.key === "ArrowLeft" ||
-      e.key === "ArrowDown" ||
-      e.key === "ArrowUp";
-    const isNestedControl = target !== gridCell;
-
-    if (!gridCell || (isNestedControl && !isArrowKey)) return;
+    if (!gridCell) return;
 
     const last = files.length - 1;
     if (last < 0) return;
 
-    let next = activeIndex;
+    const isNestedControl = target !== gridCell;
+    let next: number | null = null;
 
     switch (e.key) {
       case "ArrowRight":
@@ -251,13 +245,29 @@ export const FileGrid = ({ files }: FileGridProps) => {
         next = Math.max(activeIndex - columns, 0);
         break;
       case "Home":
-        next = e.ctrlKey ? 0 : activeIndex - (activeIndex % columns);
+        next = 0;
         break;
       case "End":
-        next = e.ctrlKey
-          ? last
-          : Math.min(activeIndex - (activeIndex % columns) + columns - 1, last);
+        next = last;
         break;
+    }
+
+    if (next !== null) {
+      e.preventDefault();
+      if (isNestedControl) e.stopPropagation();
+
+      const nextFileId = files[next]?.id;
+      if (!nextFileId) return;
+
+      activateFile(nextFileId);
+      cellRefs.current.get(nextFileId)?.focus();
+      if (e.shiftKey) selectRange(next);
+      return;
+    }
+
+    if (isNestedControl) return;
+
+    switch (e.key) {
       case " ":
         e.preventDefault();
         if (e.ctrlKey || e.metaKey) toggle(activeIndex);
@@ -278,16 +288,6 @@ export const FileGrid = ({ files }: FileGridProps) => {
         }
         return;
     }
-
-    e.preventDefault();
-    if (isNestedControl) e.stopPropagation();
-
-    const nextFileId = files[next]?.id;
-    if (!nextFileId) return;
-
-    activateFile(nextFileId);
-    cellRefs.current.get(nextFileId)?.focus();
-    if (e.shiftKey) selectRange(next);
   };
 
   return (

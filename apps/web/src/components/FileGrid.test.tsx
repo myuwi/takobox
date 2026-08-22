@@ -116,6 +116,50 @@ describe("arrow-key navigation in a three-column grid", () => {
   }
 });
 
+test("Home moves focus from a gridcell to the first file", async () => {
+  const user = userEvent.setup();
+  renderGrid(navigationFiles);
+
+  screen.getByRole("gridcell", { name: "file-4.txt" }).focus();
+
+  await user.keyboard("{Home}");
+
+  expect(screen.getByRole("gridcell", { name: "file-0.txt" })).toHaveFocus();
+});
+
+test("End moves focus from a gridcell to the final file", async () => {
+  const user = userEvent.setup();
+  renderGrid(navigationFiles);
+
+  screen.getByRole("gridcell", { name: "file-4.txt" }).focus();
+
+  await user.keyboard("{End}");
+
+  expect(screen.getByRole("gridcell", { name: "file-7.txt" })).toHaveFocus();
+});
+
+test("Home moves to the first file when focus starts on a checkbox", async () => {
+  const user = userEvent.setup();
+  renderGrid(navigationFiles);
+
+  screen.getByRole("checkbox", { name: "Select file-4.txt" }).focus();
+
+  await user.keyboard("{Home}");
+
+  expect(screen.getByRole("gridcell", { name: "file-0.txt" })).toHaveFocus();
+});
+
+test("End moves to the final file when focus starts on an actions button", async () => {
+  const user = userEvent.setup();
+  renderGrid(navigationFiles);
+
+  screen.getByRole("button", { name: "Actions for file-4.txt" }).focus();
+
+  await user.keyboard("{End}");
+
+  expect(screen.getByRole("gridcell", { name: "file-7.txt" })).toHaveFocus();
+});
+
 test("ArrowDown uses the new column count after the grid resizes", async () => {
   const user = userEvent.setup();
   renderGrid(navigationFiles);
