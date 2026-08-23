@@ -12,6 +12,7 @@ mod me;
 mod settings;
 
 use crate::{
+    error::Error,
     middleware::{
         auth::{inject_auth, require_auth},
         rate_limit::rate_limit,
@@ -25,8 +26,9 @@ async fn root() -> &'static str {
 }
 
 #[handler]
-async fn catcher(_req: &Request, _res: &mut Response, ctrl: &mut FlowCtrl) {
-    ctrl.skip_rest();
+async fn catcher(req: &mut Request, depot: &mut Depot, res: &mut Response) {
+    let status = res.status_code.unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
+    Error::from_status_code(status).write(req, depot, res).await;
 }
 
 pub fn router(app_state: AppState) -> Service {
@@ -73,5 +75,5 @@ pub fn router(app_state: AppState) -> Service {
 
     Service::new(router)
         .hoop(Logger::new())
-        .catcher(Catcher::default().hoop(catcher))
+        .catcher(Catcher::new(catcher))
 }

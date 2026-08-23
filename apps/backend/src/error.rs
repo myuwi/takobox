@@ -1,4 +1,4 @@
-use salvo::{http::headers::HeaderMap, oapi, prelude::*};
+use salvo::{oapi, prelude::*};
 use serde::Serialize;
 use tracing::error;
 
@@ -19,8 +19,14 @@ pub enum Error {
     #[error("{0}")]
     UnprocessableEntity(&'static str),
 
-    #[error("You're being rate limited. Try again in {0}s.")]
-    TooManyRequests(usize),
+    #[error("Too many requests. Try again later.")]
+    TooManyRequests,
+
+    #[error("{message}")]
+    Status {
+        status: StatusCode,
+        message: &'static str,
+    },
 
     #[error("Internal Server Error")]
     Sqlx(#[from] sqlx::Error),
@@ -59,20 +65,19 @@ impl Error {
             Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::Conflict(_) => StatusCode::CONFLICT,
             Self::UnprocessableEntity(_) => StatusCode::UNPROCESSABLE_ENTITY,
-            Self::TooManyRequests(_) => StatusCode::TOO_MANY_REQUESTS,
+            Self::TooManyRequests => StatusCode::TOO_MANY_REQUESTS,
+            Self::Status { status, .. } => *status,
             Self::Sqlx(_) | Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 
-    fn headers(&self) -> Option<HeaderMap> {
-        if let Self::TooManyRequests(wait_time) = self {
-            let mut headers = HeaderMap::new();
-            headers.insert("retry-after", wait_time.to_owned().into());
-            headers.insert("x-ratelimit-after", wait_time.to_owned().into());
-
-            Some(headers)
-        } else {
-            None
+    pub fn from_status_code(status: StatusCode) -> Self {
+        match status {
+            StatusCode::TOO_MANY_REQUESTS => Self::TooManyRequests,
+            _ => Self::Status {
+                status,
+                message: status.canonical_reason().unwrap_or("Request failed"),
+            },
         }
     }
 }
@@ -87,10 +92,6 @@ impl Writer for Error {
         }
 
         res.status_code(self.status_code());
-        if let Some(headers) = self.headers() {
-            res.set_headers(headers);
-        }
-
         res.render(Json(ErrorResponse {
             message: self.to_string(),
         }));
