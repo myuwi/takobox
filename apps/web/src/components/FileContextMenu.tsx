@@ -31,7 +31,7 @@ interface FileContextMenuProps {
   onOpenChange: (open: boolean) => void;
   returnFocusRef: RefObject<HTMLElement | null>;
   triggerTabIndex: number;
-  onDeleted: () => void;
+  onDeleted: (fileId: string) => void;
 }
 
 export const FileContextMenu = ({
@@ -108,7 +108,7 @@ export const FileContextMenu = ({
 
   const handleDelete = async () => {
     await deleteFile(file.id);
-    onDeleted();
+    onDeleted(file.id);
   };
 
   const handleOpenChange = (open: boolean) => {

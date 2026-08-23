@@ -1,7 +1,8 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import type { File } from "@takobox/sdk";
+import { client } from "@/api/client";
 import { collectionsOptions } from "@/queries/collections";
 import { createTestQueryClient, renderWithProviders } from "@/test/render";
 import { ResizeObserverMock } from "@/test/ResizeObserverMock";
@@ -279,4 +280,34 @@ test("closing a delete dialog restores focus to the element that opened the menu
   await user.click(screen.getByRole("button", { name: "Cancel" }));
 
   await waitFor(() => expect(checkbox).toHaveFocus());
+});
+
+test("deleting a file restores focus to the next file", async () => {
+  vi.spyOn(client.files, "delete").mockResolvedValue(undefined as never);
+  const user = userEvent.setup();
+  renderGrid();
+
+  const cell = screen.getByRole("gridcell", { name: "file-1.txt" });
+  cell.focus();
+  fireEvent.contextMenu(cell);
+  await user.click(screen.getByRole("menuitem", { name: "Delete" }));
+
+  await user.click(screen.getByRole("button", { name: "Delete File" }));
+
+  await waitFor(() => expect(screen.getByRole("gridcell", { name: "file-2.txt" })).toHaveFocus());
+});
+
+test("deleting the final file restores focus to the previous file", async () => {
+  vi.spyOn(client.files, "delete").mockResolvedValue(undefined as never);
+  const user = userEvent.setup();
+  renderGrid();
+
+  const cell = screen.getByRole("gridcell", { name: "file-2.txt" });
+  cell.focus();
+  fireEvent.contextMenu(cell);
+  await user.click(screen.getByRole("menuitem", { name: "Delete" }));
+
+  await user.click(screen.getByRole("button", { name: "Delete File" }));
+
+  await waitFor(() => expect(screen.getByRole("gridcell", { name: "file-1.txt" })).toHaveFocus());
 });

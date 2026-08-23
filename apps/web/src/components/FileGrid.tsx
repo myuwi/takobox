@@ -202,11 +202,11 @@ export const FileGrid = ({ files }: FileGridProps) => {
     }
   };
 
-  const handleFileDelete = (index: number) => {
-    const file = files[index];
-    if (!file) return;
+  const handleFileDeleted = (fileId: string) => {
+    const index = files.findIndex((file) => file.id === fileId);
+    if (index < 0) return;
 
-    setSelectedFileIds((selectedFileIds) => selectedFileIds.filter((fileId) => fileId !== file.id));
+    setSelectedFileIds((selectedFileIds) => selectedFileIds.filter((id) => id !== fileId));
     const nextFileId = files[index + 1]?.id ?? files[index - 1]?.id ?? null;
     activateFile(nextFileId);
     returnFocusRef.current =
@@ -362,7 +362,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
                       onOpenChange={(open) => handleMenuOpenChange(index, open)}
                       returnFocusRef={returnFocusRef}
                       triggerTabIndex={index === activeIndex ? 0 : -1}
-                      onDeleted={() => handleFileDelete(index)}
+                      onDeleted={handleFileDeleted}
                     />
                   </div>
                   <span className="line-clamp-1 px-1 text-center break-all" title={file.name}>
