@@ -341,7 +341,18 @@ describe("selection", () => {
 });
 
 describe("menu access and focus return", () => {
-  test("closing a menu opened from an actions button restores focus to the button", async () => {
+  test("Space on an actions button opens its file menu", async () => {
+    const user = userEvent.setup();
+    renderGrid();
+
+    screen.getByRole("button", { name: "Actions for file-1.txt" }).focus();
+    await user.keyboard(" ");
+
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+    expectSelectedFiles(1);
+  });
+
+  test("Escape closes a menu opened with Enter and restores focus to the actions button", async () => {
     const user = userEvent.setup();
     renderGrid();
 
