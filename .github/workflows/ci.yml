@@ -44,8 +44,11 @@ jobs:
         with:
           bun-version: 1.3.9
 
-      - name: Install deps
-        run: bun i
+      - name: Install workspace deps
+        run: bun install
+
+      - name: Install E2E deps
+        run: bun install --cwd e2e
 
       - name: Install Rust toolchains
         run: |
