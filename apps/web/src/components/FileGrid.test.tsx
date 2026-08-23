@@ -233,6 +233,21 @@ describe("responsive behavior", () => {
     await user.keyboard("{ArrowDown}");
     expect(screen.getByRole("gridcell", { name: "file-2.txt" })).toHaveFocus();
   });
+
+  test.each([
+    { role: "checkbox" as const, name: "Select file-1.txt" },
+    { role: "button" as const, name: "Actions for file-1.txt" },
+  ])("resizing keeps focus on the file $role", ({ role, name }) => {
+    renderGrid(navigationFiles);
+    setColumnCount(3);
+
+    const control = screen.getByRole(role, { name });
+    control.focus();
+
+    setColumnCount(2);
+
+    expect(control).toHaveFocus();
+  });
 });
 
 describe("selection", () => {
