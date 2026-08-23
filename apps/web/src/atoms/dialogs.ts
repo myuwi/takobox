@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 
-interface ConfirmationDialogAtom {
+interface ConfirmationDialogConfig {
   title: string;
   description: string;
   confirmText?: string;
@@ -8,9 +8,19 @@ interface ConfirmationDialogAtom {
   focusRef?: React.RefObject<HTMLElement | null>;
 }
 
-export const confirmationDialogAtom = atom<ConfirmationDialogAtom | null>(null);
+interface ConfirmationDialogState extends ConfirmationDialogConfig {
+  open: boolean;
+}
 
-interface RenameDialogAtom {
+export const confirmationDialogAtom = atom<ConfirmationDialogState | null>(null);
+export const openConfirmationDialogAtom = atom(
+  null,
+  (_get, set, config: ConfirmationDialogConfig) => {
+    set(confirmationDialogAtom, { ...config, open: true });
+  },
+);
+
+interface RenameDialogConfig {
   title: string;
   placeholder: string;
   initialValue: string;
@@ -18,4 +28,11 @@ interface RenameDialogAtom {
   focusRef?: React.RefObject<HTMLElement | null>;
 }
 
-export const renameDialogAtom = atom<RenameDialogAtom | null>(null);
+interface RenameDialogState extends RenameDialogConfig {
+  open: boolean;
+}
+
+export const renameDialogAtom = atom<RenameDialogState | null>(null);
+export const openRenameDialogAtom = atom(null, (_get, set, config: RenameDialogConfig) => {
+  set(renameDialogAtom, { ...config, open: true });
+});

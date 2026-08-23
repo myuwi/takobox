@@ -303,12 +303,14 @@ export const FileGrid = ({ files }: FileGridProps) => {
         }}
       >
         {rows.map((row, r) => (
+          // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- This ARIA grid uses CSS layout, not table markup.
           <div role="row" className="contents" key={r}>
             {row.map((file, c) => {
               const index = r * columns + c;
               const selected = selectedFileIdSet.has(file.id);
 
               return (
+                // oxlint-disable-next-line jsx-a11y/click-events-have-key-events -- Keyboard events are handled by the grid.
                 <div
                   key={file.id}
                   ref={(el) => {
@@ -319,6 +321,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
                     }
                   }}
                   className="group flex h-min cursor-pointer flex-col items-center rounded-md p-2 select-none hover:bg-accent/50 aria-selected:bg-accent"
+                  // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- This ARIA grid uses CSS layout, not table markup.
                   role="gridcell"
                   tabIndex={index === activeIndex ? 0 : -1}
                   aria-label={file.name}

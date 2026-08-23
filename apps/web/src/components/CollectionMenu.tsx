@@ -4,7 +4,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
 import { MoreHorizontal, PencilLine, Trash } from "lucide-react";
 import type { Collection } from "@takobox/sdk";
-import { confirmationDialogAtom, renameDialogAtom } from "@/atoms/dialogs";
+import { openConfirmationDialogAtom, openRenameDialogAtom } from "@/atoms/dialogs";
 import { deleteCollectionOptions, renameCollectionOptions } from "@/queries/collections";
 import { Button } from "./primitives/Button";
 import * as Menu from "./primitives/Menu";
@@ -14,8 +14,8 @@ interface CollectionMenuProps {
 }
 
 export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
-  const setConfirmDialog = useSetAtom(confirmationDialogAtom);
-  const setRenameDialog = useSetAtom(renameDialogAtom);
+  const openConfirmDialog = useSetAtom(openConfirmationDialogAtom);
+  const openRenameDialog = useSetAtom(openRenameDialogAtom);
 
   const search = useSearch({ strict: false });
   const navigate = useNavigate();
@@ -64,7 +64,7 @@ export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
           // Use a timeout to get around focus fuckery
           onClick={() =>
             setTimeout(() => {
-              setRenameDialog({
+              openRenameDialog({
                 title: "Rename collection",
                 placeholder: "Collection name",
                 initialValue: collection.name,
@@ -80,7 +80,7 @@ export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
           variant="destructive"
           onClick={() =>
             setTimeout(() => {
-              setConfirmDialog({
+              openConfirmDialog({
                 title: "Delete collection?",
                 description: `Are you sure you want to delete the collection "${collection.name}"? Files inside the collection will remain unaffected. This cannot be undone.`,
                 confirmText: "Delete Collection",

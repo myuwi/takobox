@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import type { File } from "@takobox/sdk";
 import { client } from "@/api/client";
-import { confirmationDialogAtom, renameDialogAtom } from "@/atoms/dialogs";
+import { openConfirmationDialogAtom, openRenameDialogAtom } from "@/atoms/dialogs";
 import {
   addFileToCollectionOptions,
   collectionsOptions,
@@ -45,8 +45,8 @@ export const FileContextMenu = ({
   const { data: collections } = useQuery(collectionsOptions);
   const { mutateAsync: deleteFile } = useMutation(deleteFileOptions);
 
-  const setConfirmDialog = useSetAtom(confirmationDialogAtom);
-  const setRenameDialog = useSetAtom(renameDialogAtom);
+  const openConfirmDialog = useSetAtom(openConfirmationDialogAtom);
+  const openRenameDialog = useSetAtom(openRenameDialogAtom);
 
   const { data: fileCollections = [] } = useQuery({
     ...fileOptions(file.id),
@@ -145,6 +145,7 @@ export const FileContextMenu = ({
         }}
       >
         <Menu.Group>
+          {/* oxlint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label -- Base UI renders the "Download" children inside the anchor. */}
           <Menu.Item render={<a href={downloadUrl} />}>
             <Download />
             <span>Download</span>
@@ -200,7 +201,7 @@ export const FileContextMenu = ({
           <Menu.Item
             onClick={() => {
               openingDialogRef.current = true;
-              setRenameDialog({
+              openRenameDialog({
                 title: "Rename file",
                 placeholder: "File name",
                 initialValue: file.name,
@@ -220,7 +221,7 @@ export const FileContextMenu = ({
             variant="destructive"
             onClick={() => {
               openingDialogRef.current = true;
-              setConfirmDialog({
+              openConfirmDialog({
                 title: "Delete file?",
                 description: `Are you sure you want to delete the file "${file.name}"? This cannot be undone.`,
                 confirmText: "Delete File",

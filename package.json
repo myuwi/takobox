@@ -24,8 +24,8 @@
   "devDependencies": {
     "concurrently": "^10.0.5",
     "lefthook": "^2.1.9",
-    "oxfmt": "^0.40.0",
-    "oxlint": "^1.55.0",
-    "oxlint-tsgolint": "^0.16.0"
+    "oxfmt": "^0.64.0",
+    "oxlint": "^1.79.0",
+    "oxlint-tsgolint": "^7.0.2001"
   }
 }

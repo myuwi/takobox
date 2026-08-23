@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { isAxiosError, type AxiosError } from "axios";
 import { useAtom } from "jotai";
 import { useForm } from "react-hook-form";
@@ -11,7 +11,6 @@ import { Input } from "./primitives/Input";
 import { Label } from "./primitives/Label";
 
 export const RenameDialog = () => {
-  const [open, setOpen] = useState(false);
   const [renameDialog, setRenameDialog] = useAtom(renameDialogAtom);
   const [error, setError] = useState<AxiosError>();
   const isError = !!error;
@@ -28,18 +27,18 @@ export const RenameDialog = () => {
     if (!open) {
       reset();
       setError(undefined);
-      setRenameDialog(null);
+      setRenameDialog((dialog) => (dialog?.open === false ? null : dialog));
     }
   };
 
-  useEffect(() => {
-    setOpen(!!renameDialog);
-  }, [renameDialog]);
+  const handleOpenChange = (open: boolean) => {
+    setRenameDialog((dialog) => (dialog ? { ...dialog, open } : null));
+  };
 
   const onSubmit = async (values: { name: string }) => {
     try {
       await renameDialog?.callback(values.name);
-      setOpen(false);
+      handleOpenChange(false);
     } catch (err) {
       if (isAxiosError(err)) {
         setError(err);
@@ -53,7 +52,11 @@ export const RenameDialog = () => {
   const disabled = isError || name === renameDialog?.initialValue || name === "";
 
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen} onOpenChangeComplete={handleOpenChangeComplete}>
+    <Dialog.Root
+      open={renameDialog?.open ?? false}
+      onOpenChange={handleOpenChange}
+      onOpenChangeComplete={handleOpenChangeComplete}
+    >
       <Dialog.Content finalFocus={renameDialog?.focusRef}>
         <form
           className="contents"
