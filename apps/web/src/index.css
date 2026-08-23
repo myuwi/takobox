@@ -17,6 +17,7 @@
   --color-destructive-foreground: #fff;
   --color-muted: var(--color-zinc-200);
   --color-muted-foreground: var(--color-zinc-500);
+  --color-subtle-foreground: var(--color-zinc-600);
 
   --color-border: --alpha(var(--color-black) / 10%);
   --color-input: var(--color-border);

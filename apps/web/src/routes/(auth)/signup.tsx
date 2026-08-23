@@ -61,9 +61,9 @@ function SignUp() {
         </Label>
       </div>
       <Button type="submit">Create account</Button>
-      <span className="text-center text-zinc-500">
+      <span className="text-center text-muted-foreground">
         Already have an account?{" "}
-        <Link className="text-zinc-700 hover:underline" to="/login">
+        <Link className="text-foreground hover:underline" to="/login">
           Log in
         </Link>
       </span>
