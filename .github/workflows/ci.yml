@@ -33,7 +33,7 @@ jobs:
               - "apps/backend/**"
 
   lint:
-    name: Lint
+    name: Lint and Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -49,6 +49,9 @@ jobs:
 
       - name: Lint
         run: bun run lint
+
+      - name: Test
+        run: bun run test
 
   build-push:
     name: Build and Push images
