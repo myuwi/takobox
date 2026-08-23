@@ -28,9 +28,10 @@ pub struct Env {
 }
 
 impl Env {
-    pub fn parse() -> figment::Result<Env> {
+    pub fn parse() -> Result<Env, Box<figment::Error>> {
         Figment::new()
             .merge(figment::providers::Env::prefixed("TAKOBOX_"))
             .extract()
+            .map_err(Box::new)
     }
 }
