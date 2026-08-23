@@ -125,12 +125,12 @@ export const FileContextMenu = ({
             variant="ghost"
             size="icon-sm"
             tabIndex={triggerTabIndex}
-            aria-label={`Actions for ${file.name}`}
             className="invisible absolute right-0 bottom-0 group-focus-within:visible group-hover:visible group-aria-selected:visible hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:visible data-popup-open:bg-muted"
             onClick={stopPropagation}
             onDoubleClick={stopPropagation}
           >
             <EllipsisVertical className="size-4" />
+            <span className="sr-only">Actions for {file.name}</span>
           </Button>
         }
       />

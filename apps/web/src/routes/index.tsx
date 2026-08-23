@@ -35,7 +35,11 @@ function App() {
       <Nav />
       <main className="mx-auto flex max-w-5xl flex-col items-center gap-6 px-4 py-48">
         <h1 className="text-center text-4xl">
-          A <span className="text-primary">simpler</span> file upload service
+          A{" "}
+          <span className="text-primary" data-a11y-contrast-exempt>
+            simpler
+          </span>{" "}
+          file upload service
         </h1>
         <h2 className="text-base text-zinc-600">Lightweight, self-hostable and blazingly fast.</h2>
         <div className="flex flex-row gap-4">

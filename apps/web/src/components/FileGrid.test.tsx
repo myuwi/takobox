@@ -209,11 +209,9 @@ describe("keyboard navigation", () => {
     await user.keyboard("{ArrowDown}");
 
     expect(screen.getByRole("gridcell", { name: "file-3.txt" })).toHaveFocus();
-    expect(
-      actionButtons
-        .filter((button) => button.tabIndex === 0)
-        .map((button) => button.getAttribute("aria-label")),
-    ).toEqual(["Actions for file-3.txt"]);
+    expect(actionButtons.filter((button) => button.tabIndex === 0)).toEqual([
+      screen.getByRole("button", { name: "Actions for file-3.txt" }),
+    ]);
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
   });
 });

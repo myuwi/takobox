@@ -124,7 +124,7 @@ function RouteComponent() {
           data-dragging={isDragActive}
           {...getRootProps()}
         >
-          <input {...getInputProps()} />
+          <input {...getInputProps({ hidden: true })} />
           {files && files.length > 0 ? (
             <FileGrid key={JSON.stringify([collectionId, q])} files={files} />
           ) : (

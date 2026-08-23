@@ -54,6 +54,7 @@ export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
             onClick={(e) => e.preventDefault()}
           >
             <MoreHorizontal className="p-0.5" />
+            <span className="sr-only">Actions for {collection.name}</span>
           </Button>
         }
         ref={menuTriggerRef}

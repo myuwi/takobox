@@ -28,12 +28,12 @@ export const Sidebar = () => {
   });
 
   const sidebar = (
-    <div className="flex w-62 shrink-0 flex-col gap-4 p-4">
+    <aside className="flex w-62 shrink-0 flex-col gap-4 p-4">
       <Link to="/" className="flex h-9 items-center self-start">
         <Logo />
       </Link>
 
-      <input {...getInputProps()} />
+      <input {...getInputProps({ hidden: true })} />
       <Button size="lg" onClick={open}>
         <Plus />
         <span>Upload file</span>
@@ -89,7 +89,7 @@ export const Sidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-    </div>
+    </aside>
   );
 
   return (

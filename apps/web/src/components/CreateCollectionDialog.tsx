@@ -51,6 +51,7 @@ export const CreateCollectionDialog = () => {
         render={
           <Button variant="ghost" size="icon-sm" className="mr-1">
             <Plus className="p-0.5" />
+            <span className="sr-only">Create collection</span>
           </Button>
         }
       />
