@@ -32,7 +32,7 @@ jobs:
             server:
               - "apps/backend/**"
 
-  lint:
+  check:
     name: Lint and Test
     runs-on: ubuntu-latest
     steps:
@@ -47,15 +47,32 @@ jobs:
       - name: Install deps
         run: bun i
 
-      - name: Lint
+      - name: Install Rust toolchains
+        run: |
+          rustup toolchain install stable --profile minimal --component clippy
+          rustup toolchain install nightly --profile minimal --component rustfmt
+
+      - name: Lint TypeScript
         run: bun run lint
 
-      - name: Test
+      - name: Test TypeScript
         run: bun run test
+
+      - name: Check Rust formatting
+        working-directory: apps/backend
+        run: cargo +nightly fmt --check
+
+      - name: Run Clippy
+        working-directory: apps/backend
+        run: cargo +stable clippy --all-targets -- -D warnings
+
+      - name: Test Rust
+        working-directory: apps/backend
+        run: cargo +stable test
 
   build-push:
     name: Build and Push images
-    needs: [changes, lint]
+    needs: [changes, check]
     if: |
       needs.changes.outputs.web == 'true' ||
       needs.changes.outputs.server == 'true'
