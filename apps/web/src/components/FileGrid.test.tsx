@@ -55,32 +55,20 @@ const setColumnCount = (columns: number) => {
   });
 };
 
-test("only makes the active file and its controls tabbable", () => {
-  renderGrid();
+const expectSelectedFiles = (...selectedIndexes: number[]) => {
+  const selectedNames = selectedIndexes.map((index) => `file-${index}.txt`);
+  const { cells, checkboxes } = getGridElements();
 
-  const { cells, checkboxes, actionButtons } = getGridElements();
+  const selectedGridCells = cells
+    .filter((cell) => cell.getAttribute("aria-selected") === "true")
+    .map((cell) => cell.getAttribute("aria-label"));
+  const selectedCheckboxes = checkboxes
+    .filter((checkbox) => checkbox.getAttribute("aria-checked") === "true")
+    .map((checkbox) => checkbox.getAttribute("aria-label")?.replace("Select ", ""));
 
-  expect(cells.map((cell) => cell.tabIndex)).toEqual([0, -1, -1]);
-  expect(checkboxes.map((checkbox) => checkbox.tabIndex)).toEqual([0, -1, -1]);
-  expect(actionButtons.map((button) => button.tabIndex)).toEqual([0, -1, -1]);
-});
-
-test("tabs through the active cell controls before leaving the grid", async () => {
-  const user = userEvent.setup();
-  renderGrid();
-
-  await user.tab();
-  expect(screen.getByRole("gridcell", { name: "file-0.txt" })).toHaveFocus();
-
-  await user.tab();
-  expect(screen.getByRole("checkbox", { name: "Select file-0.txt" })).toHaveFocus();
-
-  await user.tab();
-  expect(screen.getByRole("button", { name: "Actions for file-0.txt" })).toHaveFocus();
-
-  await user.tab();
-  expect(screen.getByRole("button", { name: "Outside the grid" })).toHaveFocus();
-});
+  expect(selectedGridCells).toEqual(selectedNames);
+  expect(selectedCheckboxes).toEqual(selectedNames);
+};
 
 // prettier-ignore
 const arrowNavigationCases = [
@@ -101,213 +89,355 @@ const arrowNavigationCases = [
   { key: "ArrowUp", scenario: "keeps focus on the first file at the grid boundary", from: 0, to: 0 },
 ] as const;
 
-describe("arrow-key navigation in a three-column grid", () => {
-  for (const { key, scenario, from, to } of arrowNavigationCases) {
-    test(`${key} ${scenario} (${from} → ${to})`, async () => {
-      const user = userEvent.setup();
-      renderGrid(navigationFiles);
-      setColumnCount(3);
+describe("focus and tab order", () => {
+  test("only makes the active file and its controls tabbable", () => {
+    renderGrid();
 
-      const { cells } = getGridElements();
-      screen.getByRole("gridcell", { name: `file-${from}.txt` }).focus();
+    const { cells, checkboxes, actionButtons } = getGridElements();
 
-      await user.keyboard(`{${key}}`);
+    expect(cells.map((cell) => cell.tabIndex)).toEqual([0, -1, -1]);
+    expect(checkboxes.map((checkbox) => checkbox.tabIndex)).toEqual([0, -1, -1]);
+    expect(actionButtons.map((button) => button.tabIndex)).toEqual([0, -1, -1]);
+  });
 
-      expect(screen.getByRole("gridcell", { name: `file-${to}.txt` })).toHaveFocus();
-      expect(
-        cells.filter((cell) => cell.tabIndex === 0).map((cell) => cell.getAttribute("aria-label")),
-      ).toEqual([`file-${to}.txt`]);
-    });
-  }
+  test("tabs through the active cell controls before leaving the grid", async () => {
+    const user = userEvent.setup();
+    renderGrid();
+
+    await user.tab();
+    expect(screen.getByRole("gridcell", { name: "file-0.txt" })).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("checkbox", { name: "Select file-0.txt" })).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Actions for file-0.txt" })).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Outside the grid" })).toHaveFocus();
+  });
 });
 
-test("Home moves focus from a gridcell to the first file", async () => {
-  const user = userEvent.setup();
-  renderGrid(navigationFiles);
+describe("keyboard navigation", () => {
+  describe("arrow-key navigation in a three-column grid", () => {
+    for (const { key, scenario, from, to } of arrowNavigationCases) {
+      test(`${key} ${scenario} (${from} → ${to})`, async () => {
+        const user = userEvent.setup();
+        renderGrid(navigationFiles);
+        setColumnCount(3);
 
-  screen.getByRole("gridcell", { name: "file-4.txt" }).focus();
+        const { cells } = getGridElements();
+        screen.getByRole("gridcell", { name: `file-${from}.txt` }).focus();
 
-  await user.keyboard("{Home}");
+        await user.keyboard(`{${key}}`);
 
-  expect(screen.getByRole("gridcell", { name: "file-0.txt" })).toHaveFocus();
+        expect(screen.getByRole("gridcell", { name: `file-${to}.txt` })).toHaveFocus();
+        expect(
+          cells
+            .filter((cell) => cell.tabIndex === 0)
+            .map((cell) => cell.getAttribute("aria-label")),
+        ).toEqual([`file-${to}.txt`]);
+      });
+    }
+  });
+
+  test("Home moves focus from a gridcell to the first file", async () => {
+    const user = userEvent.setup();
+    renderGrid(navigationFiles);
+
+    screen.getByRole("gridcell", { name: "file-4.txt" }).focus();
+
+    await user.keyboard("{Home}");
+
+    expect(screen.getByRole("gridcell", { name: "file-0.txt" })).toHaveFocus();
+  });
+
+  test("End moves focus from a gridcell to the final file", async () => {
+    const user = userEvent.setup();
+    renderGrid(navigationFiles);
+
+    screen.getByRole("gridcell", { name: "file-4.txt" }).focus();
+
+    await user.keyboard("{End}");
+
+    expect(screen.getByRole("gridcell", { name: "file-7.txt" })).toHaveFocus();
+  });
+
+  test("Home moves to the first file when focus starts on a checkbox", async () => {
+    const user = userEvent.setup();
+    renderGrid(navigationFiles);
+
+    screen.getByRole("checkbox", { name: "Select file-4.txt" }).focus();
+
+    await user.keyboard("{Home}");
+
+    expect(screen.getByRole("gridcell", { name: "file-0.txt" })).toHaveFocus();
+  });
+
+  test("End moves to the final file when focus starts on an actions button", async () => {
+    const user = userEvent.setup();
+    renderGrid(navigationFiles);
+
+    screen.getByRole("button", { name: "Actions for file-4.txt" }).focus();
+
+    await user.keyboard("{End}");
+
+    expect(screen.getByRole("gridcell", { name: "file-7.txt" })).toHaveFocus();
+  });
+
+  test("ArrowRight moves to another cell when focus starts on a checkbox", async () => {
+    const user = userEvent.setup();
+    renderGrid();
+
+    const { checkboxes } = getGridElements();
+    screen.getByRole("checkbox", { name: "Select file-0.txt" }).focus();
+
+    await user.keyboard("{ArrowRight}");
+
+    expect(screen.getByRole("gridcell", { name: "file-1.txt" })).toHaveFocus();
+    expect(checkboxes.map((checkbox) => checkbox.tabIndex)).toEqual([-1, 0, -1]);
+  });
+
+  test("ArrowDown moves from an actions button without opening its menu", async () => {
+    const user = userEvent.setup();
+    renderGrid(navigationFiles);
+    setColumnCount(3);
+
+    const { actionButtons } = getGridElements();
+    screen.getByRole("button", { name: "Actions for file-0.txt" }).focus();
+
+    await user.keyboard("{ArrowDown}");
+
+    expect(screen.getByRole("gridcell", { name: "file-3.txt" })).toHaveFocus();
+    expect(
+      actionButtons
+        .filter((button) => button.tabIndex === 0)
+        .map((button) => button.getAttribute("aria-label")),
+    ).toEqual(["Actions for file-3.txt"]);
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
 });
 
-test("End moves focus from a gridcell to the final file", async () => {
-  const user = userEvent.setup();
-  renderGrid(navigationFiles);
+describe("responsive behavior", () => {
+  test("ArrowDown uses the new column count after the grid resizes", async () => {
+    const user = userEvent.setup();
+    renderGrid(navigationFiles);
+    setColumnCount(3);
 
-  screen.getByRole("gridcell", { name: "file-4.txt" }).focus();
+    const startCell = screen.getByRole("gridcell", { name: "file-0.txt" });
+    startCell.focus();
 
-  await user.keyboard("{End}");
+    setColumnCount(2);
 
-  expect(screen.getByRole("gridcell", { name: "file-7.txt" })).toHaveFocus();
+    expect(startCell).toHaveFocus();
+    await user.keyboard("{ArrowDown}");
+    expect(screen.getByRole("gridcell", { name: "file-2.txt" })).toHaveFocus();
+  });
 });
 
-test("Home moves to the first file when focus starts on a checkbox", async () => {
-  const user = userEvent.setup();
-  renderGrid(navigationFiles);
+describe("selection", () => {
+  test("Space selects the focused file and clears the previous selection", async () => {
+    const user = userEvent.setup();
+    renderGrid();
 
-  screen.getByRole("checkbox", { name: "Select file-4.txt" }).focus();
+    await user.click(screen.getByRole("gridcell", { name: "file-0.txt" }));
+    screen.getByRole("gridcell", { name: "file-1.txt" }).focus();
+    await user.keyboard(" ");
 
-  await user.keyboard("{Home}");
+    expectSelectedFiles(1);
+  });
 
-  expect(screen.getByRole("gridcell", { name: "file-0.txt" })).toHaveFocus();
+  test("Ctrl+Space toggles the focused file without clearing another selection", async () => {
+    const user = userEvent.setup();
+    renderGrid();
+
+    screen.getByRole("gridcell", { name: "file-0.txt" }).focus();
+    await user.keyboard(" ");
+    screen.getByRole("gridcell", { name: "file-1.txt" }).focus();
+    await user.keyboard("{Control>} {/Control}");
+    expectSelectedFiles(0, 1);
+
+    await user.keyboard("{Control>} {/Control}");
+    expectSelectedFiles(0);
+  });
+
+  test("Space on a checkbox toggles its file without invoking gridcell selection", async () => {
+    const user = userEvent.setup();
+    renderGrid();
+
+    const checkbox = screen.getByRole("checkbox", { name: "Select file-1.txt" });
+    checkbox.focus();
+    await user.keyboard(" ");
+    expectSelectedFiles(1);
+
+    await user.keyboard(" ");
+    expectSelectedFiles();
+  });
+
+  test("Shift+ArrowDown selects the range through the destination file", async () => {
+    const user = userEvent.setup();
+    renderGrid(navigationFiles);
+    setColumnCount(3);
+
+    screen.getByRole("gridcell", { name: "file-1.txt" }).focus();
+    await user.keyboard(" ");
+    await user.keyboard("{Shift>}{ArrowDown}{/Shift}");
+
+    expect(screen.getByRole("gridcell", { name: "file-4.txt" })).toHaveFocus();
+    expectSelectedFiles(1, 2, 3, 4);
+  });
+
+  test("Shift+ArrowRight establishes an anchor at the origin and selects the destination", async () => {
+    const user = userEvent.setup();
+    renderGrid();
+
+    screen.getByRole("gridcell", { name: "file-1.txt" }).focus();
+    await user.keyboard("{Shift>}{ArrowRight}{/Shift}");
+
+    expect(screen.getByRole("gridcell", { name: "file-2.txt" })).toHaveFocus();
+    expectSelectedFiles(1, 2);
+  });
+
+  test("Shift+ArrowLeft extends selection backward from the anchor", async () => {
+    const user = userEvent.setup();
+    renderGrid(navigationFiles);
+
+    screen.getByRole("gridcell", { name: "file-4.txt" }).focus();
+    await user.keyboard(" ");
+    await user.keyboard("{Shift>}{ArrowLeft}{ArrowLeft}{/Shift}");
+
+    expect(screen.getByRole("gridcell", { name: "file-2.txt" })).toHaveFocus();
+    expectSelectedFiles(2, 3, 4);
+  });
+
+  test("Shift+ArrowLeft shrinks and reverses a forward selection around its original anchor", async () => {
+    const user = userEvent.setup();
+    renderGrid(navigationFiles);
+
+    screen.getByRole("gridcell", { name: "file-1.txt" }).focus();
+    await user.keyboard(" ");
+    await user.keyboard("{Shift>}{ArrowRight}{ArrowRight}{/Shift}");
+    expectSelectedFiles(1, 2, 3);
+
+    await user.keyboard("{Shift>}{ArrowLeft}{/Shift}");
+    expectSelectedFiles(1, 2);
+
+    await user.keyboard("{Shift>}{ArrowLeft}{ArrowLeft}{/Shift}");
+    expect(screen.getByRole("gridcell", { name: "file-0.txt" })).toHaveFocus();
+    expectSelectedFiles(0, 1);
+  });
+
+  test("Ctrl+A selects every file and Escape clears the selection", async () => {
+    const user = userEvent.setup();
+    renderGrid();
+
+    screen.getByRole("gridcell", { name: "file-0.txt" }).focus();
+    await user.keyboard("{Control>}a{/Control}");
+    expectSelectedFiles(0, 1, 2);
+
+    await user.keyboard("{Escape}");
+    expectSelectedFiles();
+  });
 });
 
-test("End moves to the final file when focus starts on an actions button", async () => {
-  const user = userEvent.setup();
-  renderGrid(navigationFiles);
+describe("menu access and focus return", () => {
+  test("closing a menu opened from an actions button restores focus to the button", async () => {
+    const user = userEvent.setup();
+    renderGrid();
 
-  screen.getByRole("button", { name: "Actions for file-4.txt" }).focus();
+    const actionsButton = screen.getByRole("button", { name: "Actions for file-0.txt" });
+    actionsButton.focus();
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("menu")).toBeInTheDocument();
 
-  await user.keyboard("{End}");
+    await user.keyboard("{Escape}");
 
-  expect(screen.getByRole("gridcell", { name: "file-7.txt" })).toHaveFocus();
-});
+    await waitFor(() => expect(actionsButton).toHaveFocus());
+  });
 
-test("ArrowDown uses the new column count after the grid resizes", async () => {
-  const user = userEvent.setup();
-  renderGrid(navigationFiles);
-  setColumnCount(3);
+  test("closing a context menu opened from a gridcell restores focus to the cell", async () => {
+    const user = userEvent.setup();
+    renderGrid();
 
-  const startCell = screen.getByRole("gridcell", { name: "file-0.txt" });
-  startCell.focus();
+    const cell = screen.getByRole("gridcell", { name: "file-0.txt" });
+    cell.focus();
+    fireEvent.contextMenu(cell);
+    expect(screen.getByRole("menu")).toBeInTheDocument();
 
-  setColumnCount(2);
+    await user.keyboard("{Escape}");
 
-  expect(startCell).toHaveFocus();
-  await user.keyboard("{ArrowDown}");
-  expect(screen.getByRole("gridcell", { name: "file-2.txt" })).toHaveFocus();
-});
+    await waitFor(() => expect(cell).toHaveFocus());
+  });
 
-test("ArrowRight moves to another cell when focus starts on a checkbox", async () => {
-  const user = userEvent.setup();
-  renderGrid();
+  test("closing a context menu opened from a checkbox restores focus to the checkbox", async () => {
+    const user = userEvent.setup();
+    renderGrid();
 
-  const { checkboxes } = getGridElements();
-  screen.getByRole("checkbox", { name: "Select file-0.txt" }).focus();
+    const checkbox = screen.getByRole("checkbox", { name: "Select file-0.txt" });
+    checkbox.focus();
+    fireEvent.contextMenu(checkbox);
+    expect(screen.getByRole("menu")).toBeInTheDocument();
 
-  await user.keyboard("{ArrowRight}");
+    await user.keyboard("{Escape}");
 
-  expect(screen.getByRole("gridcell", { name: "file-1.txt" })).toHaveFocus();
-  expect(checkboxes.map((checkbox) => checkbox.tabIndex)).toEqual([-1, 0, -1]);
-});
+    await waitFor(() => expect(checkbox).toHaveFocus());
+  });
 
-test("ArrowDown moves from an actions button without opening its menu", async () => {
-  const user = userEvent.setup();
-  renderGrid(navigationFiles);
-  setColumnCount(3);
+  test("closing a rename dialog restores focus to the element that opened the menu", async () => {
+    const user = userEvent.setup();
+    renderGrid();
 
-  const { actionButtons } = getGridElements();
-  screen.getByRole("button", { name: "Actions for file-0.txt" }).focus();
+    const checkbox = screen.getByRole("checkbox", { name: "Select file-0.txt" });
+    checkbox.focus();
+    fireEvent.contextMenu(checkbox);
+    await user.click(screen.getByRole("menuitem", { name: "Rename" }));
 
-  await user.keyboard("{ArrowDown}");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
-  expect(screen.getByRole("gridcell", { name: "file-3.txt" })).toHaveFocus();
-  expect(
-    actionButtons
-      .filter((button) => button.tabIndex === 0)
-      .map((button) => button.getAttribute("aria-label")),
-  ).toEqual(["Actions for file-3.txt"]);
-  expect(screen.queryByRole("menu")).not.toBeInTheDocument();
-});
+    await waitFor(() => expect(checkbox).toHaveFocus());
+  });
 
-test("closing a menu opened from an actions button restores focus to the button", async () => {
-  const user = userEvent.setup();
-  renderGrid();
+  test("closing a delete dialog restores focus to the element that opened the menu", async () => {
+    const user = userEvent.setup();
+    renderGrid();
 
-  const actionsButton = screen.getByRole("button", { name: "Actions for file-0.txt" });
-  actionsButton.focus();
-  await user.keyboard("{Enter}");
-  expect(screen.getByRole("menu")).toBeInTheDocument();
+    const checkbox = screen.getByRole("checkbox", { name: "Select file-0.txt" });
+    checkbox.focus();
+    fireEvent.contextMenu(checkbox);
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
 
-  await user.keyboard("{Escape}");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
-  await waitFor(() => expect(actionsButton).toHaveFocus());
-});
+    await waitFor(() => expect(checkbox).toHaveFocus());
+  });
 
-test("closing a context menu opened from a gridcell restores focus to the cell", async () => {
-  const user = userEvent.setup();
-  renderGrid();
+  test("deleting a file restores focus to the next file", async () => {
+    vi.spyOn(client.files, "delete").mockResolvedValue(undefined as never);
+    const user = userEvent.setup();
+    renderGrid();
 
-  const cell = screen.getByRole("gridcell", { name: "file-0.txt" });
-  cell.focus();
-  fireEvent.contextMenu(cell);
-  expect(screen.getByRole("menu")).toBeInTheDocument();
+    const cell = screen.getByRole("gridcell", { name: "file-1.txt" });
+    cell.focus();
+    fireEvent.contextMenu(cell);
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
 
-  await user.keyboard("{Escape}");
+    await user.click(screen.getByRole("button", { name: "Delete File" }));
 
-  await waitFor(() => expect(cell).toHaveFocus());
-});
+    await waitFor(() => expect(screen.getByRole("gridcell", { name: "file-2.txt" })).toHaveFocus());
+  });
 
-test("closing a context menu opened from a checkbox restores focus to the checkbox", async () => {
-  const user = userEvent.setup();
-  renderGrid();
+  test("deleting the final file restores focus to the previous file", async () => {
+    vi.spyOn(client.files, "delete").mockResolvedValue(undefined as never);
+    const user = userEvent.setup();
+    renderGrid();
 
-  const checkbox = screen.getByRole("checkbox", { name: "Select file-0.txt" });
-  checkbox.focus();
-  fireEvent.contextMenu(checkbox);
-  expect(screen.getByRole("menu")).toBeInTheDocument();
+    const cell = screen.getByRole("gridcell", { name: "file-2.txt" });
+    cell.focus();
+    fireEvent.contextMenu(cell);
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
 
-  await user.keyboard("{Escape}");
+    await user.click(screen.getByRole("button", { name: "Delete File" }));
 
-  await waitFor(() => expect(checkbox).toHaveFocus());
-});
-
-test("closing a rename dialog restores focus to the element that opened the menu", async () => {
-  const user = userEvent.setup();
-  renderGrid();
-
-  const checkbox = screen.getByRole("checkbox", { name: "Select file-0.txt" });
-  checkbox.focus();
-  fireEvent.contextMenu(checkbox);
-  await user.click(screen.getByRole("menuitem", { name: "Rename" }));
-
-  await user.click(screen.getByRole("button", { name: "Cancel" }));
-
-  await waitFor(() => expect(checkbox).toHaveFocus());
-});
-
-test("closing a delete dialog restores focus to the element that opened the menu", async () => {
-  const user = userEvent.setup();
-  renderGrid();
-
-  const checkbox = screen.getByRole("checkbox", { name: "Select file-0.txt" });
-  checkbox.focus();
-  fireEvent.contextMenu(checkbox);
-  await user.click(screen.getByRole("menuitem", { name: "Delete" }));
-
-  await user.click(screen.getByRole("button", { name: "Cancel" }));
-
-  await waitFor(() => expect(checkbox).toHaveFocus());
-});
-
-test("deleting a file restores focus to the next file", async () => {
-  vi.spyOn(client.files, "delete").mockResolvedValue(undefined as never);
-  const user = userEvent.setup();
-  renderGrid();
-
-  const cell = screen.getByRole("gridcell", { name: "file-1.txt" });
-  cell.focus();
-  fireEvent.contextMenu(cell);
-  await user.click(screen.getByRole("menuitem", { name: "Delete" }));
-
-  await user.click(screen.getByRole("button", { name: "Delete File" }));
-
-  await waitFor(() => expect(screen.getByRole("gridcell", { name: "file-2.txt" })).toHaveFocus());
-});
-
-test("deleting the final file restores focus to the previous file", async () => {
-  vi.spyOn(client.files, "delete").mockResolvedValue(undefined as never);
-  const user = userEvent.setup();
-  renderGrid();
-
-  const cell = screen.getByRole("gridcell", { name: "file-2.txt" });
-  cell.focus();
-  fireEvent.contextMenu(cell);
-  await user.click(screen.getByRole("menuitem", { name: "Delete" }));
-
-  await user.click(screen.getByRole("button", { name: "Delete File" }));
-
-  await waitFor(() => expect(screen.getByRole("gridcell", { name: "file-1.txt" })).toHaveFocus());
+    await waitFor(() => expect(screen.getByRole("gridcell", { name: "file-1.txt" })).toHaveFocus());
+  });
 });
