@@ -69,6 +69,7 @@
         "@hey-api/openapi-ts": "^0.98.2",
         "@types/bun": "1.3.9",
         "typescript": "^5",
+        "vitest": "^4.1.11",
       },
     },
   },

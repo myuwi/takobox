@@ -14,6 +14,7 @@ export default defineConfig({
     },
     {
       name: "@hey-api/sdk",
+      client: false,
       operations: {
         strategy: "single",
         containerName: "TakoboxClient",

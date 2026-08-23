@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "ignorePatterns": ["**/*.gen.ts"],
+  "ignorePatterns": ["**/*.gen.ts", "packages/sdk/src/gen/**"],
   "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "promise"],
   "rules": {
     "no-unused-vars": [
