@@ -1,11 +1,13 @@
-import { act, screen, within } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test } from "vitest";
 import type { File } from "@takobox/sdk";
 import { collectionsOptions } from "@/queries/collections";
 import { createTestQueryClient, renderWithProviders } from "@/test/render";
 import { ResizeObserverMock } from "@/test/ResizeObserverMock";
+import { ConfirmationDialog } from "./ConfirmationDialog";
 import { FileGrid } from "./FileGrid";
+import { RenameDialog } from "./RenameDialog";
 
 const createFile = (index: number): File => ({
   id: `file-${index}`,
@@ -25,6 +27,8 @@ const renderGrid = (gridFiles = files) => {
   return renderWithProviders(
     <>
       <FileGrid files={gridFiles} />
+      <ConfirmationDialog />
+      <RenameDialog />
       <button>Outside the grid</button>
     </>,
     { queryClient },
@@ -205,4 +209,74 @@ test("ArrowDown moves from an actions button without opening its menu", async ()
       .map((button) => button.getAttribute("aria-label")),
   ).toEqual(["Actions for file-3.txt"]);
   expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+});
+
+test("closing a menu opened from an actions button restores focus to the button", async () => {
+  const user = userEvent.setup();
+  renderGrid();
+
+  const actionsButton = screen.getByRole("button", { name: "Actions for file-0.txt" });
+  actionsButton.focus();
+  await user.keyboard("{Enter}");
+  expect(screen.getByRole("menu")).toBeInTheDocument();
+
+  await user.keyboard("{Escape}");
+
+  await waitFor(() => expect(actionsButton).toHaveFocus());
+});
+
+test("closing a context menu opened from a gridcell restores focus to the cell", async () => {
+  const user = userEvent.setup();
+  renderGrid();
+
+  const cell = screen.getByRole("gridcell", { name: "file-0.txt" });
+  cell.focus();
+  fireEvent.contextMenu(cell);
+  expect(screen.getByRole("menu")).toBeInTheDocument();
+
+  await user.keyboard("{Escape}");
+
+  await waitFor(() => expect(cell).toHaveFocus());
+});
+
+test("closing a context menu opened from a checkbox restores focus to the checkbox", async () => {
+  const user = userEvent.setup();
+  renderGrid();
+
+  const checkbox = screen.getByRole("checkbox", { name: "Select file-0.txt" });
+  checkbox.focus();
+  fireEvent.contextMenu(checkbox);
+  expect(screen.getByRole("menu")).toBeInTheDocument();
+
+  await user.keyboard("{Escape}");
+
+  await waitFor(() => expect(checkbox).toHaveFocus());
+});
+
+test("closing a rename dialog restores focus to the element that opened the menu", async () => {
+  const user = userEvent.setup();
+  renderGrid();
+
+  const checkbox = screen.getByRole("checkbox", { name: "Select file-0.txt" });
+  checkbox.focus();
+  fireEvent.contextMenu(checkbox);
+  await user.click(screen.getByRole("menuitem", { name: "Rename" }));
+
+  await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+  await waitFor(() => expect(checkbox).toHaveFocus());
+});
+
+test("closing a delete dialog restores focus to the element that opened the menu", async () => {
+  const user = userEvent.setup();
+  renderGrid();
+
+  const checkbox = screen.getByRole("checkbox", { name: "Select file-0.txt" });
+  checkbox.focus();
+  fireEvent.contextMenu(checkbox);
+  await user.click(screen.getByRole("menuitem", { name: "Delete" }));
+
+  await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+  await waitFor(() => expect(checkbox).toHaveFocus());
 });

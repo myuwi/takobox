@@ -29,7 +29,7 @@ interface FileContextMenuProps {
   file: File;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  focusRef?: RefObject<HTMLElement | null>;
+  returnFocusRef: RefObject<HTMLElement | null>;
   triggerTabIndex: number;
   onDeleted: () => void;
 }
@@ -38,7 +38,7 @@ export const FileContextMenu = ({
   file,
   open,
   onOpenChange,
-  focusRef,
+  returnFocusRef,
   triggerTabIndex,
   onDeleted,
 }: FileContextMenuProps) => {
@@ -77,6 +77,7 @@ export const FileContextMenu = ({
   });
 
   const openingDialogRef = useRef(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const downloadUrl = `/api/files/${file.id}/download`;
   const thumbnailPath = getThumbnailPath(file.filename);
@@ -110,11 +111,17 @@ export const FileContextMenu = ({
     onDeleted();
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (open) returnFocusRef.current = triggerRef.current;
+    onOpenChange(open);
+  };
+
   return (
-    <Menu.Root open={open} onOpenChange={onOpenChange} modal={false}>
+    <Menu.Root open={open} onOpenChange={handleOpenChange} modal={false}>
       <Menu.Trigger
         render={
           <Button
+            ref={triggerRef}
             variant="ghost"
             size="icon-sm"
             tabIndex={triggerTabIndex}
@@ -134,7 +141,7 @@ export const FileContextMenu = ({
             openingDialogRef.current = false;
             return false;
           }
-          return focusRef?.current ?? false;
+          return returnFocusRef.current ?? true;
         }}
       >
         <Menu.Group>
@@ -198,7 +205,7 @@ export const FileContextMenu = ({
                 placeholder: "File name",
                 initialValue: file.name,
                 callback: handleRename,
-                focusRef,
+                focusRef: returnFocusRef,
               });
             }}
           >
@@ -218,7 +225,7 @@ export const FileContextMenu = ({
                 description: `Are you sure you want to delete the file "${file.name}"? This cannot be undone.`,
                 confirmText: "Delete File",
                 callback: handleDelete,
-                focusRef,
+                focusRef: returnFocusRef,
               });
             }}
           >

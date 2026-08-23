@@ -111,6 +111,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
 
   const gridRef = useRef<HTMLDivElement>(null);
   const cellRefs = useRef(new Map<string, HTMLDivElement>());
+  const returnFocusRef = useRef<HTMLElement | null>(null);
   const activeFileIdRef = useRef(activeFileId);
   const anchorFileIdRef = useRef<string | null>(null);
   const focusedFileIdRef = useRef<string | null>(null);
@@ -136,15 +137,6 @@ export const FileGrid = ({ files }: FileGridProps) => {
 
     focusedCell.focus();
   }, [columns, files]);
-
-  const activeCellRef: RefObject<HTMLElement | null> = {
-    get current() {
-      const fileId = activeFileIdRef.current;
-      const cell = fileId ? cellRefs.current.get(fileId) : undefined;
-
-      return cell?.isConnected ? cell : gridRef.current;
-    },
-  };
 
   const activateFile = (fileId: string | null) => {
     activeFileIdRef.current = fileId;
@@ -215,7 +207,10 @@ export const FileGrid = ({ files }: FileGridProps) => {
     if (!file) return;
 
     setSelectedFileIds((selectedFileIds) => selectedFileIds.filter((fileId) => fileId !== file.id));
-    activateFile(files[index + 1]?.id ?? files[index - 1]?.id ?? null);
+    const nextFileId = files[index + 1]?.id ?? files[index - 1]?.id ?? null;
+    activateFile(nextFileId);
+    returnFocusRef.current =
+      (nextFileId ? cellRefs.current.get(nextFileId) : undefined) ?? gridRef.current;
   };
 
   const handleKeyDownCapture = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -336,6 +331,12 @@ export const FileGrid = ({ files }: FileGridProps) => {
                   onDoubleClick={() => openFile(file)}
                   onContextMenu={(e) => {
                     e.preventDefault();
+                    const focusedElement = document.activeElement;
+                    returnFocusRef.current =
+                      focusedElement instanceof HTMLElement &&
+                      e.currentTarget.contains(focusedElement)
+                        ? focusedElement
+                        : e.currentTarget;
                     handleMenuOpenChange(index, true);
                   }}
                 >
@@ -359,7 +360,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
                       file={file}
                       open={openMenuFileId === file.id}
                       onOpenChange={(open) => handleMenuOpenChange(index, open)}
-                      focusRef={activeCellRef}
+                      returnFocusRef={returnFocusRef}
                       triggerTabIndex={index === activeIndex ? 0 : -1}
                       onDeleted={() => handleFileDelete(index)}
                     />
