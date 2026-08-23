@@ -9,40 +9,40 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as authLayoutRouteImport } from './routes/(auth)/_layout'
-import { Route as appLayoutRouteImport } from './routes/(app)/_layout'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as authSignupRouteImport } from './routes/(auth)/signup'
-import { Route as authLoginRouteImport } from './routes/(auth)/login'
+import { Route as appLayoutRouteImport } from './routes/(app)/_layout'
+import { Route as authLayoutRouteImport } from './routes/(auth)/_layout'
 import { Route as appdashboardLayoutRouteImport } from './routes/(app)/(dashboard)/_layout'
+import { Route as authLoginRouteImport } from './routes/(auth)/login'
+import { Route as authSignupRouteImport } from './routes/(auth)/signup'
 import { Route as appdashboardHomeRouteImport } from './routes/(app)/(dashboard)/home'
 
-const authLayoutRoute = authLayoutRouteImport.update({
-  id: '/(auth)',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const appLayoutRoute = appLayoutRouteImport.update({
   id: '/(app)',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const authLayoutRoute = authLayoutRouteImport.update({
+  id: '/(auth)',
   getParentRoute: () => rootRouteImport,
 } as any)
-const authSignupRoute = authSignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => authLayoutRoute,
+const appdashboardLayoutRoute = appdashboardLayoutRouteImport.update({
+  id: '/(dashboard)',
+  getParentRoute: () => appLayoutRoute,
 } as any)
 const authLoginRoute = authLoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => authLayoutRoute,
 } as any)
-const appdashboardLayoutRoute = appdashboardLayoutRouteImport.update({
-  id: '/(dashboard)',
-  getParentRoute: () => appLayoutRoute,
+const authSignupRoute = authSignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => authLayoutRoute,
 } as any)
 const appdashboardHomeRoute = appdashboardHomeRouteImport.update({
   id: '/home',
@@ -96,11 +96,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/(auth)': {
-      id: '/(auth)'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof authLayoutRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(app)': {
@@ -110,19 +110,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/(auth)': {
+      id: '/(auth)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof authLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(auth)/signup': {
-      id: '/(auth)/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof authSignupRouteImport
-      parentRoute: typeof authLayoutRoute
+    '/(app)/(dashboard)': {
+      id: '/(app)/(dashboard)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof appdashboardLayoutRouteImport
+      parentRoute: typeof appLayoutRoute
     }
     '/(auth)/login': {
       id: '/(auth)/login'
@@ -131,12 +131,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authLoginRouteImport
       parentRoute: typeof authLayoutRoute
     }
-    '/(app)/(dashboard)': {
-      id: '/(app)/(dashboard)'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof appdashboardLayoutRouteImport
-      parentRoute: typeof appLayoutRoute
+    '/(auth)/signup': {
+      id: '/(auth)/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof authSignupRouteImport
+      parentRoute: typeof authLayoutRoute
     }
     '/(app)/(dashboard)/home': {
       id: '/(app)/(dashboard)/home'
