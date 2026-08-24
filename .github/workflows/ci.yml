@@ -39,6 +39,11 @@ jobs:
         with:
           components: clippy
 
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/backend
+
       - name: Lint TypeScript
         run: bun run lint
 
@@ -85,6 +90,8 @@ jobs:
           file: apps/web/Dockerfile
           load: true
           tags: ghcr.io/${{ github.repository_owner }}/takobox-web:dev
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
 
       - name: Build server image
         uses: docker/build-push-action@v7
@@ -93,6 +100,8 @@ jobs:
           file: apps/backend/Dockerfile
           load: true
           tags: ghcr.io/${{ github.repository_owner }}/takobox-server:dev
+          cache-from: type=gha,scope=server
+          cache-to: type=gha,mode=max,scope=server
 
       - name: Push web image
         run: docker push ghcr.io/${{ github.repository_owner }}/takobox-web:dev
