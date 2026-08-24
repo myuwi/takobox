@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
-  "ignorePatterns": ["**/*.gen.ts", "packages/sdk/src/gen/**"],
+  "ignorePatterns": ["**/*.gen.ts", "packages/sdk/src/gen/**", "mise.toml"],
   "overrides": [
     {
       "files": ["apps/web/**"],

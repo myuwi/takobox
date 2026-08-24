@@ -1,4 +1,4 @@
-FROM rust:alpine AS builder
+FROM rust:1.98.0-alpine AS builder
 WORKDIR /app
 
 RUN apk add --no-cache \

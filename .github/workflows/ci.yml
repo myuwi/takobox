@@ -29,10 +29,15 @@ jobs:
       - name: Install E2E deps
         run: bun install --cwd e2e
 
-      - name: Install Rust toolchains
-        run: |
-          rustup toolchain install stable --profile minimal --component clippy
-          rustup toolchain install nightly --profile minimal --component rustfmt
+      - name: Install nightly Rust
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.98.0
+        with:
+          components: clippy
 
       - name: Lint TypeScript
         run: bun run lint
@@ -46,11 +51,11 @@ jobs:
 
       - name: Run Clippy
         working-directory: apps/backend
-        run: cargo +stable clippy --all-targets -- -D warnings
+        run: cargo clippy --all-targets -- -D warnings
 
       - name: Test Rust
         working-directory: apps/backend
-        run: cargo +stable test
+        run: cargo test
 
   build-push:
     name: Build and Push images
