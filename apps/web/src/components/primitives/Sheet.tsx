@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog as SheetPrimitive } from "@base-ui-components/react/dialog";
+import { Dialog as SheetPrimitive } from "@base-ui/react/dialog";
 import { cva } from "class-variance-authority";
 import { cn } from "@/utils/cn";
 import { tw } from "@/utils/tw";

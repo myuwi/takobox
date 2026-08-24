@@ -1,5 +1,5 @@
 import React from "react";
-import { Menu as MenuPrimitive } from "@base-ui-components/react";
+import { Menu as MenuPrimitive } from "@base-ui/react";
 import { Check, ChevronRightIcon, Circle } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { stopPropagation } from "@/utils/event";

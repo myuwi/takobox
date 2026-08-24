@@ -1,5 +1,5 @@
 import React from "react";
-import { mergeProps, useRender } from "@base-ui-components/react";
+import { mergeProps, useRender } from "@base-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/utils/cn";
 

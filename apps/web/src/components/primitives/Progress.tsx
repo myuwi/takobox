@@ -1,5 +1,5 @@
 import type React from "react";
-import { Progress as ProgressPrimitive } from "@base-ui-components/react";
+import { Progress as ProgressPrimitive } from "@base-ui/react";
 import { cn } from "@/utils/cn";
 
 export function Progress({

@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog as DialogPrimitive } from "@base-ui-components/react/dialog";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { cn } from "@/utils/cn";
 import { stopPropagation } from "@/utils/event";
 import { tw } from "@/utils/tw";
