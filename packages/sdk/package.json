@@ -11,9 +11,10 @@
     "axios": "^1.19.0"
   },
   "devDependencies": {
-    "@hey-api/openapi-ts": "^0.98.2",
+    "@hey-api/openapi-ts": "^0.99.0",
     "@types/bun": "1.4.0",
-    "typescript": "^5.9.3",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "^4.1.11"
   }
 }
