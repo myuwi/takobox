@@ -24,7 +24,7 @@ pub async fn inject_auth(depot: &mut Depot, req: &mut Request) {
         pool,
         session_secret,
         ..
-    } = depot.obtain::<AppState>().unwrap();
+    } = depot.get_typed::<AppState>().unwrap();
 
     if let Some(session) = resolve_session(pool, &req.cookies().private(session_secret)).await {
         req.extensions_mut().insert(session);
@@ -40,7 +40,10 @@ impl<'ex> Extractible<'ex> for Session {
         &METADATA
     }
 
-    async fn extract(req: &'ex mut Request) -> Result<Self, impl Writer + Send + Debug + 'static> {
+    async fn extract(
+        req: &'ex mut Request,
+        _depot: &'ex mut Depot,
+    ) -> Result<Self, impl Writer + Send + Debug + 'static> {
         req.extensions()
             .get::<Session>()
             .ok_or(Error::Unauthorized("Unauthorized"))

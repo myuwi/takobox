@@ -27,7 +27,7 @@ use crate::{
 /// Get the files belonging to the current user
 #[endpoint(operation_id = "files.list", tags("Files"), status_codes(200))]
 async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<File>>, Error> {
-    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
     let files = File::get_all_for_user(pool, session.user_id).await?;
 
     Ok(Json(files))
@@ -42,7 +42,7 @@ async fn show(
     session: Session,
     id: PathParam<NanoId>,
 ) -> Result<Json<FileWithCollections>, Error> {
-    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
     let file = FileWithCollections::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
@@ -93,7 +93,7 @@ async fn upload(
     file: FormFile,
     query_params: UploadFileSearchParams,
 ) -> Result<Json<File>, Error> {
-    let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
     let UploadFileSearchParams { collection_id } = &query_params;
 
     let Some(original_name) = file.name() else {
@@ -172,7 +172,7 @@ async fn rename(
     id: PathParam<NanoId>,
     body: JsonBody<RenameFilePayload>,
 ) -> Result<Json<File>, Error> {
-    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     let name = FileName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
 
@@ -200,7 +200,7 @@ async fn delete(
     session: Session,
     id: PathParam<NanoId>,
 ) -> Result<StatusCode, Error> {
-    let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
 
     let file = File::delete(pool, session.user_id, &id)
         .await?
@@ -232,7 +232,7 @@ async fn download(
     session: Session,
     id: PathParam<NanoId>,
 ) -> Result<StatusCode, Error> {
-    let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
 
     let file = File::get_by_public_id(pool, session.user_id, &id)
         .await?
@@ -265,7 +265,7 @@ async fn regenerate_thumbnail(
     session: Session,
     id: PathParam<NanoId>,
 ) -> Result<StatusCode, Error> {
-    let AppState { pool, dirs, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
 
     let file = File::get_by_public_id(pool, session.user_id, &id)
         .await?

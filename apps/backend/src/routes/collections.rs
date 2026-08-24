@@ -24,7 +24,7 @@ use crate::{
     status_codes(200)
 )]
 async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<Collection>>, Error> {
-    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
     let collections = Collection::get_all_for_user(pool, session.user_id).await?;
 
     Ok(Json(collections))
@@ -54,7 +54,7 @@ async fn create(
     session: Session,
     body: JsonBody<CreateCollectionPayload>,
 ) -> Result<Json<Collection>, Error> {
-    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     let name = CollectionName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
 
@@ -89,7 +89,7 @@ async fn rename(
     id: PathParam<NanoId>,
     body: JsonBody<RenameCollectionPayload>,
 ) -> Result<Json<Collection>, Error> {
-    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     let name = CollectionName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
 
@@ -116,7 +116,7 @@ async fn delete(
     session: Session,
     id: PathParam<NanoId>,
 ) -> Result<StatusCode, Error> {
-    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     Collection::delete(pool, session.user_id, &id)
         .await?

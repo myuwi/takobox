@@ -32,7 +32,7 @@ async fn login(
         pool,
         session_secret,
         ..
-    } = depot.obtain::<AppState>().unwrap();
+    } = depot.get_typed::<AppState>().unwrap();
 
     let user = User::get_by_username(pool, &body.username)
         .await?
@@ -62,7 +62,7 @@ async fn register(
         pool,
         session_secret,
         ..
-    } = depot.obtain::<AppState>().unwrap();
+    } = depot.get_typed::<AppState>().unwrap();
 
     if !settings.enable_account_creation {
         return Err(Error::Unauthorized(
@@ -97,7 +97,7 @@ async fn logout(
     res: &mut Response,
     session: Session,
 ) -> Result<StatusCode, Error> {
-    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     Session::delete(pool, session.id).await?;
 

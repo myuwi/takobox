@@ -24,7 +24,7 @@ async fn index(
     session: Session,
     id: PathParam<NanoId>,
 ) -> Result<Json<Vec<File>>, Error> {
-    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
     if !Collection::exists(pool, session.user_id, &id).await? {
         return Err(Error::NotFound(
             "Collection not found or not owned by user.",
@@ -56,7 +56,7 @@ async fn add(
     id: PathParam<NanoId>,
     body: JsonBody<CollectionFilesPayload>,
 ) -> Result<StatusCode, Error> {
-    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     if !Collection::exists(pool, session.user_id, &id).await? {
         return Err(Error::NotFound(
@@ -89,7 +89,7 @@ async fn remove(
     id: PathParam<NanoId>,
     body: JsonBody<CollectionFilesPayload>,
 ) -> Result<StatusCode, Error> {
-    let AppState { pool, .. } = depot.obtain::<AppState>().unwrap();
+    let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     if !Collection::exists(pool, session.user_id, &id).await? {
         return Err(Error::NotFound(
