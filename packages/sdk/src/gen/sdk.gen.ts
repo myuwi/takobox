@@ -53,6 +53,7 @@ export class Auth extends HeyApiClient {
      */
     public login<ThrowOnError extends boolean = true>(options?: Options<AuthLoginData, ThrowOnError>): RequestResult<AuthLoginResponses, AuthLoginErrors, ThrowOnError> {
         return (options?.client ?? this.client).post<AuthLoginResponses, AuthLoginErrors, ThrowOnError>({
+            responseType: 'json',
             url: '/auth/login',
             ...options,
             headers: {
@@ -78,6 +79,7 @@ export class Auth extends HeyApiClient {
      */
     public register<ThrowOnError extends boolean = true>(options?: Options<AuthRegisterData, ThrowOnError>): RequestResult<AuthRegisterResponses, AuthRegisterErrors, ThrowOnError> {
         return (options?.client ?? this.client).post<AuthRegisterResponses, AuthRegisterErrors, ThrowOnError>({
+            responseType: 'json',
             url: '/auth/register',
             ...options,
             headers: {

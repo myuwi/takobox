@@ -5,7 +5,7 @@ import { meOptions } from "./me";
 
 export const registerOptions = mutationOptions({
   mutationFn: (body: AuthCredentials) => client.auth.register({ body }),
-  onSuccess: async (_, _variables, _mutateResult, context) => {
-    await context.client.invalidateQueries({ queryKey: meOptions.queryKey });
+  onSuccess: ({ data }, _variables, _mutateResult, context) => {
+    context.client.setQueryData(meOptions.queryKey, data);
   },
 });

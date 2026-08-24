@@ -90,10 +90,12 @@ export type AuthLoginError = AuthLoginErrors[keyof AuthLoginErrors];
 
 export type AuthLoginResponses = {
     /**
-     * OK
+     * Response with json format data
      */
-    200: unknown;
+    200: User;
 };
+
+export type AuthLoginResponse = AuthLoginResponses[keyof AuthLoginResponses];
 
 export type AuthLogoutData = {
     body?: never;
@@ -117,10 +119,12 @@ export type AuthLogoutError = AuthLogoutErrors[keyof AuthLogoutErrors];
 
 export type AuthLogoutResponses = {
     /**
-     * OK
+     * No Content
      */
-    200: unknown;
+    204: void;
 };
+
+export type AuthLogoutResponse = AuthLogoutResponses[keyof AuthLogoutResponses];
 
 export type AuthRegisterData = {
     /**
@@ -147,10 +151,12 @@ export type AuthRegisterError = AuthRegisterErrors[keyof AuthRegisterErrors];
 
 export type AuthRegisterResponses = {
     /**
-     * Created
+     * User created
      */
-    201: unknown;
+    201: User;
 };
+
+export type AuthRegisterResponse = AuthRegisterResponses[keyof AuthRegisterResponses];
 
 export type CollectionsListData = {
     body?: never;

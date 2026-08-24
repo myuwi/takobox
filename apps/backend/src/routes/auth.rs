@@ -1,4 +1,8 @@
-use salvo::{oapi::extract::JsonBody, prelude::*};
+use salvo::{
+    http::header::{self, HeaderValue},
+    oapi::extract::JsonBody,
+    prelude::*,
+};
 use serde::Deserialize;
 
 use crate::{
@@ -27,7 +31,7 @@ async fn login(
     body: JsonBody<AuthCredentials>,
     depot: &mut Depot,
     res: &mut Response,
-) -> Result<StatusCode, Error> {
+) -> Result<Json<User>, Error> {
     let AppState {
         pool,
         session_secret,
@@ -45,18 +49,25 @@ async fn login(
 
     res.cookies_mut().private_mut(session_secret).add(session);
 
-    Ok(StatusCode::OK)
+    Ok(Json(user))
 }
 
 /// Register
 ///
 /// Register a user account
-#[endpoint(operation_id = "auth.register", tags("Auth"), status_codes(201))]
+#[endpoint(
+    operation_id = "auth.register",
+    tags("Auth"),
+    responses(
+        (status_code = 201, description = "User created", body = User)
+    ),
+    status_codes(201)
+)]
 async fn register(
     body: JsonBody<AuthCredentials>,
     depot: &mut Depot,
     res: &mut Response,
-) -> Result<StatusCode, Error> {
+) -> Result<Json<User>, Error> {
     let AppState {
         settings,
         pool,
@@ -84,14 +95,17 @@ async fn register(
     let session = Session::create(pool, user.id).await?;
 
     res.cookies_mut().private_mut(session_secret).add(session);
+    res.status_code(StatusCode::CREATED);
+    res.headers_mut()
+        .insert(header::LOCATION, HeaderValue::from_static("/api/me"));
 
-    Ok(StatusCode::CREATED)
+    Ok(Json(user))
 }
 
 /// Logout
 ///
 /// Log out of a user account, invalidating the login session
-#[endpoint(operation_id = "auth.logout", tags("Auth"), status_codes(200))]
+#[endpoint(operation_id = "auth.logout", tags("Auth"), status_codes(204))]
 async fn logout(
     depot: &mut Depot,
     res: &mut Response,
@@ -103,7 +117,7 @@ async fn logout(
 
     res.cookies_mut().add(Session::empty_cookie());
 
-    Ok(StatusCode::OK)
+    Ok(StatusCode::NO_CONTENT)
 }
 
 pub fn routes() -> Router {
