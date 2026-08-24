@@ -3,9 +3,7 @@ WORKDIR /app
 
 RUN apk add --no-cache \
     musl-dev \
-    pkgconf \
-    openssl-dev \
-    openssl-libs-static
+    pkgconf
 
 # cache deps
 COPY ./apps/backend/Cargo.toml ./apps/backend/Cargo.lock ./
