@@ -35,7 +35,12 @@ trap 'exit 0' INT TERM
 
 "${compose[@]}" down --volumes --remove-orphans
 
-"${compose[@]}" up --build --force-recreate &
+declare -a up_args=(--force-recreate)
+if [[ "${E2E_SKIP_BUILD:-}" != "1" ]]; then
+	up_args+=(--build)
+fi
+
+"${compose[@]}" up "${up_args[@]}" &
 stack_pid=$!
 
 if wait "${stack_pid}"; then

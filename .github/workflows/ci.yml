@@ -63,7 +63,7 @@ jobs:
         run: cargo test
 
   build-push:
-    name: Build and Push images
+    name: Build, Test and Push images
     needs: check
     runs-on: ubuntu-latest
     permissions:
@@ -102,6 +102,27 @@ jobs:
           tags: ghcr.io/${{ github.repository_owner }}/takobox-server:dev
           cache-from: type=gha,scope=server
           cache-to: type=gha,mode=max,scope=server
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .tool-versions
+
+      - name: Install E2E deps and browsers
+        run: bun run test:e2e:install
+
+      - name: Run E2E tests
+        env:
+          E2E_SKIP_BUILD: "1"
+        run: bun run test:e2e
+
+      - name: Upload E2E artifacts
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-artifacts
+          path: e2e/.artifacts
+          retention-days: 7
 
       - name: Push web image
         run: docker push ghcr.io/${{ github.repository_owner }}/takobox-web:dev
