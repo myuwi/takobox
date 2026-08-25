@@ -10,6 +10,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  RUST_TOOLCHAIN: 1.98.0
+  NIGHTLY_TOOLCHAIN: nightly-2026-08-24
+  CARGO_INCREMENTAL: 0
+
 jobs:
   check:
     name: Lint and Test
@@ -29,15 +34,11 @@ jobs:
       - name: Install E2E deps
         run: bun install --cwd e2e
 
-      - name: Install nightly Rust
-        uses: dtolnay/rust-toolchain@nightly
-        with:
-          components: rustfmt
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.98.0
-        with:
-          components: clippy
+      - name: Install Rust toolchains
+        run: |
+          rustup toolchain install ${{ env.NIGHTLY_TOOLCHAIN }} --profile minimal --component rustfmt --no-self-update
+          rustup toolchain install ${{ env.RUST_TOOLCHAIN }} --profile minimal --component clippy --no-self-update
+          rustup default ${{ env.RUST_TOOLCHAIN }}
 
       - name: Cache Rust build artifacts
         uses: Swatinem/rust-cache@v2
@@ -52,7 +53,7 @@ jobs:
 
       - name: Check Rust formatting
         working-directory: apps/backend
-        run: cargo +nightly fmt --check
+        run: cargo +${{ env.NIGHTLY_TOOLCHAIN }} fmt --check
 
       - name: Run Clippy
         working-directory: apps/backend
