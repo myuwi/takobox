@@ -165,10 +165,12 @@ impl Collection {
             "insert into collection_files (collection_id, file_id)
             select c.id, f.id
             from collections c
-            join files f on f.public_id = $2 
+            join files f on f.public_id = $2
             where c.public_id = $1
               and c.user_id = $3
               and f.user_id = $3
+            on conflict (collection_id, file_id) do update
+              set collection_id = excluded.collection_id
             returning *",
         )
         .bind(collection_id)

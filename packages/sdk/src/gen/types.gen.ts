@@ -15,10 +15,6 @@ export type Collection = {
     name: string;
 };
 
-export type CollectionFilesPayload = {
-    id: NanoId;
-};
-
 export type CreateCollectionPayload = {
     name: string;
 };
@@ -282,43 +278,6 @@ export type CollectionsRenameResponses = {
 
 export type CollectionsRenameResponse = CollectionsRenameResponses[keyof CollectionsRenameResponses];
 
-export type CollectionsFilesRemoveData = {
-    /**
-     * Extract json format data from request.
-     */
-    body?: CollectionFilesPayload;
-    path: {
-        /**
-         * Get parameter `id` from request url path.
-         */
-        id: NanoId;
-    };
-    query?: never;
-    url: '/collections/{id}/files';
-};
-
-export type CollectionsFilesRemoveErrors = {
-    /**
-     * Error response
-     */
-    '4XX': ErrorResponse;
-    /**
-     * Server error response
-     */
-    '5XX': ErrorResponse;
-};
-
-export type CollectionsFilesRemoveError = CollectionsFilesRemoveErrors[keyof CollectionsFilesRemoveErrors];
-
-export type CollectionsFilesRemoveResponses = {
-    /**
-     * No Content
-     */
-    204: void;
-};
-
-export type CollectionsFilesRemoveResponse = CollectionsFilesRemoveResponses[keyof CollectionsFilesRemoveResponses];
-
 export type CollectionsFilesListData = {
     body?: never;
     path: {
@@ -353,19 +312,58 @@ export type CollectionsFilesListResponses = {
 
 export type CollectionsFilesListResponse = CollectionsFilesListResponses[keyof CollectionsFilesListResponses];
 
-export type CollectionsFilesAddData = {
-    /**
-     * Extract json format data from request.
-     */
-    body?: CollectionFilesPayload;
+export type CollectionsFilesRemoveData = {
+    body?: never;
     path: {
         /**
          * Get parameter `id` from request url path.
          */
         id: NanoId;
+        /**
+         * Get parameter `file_id` from request url path.
+         */
+        file_id: NanoId;
     };
     query?: never;
-    url: '/collections/{id}/files';
+    url: '/collections/{id}/files/{file_id}';
+};
+
+export type CollectionsFilesRemoveErrors = {
+    /**
+     * Error response
+     */
+    '4XX': ErrorResponse;
+    /**
+     * Server error response
+     */
+    '5XX': ErrorResponse;
+};
+
+export type CollectionsFilesRemoveError = CollectionsFilesRemoveErrors[keyof CollectionsFilesRemoveErrors];
+
+export type CollectionsFilesRemoveResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type CollectionsFilesRemoveResponse = CollectionsFilesRemoveResponses[keyof CollectionsFilesRemoveResponses];
+
+export type CollectionsFilesAddData = {
+    body?: never;
+    path: {
+        /**
+         * Get parameter `id` from request url path.
+         */
+        id: NanoId;
+        /**
+         * Get parameter `file_id` from request url path.
+         */
+        file_id: NanoId;
+    };
+    query?: never;
+    url: '/collections/{id}/files/{file_id}';
 };
 
 export type CollectionsFilesAddErrors = {
@@ -383,10 +381,12 @@ export type CollectionsFilesAddError = CollectionsFilesAddErrors[keyof Collectio
 
 export type CollectionsFilesAddResponses = {
     /**
-     * Created
+     * No Content
      */
-    201: unknown;
+    204: void;
 };
+
+export type CollectionsFilesAddResponse = CollectionsFilesAddResponses[keyof CollectionsFilesAddResponses];
 
 export type FilesListData = {
     body?: never;

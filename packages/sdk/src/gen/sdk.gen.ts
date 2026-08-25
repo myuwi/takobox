@@ -92,22 +92,6 @@ export class Auth extends HeyApiClient {
 
 export class Files extends HeyApiClient {
     /**
-     * Remove file from collection
-     *
-     * Remove a file from a collection belonging to the current user
-     */
-    public remove<ThrowOnError extends boolean = true>(options: Options<CollectionsFilesRemoveData, ThrowOnError>): RequestResult<CollectionsFilesRemoveResponses, CollectionsFilesRemoveErrors, ThrowOnError> {
-        return (options.client ?? this.client).delete<CollectionsFilesRemoveResponses, CollectionsFilesRemoveErrors, ThrowOnError>({
-            url: '/collections/{id}/files',
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
-        });
-    }
-    
-    /**
      * Get files
      *
      * Get the files belonging to the current user
@@ -121,19 +105,21 @@ export class Files extends HeyApiClient {
     }
     
     /**
+     * Remove file from collection
+     *
+     * Remove a file from a collection belonging to the current user
+     */
+    public remove<ThrowOnError extends boolean = true>(options: Options<CollectionsFilesRemoveData, ThrowOnError>): RequestResult<CollectionsFilesRemoveResponses, CollectionsFilesRemoveErrors, ThrowOnError> {
+        return (options.client ?? this.client).delete<CollectionsFilesRemoveResponses, CollectionsFilesRemoveErrors, ThrowOnError>({ url: '/collections/{id}/files/{file_id}', ...options });
+    }
+    
+    /**
      * Add file to collection
      *
      * Add a file to a collection belonging to the current user
      */
     public add<ThrowOnError extends boolean = true>(options: Options<CollectionsFilesAddData, ThrowOnError>): RequestResult<CollectionsFilesAddResponses, CollectionsFilesAddErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<CollectionsFilesAddResponses, CollectionsFilesAddErrors, ThrowOnError>({
-            url: '/collections/{id}/files',
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
-        });
+        return (options.client ?? this.client).put<CollectionsFilesAddResponses, CollectionsFilesAddErrors, ThrowOnError>({ url: '/collections/{id}/files/{file_id}', ...options });
     }
 }
 

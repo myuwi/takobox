@@ -1,15 +1,7 @@
-use salvo::{
-    oapi::extract::{JsonBody, PathParam},
-    prelude::*,
-};
-use serde::Deserialize;
+use salvo::{oapi::extract::PathParam, prelude::*};
 
 use crate::{
-    http::{
-        error::{Error, ResultExt},
-        response::FileResponse,
-        state::AppState,
-    },
+    http::{error::Error, response::FileResponse, state::AppState},
     models::{collection::Collection, session::Session},
     types::NanoId,
 };
@@ -39,25 +31,19 @@ async fn index(
     Ok(Json(files.into_iter().map(Into::into).collect()))
 }
 
-#[derive(Debug, Deserialize, ToSchema)]
-#[salvo(schema(name = CollectionFilesPayload))]
-pub struct CollectionFilesPayload {
-    pub id: NanoId,
-}
-
 /// Add file to collection
 ///
 /// Add a file to a collection belonging to the current user
 #[endpoint(
     operation_id = "collections.files.add",
     tags("Collections"),
-    status_codes(201)
+    status_codes(204)
 )]
 async fn add(
     depot: &mut Depot,
     session: Session,
     id: PathParam<NanoId>,
-    body: JsonBody<CollectionFilesPayload>,
+    file_id: PathParam<NanoId>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
@@ -67,15 +53,11 @@ async fn add(
         ));
     }
 
-    Collection::add_file(pool, session.user_id, &id, &body.id)
-        .await
-        .map_constraint_err(
-            "collection_files.collection_id, collection_files.file_id",
-            |_| Error::Conflict("File already belongs to the collection."),
-        )?
+    Collection::add_file(pool, session.user_id, &id, &file_id)
+        .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
-    Ok(StatusCode::CREATED)
+    Ok(StatusCode::NO_CONTENT)
 }
 
 /// Remove file from collection
@@ -90,7 +72,7 @@ async fn remove(
     depot: &mut Depot,
     session: Session,
     id: PathParam<NanoId>,
-    body: JsonBody<CollectionFilesPayload>,
+    file_id: PathParam<NanoId>,
 ) -> Result<StatusCode, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
@@ -100,7 +82,7 @@ async fn remove(
         ));
     }
 
-    Collection::remove_file(pool, session.user_id, &id, &body.id)
+    Collection::remove_file(pool, session.user_id, &id, &file_id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found in collection."))?;
 
@@ -108,5 +90,7 @@ async fn remove(
 }
 
 pub fn routes() -> Router {
-    Router::new().get(index).post(add).delete(remove)
+    Router::new()
+        .get(index)
+        .push(Router::with_path("{file_id}").put(add).delete(remove))
 }
