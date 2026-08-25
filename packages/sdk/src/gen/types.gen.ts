@@ -35,15 +35,6 @@ export type File = {
     size: number;
 };
 
-export type FileCollection = {
-    id: NanoId;
-    name: string;
-};
-
-export type FileWithCollections = File & {
-    collections: Array<FileCollection>;
-};
-
 export type NanoId = string;
 
 export type RenameCollectionPayload = {
@@ -527,7 +518,7 @@ export type FilesGetResponses = {
     /**
      * Response with json format data
      */
-    200: FileWithCollections;
+    200: File;
 };
 
 export type FilesGetResponse = FilesGetResponses[keyof FilesGetResponses];
@@ -568,6 +559,40 @@ export type FilesRenameResponses = {
 };
 
 export type FilesRenameResponse = FilesRenameResponses[keyof FilesRenameResponses];
+
+export type FilesCollectionsListData = {
+    body?: never;
+    path: {
+        /**
+         * Get parameter `id` from request url path.
+         */
+        id: NanoId;
+    };
+    query?: never;
+    url: '/files/{id}/collections';
+};
+
+export type FilesCollectionsListErrors = {
+    /**
+     * Error response
+     */
+    '4XX': ErrorResponse;
+    /**
+     * Server error response
+     */
+    '5XX': ErrorResponse;
+};
+
+export type FilesCollectionsListError = FilesCollectionsListErrors[keyof FilesCollectionsListErrors];
+
+export type FilesCollectionsListResponses = {
+    /**
+     * Response with json format data
+     */
+    200: Array<Collection>;
+};
+
+export type FilesCollectionsListResponse = FilesCollectionsListResponses[keyof FilesCollectionsListResponses];
 
 export type FilesDownloadData = {
     body?: never;

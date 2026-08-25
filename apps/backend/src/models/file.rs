@@ -5,7 +5,6 @@ use sanitize_filename::is_sanitized;
 use serde::Serialize;
 use sqlx::{FromRow, SqliteExecutor};
 
-use super::collection::FileCollection;
 use crate::{serialize::serialize_timestamp, types::NanoId};
 
 #[derive(Debug)]
@@ -158,49 +157,6 @@ impl File {
             "delete from files 
             where public_id = $1 and user_id = $2
             returning *",
-        )
-        .bind(id)
-        .bind(user_id)
-        .fetch_optional(conn)
-        .await
-    }
-}
-
-#[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
-#[salvo(schema(name = FileWithCollections))]
-#[serde(rename_all = "camelCase")]
-pub struct FileWithCollections {
-    #[serde(flatten)]
-    #[sqlx(flatten)]
-    pub file: File,
-    #[sqlx(json)]
-    pub collections: Vec<FileCollection>,
-}
-
-impl FileWithCollections {
-    pub async fn get_by_public_id(
-        conn: impl SqliteExecutor<'_>,
-        user_id: i64,
-        id: &NanoId,
-    ) -> Result<Option<FileWithCollections>, sqlx::Error> {
-        sqlx::query_as(
-            r#"select 
-                f.id, f.public_id, f.user_id, f.filename, f.name, f.size, f.created_at,
-                coalesce(
-                    (
-                        select json_group_array(
-                            json_object('id', c.id, 'public_id', c.public_id, 'name', c.name)
-                        )
-                        from collection_files cf 
-                        left join collections c on cf.collection_id = c.id 
-                        where cf.file_id = f.id
-                    ), '[]'
-                ) as collections
-            from files f
-            left join collection_files cf on f.id = cf.file_id
-            left join collections c on cf.collection_id = c.id
-            where f.public_id = $1 and f.user_id = $2
-            group by f.id, f.public_id, f.user_id, f.filename, f.name, f.size, f.created_at"#,
         )
         .bind(id)
         .bind(user_id)

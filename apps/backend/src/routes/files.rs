@@ -14,7 +14,7 @@ use crate::{
     error::Error,
     models::{
         collection::Collection,
-        file::{File, FileName, FileWithCollections},
+        file::{File, FileName},
         session::Session,
     },
     services::thumbnails::{ThumbnailError, generate_thumbnail},
@@ -41,13 +41,37 @@ async fn show(
     depot: &mut Depot,
     session: Session,
     id: PathParam<NanoId>,
-) -> Result<Json<FileWithCollections>, Error> {
+) -> Result<Json<File>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
-    let file = FileWithCollections::get_by_public_id(pool, session.user_id, &id)
+    let file = File::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
     Ok(Json(file))
+}
+
+/// Get file collections
+///
+/// Get the collections containing a file belonging to the current user
+#[endpoint(
+    operation_id = "files.collections.list",
+    tags("Files"),
+    status_codes(200)
+)]
+async fn collections(
+    depot: &mut Depot,
+    session: Session,
+    id: PathParam<NanoId>,
+) -> Result<Json<Vec<Collection>>, Error> {
+    let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
+
+    let file = File::get_by_public_id(pool, session.user_id, &id)
+        .await?
+        .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
+
+    let file_collections = Collection::get_all_for_file(pool, session.user_id, file.id).await?;
+
+    Ok(Json(file_collections))
 }
 
 #[derive(Deserialize, Extractible, Debug)]
@@ -305,6 +329,7 @@ pub fn routes(state: &AppState) -> Router {
                 .get(show)
                 .patch(rename)
                 .delete(delete)
+                .push(Router::with_path("collections").get(collections))
                 .push(Router::with_path("download").get(download))
                 .push(Router::with_path("regenerate-thumbnail").post(regenerate_thumbnail)),
         )

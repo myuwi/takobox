@@ -1,5 +1,5 @@
 use salvo::oapi::ToSchema;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use sqlx::{FromRow, SqliteExecutor, sqlite::SqliteRow};
 
 use super::file::File;
@@ -45,17 +45,6 @@ pub struct Collection {
     pub created_at: i64,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
-#[salvo(schema(name = FileCollection))]
-pub struct FileCollection {
-    #[serde(skip_serializing)]
-    pub id: i64,
-    #[salvo(schema(rename = "id"))]
-    #[serde(rename(serialize = "id"))]
-    pub public_id: NanoId,
-    pub name: String,
-}
-
 impl Collection {
     pub async fn get_all_for_user(
         conn: impl SqliteExecutor<'_>,
@@ -66,6 +55,23 @@ impl Collection {
             where user_id = $1
             order by name asc",
         )
+        .bind(user_id)
+        .fetch_all(conn)
+        .await
+    }
+
+    pub async fn get_all_for_file(
+        conn: impl SqliteExecutor<'_>,
+        user_id: i64,
+        file_id: i64,
+    ) -> Result<Vec<Collection>, sqlx::Error> {
+        sqlx::query_as(
+            "select c.* from collections c
+            join collection_files cf on cf.collection_id = c.id
+            where cf.file_id = $1 and c.user_id = $2
+            order by c.name asc",
+        )
+        .bind(file_id)
         .bind(user_id)
         .fetch_all(conn)
         .await

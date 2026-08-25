@@ -20,6 +20,15 @@ export const fileOptions = (id: string) =>
     },
   });
 
+export const fileCollectionsOptions = (id: string) =>
+  queryOptions({
+    queryKey: ["files", id, "collections"],
+    queryFn: async () => {
+      const { data } = await client.files.collections.list({ path: { id } });
+      return data;
+    },
+  });
+
 interface UploadFileMutationArgs {
   file: File;
   collectionId?: string;

@@ -1,6 +1,6 @@
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import { client } from "@/api/client";
-import { fileOptions } from "./files";
+import { fileCollectionsOptions } from "./files";
 
 export const collectionsOptions = queryOptions({
   queryKey: ["collections"],
@@ -67,7 +67,7 @@ export const addFileToCollectionOptions = mutationOptions({
   onSuccess: async (_, variables, _mutateResult, context) => {
     await Promise.all([
       context.client.invalidateQueries({
-        queryKey: fileOptions(variables.fileId).queryKey,
+        queryKey: fileCollectionsOptions(variables.fileId).queryKey,
       }),
       context.client.invalidateQueries({
         queryKey: collectionFilesOptions(variables.id).queryKey,
@@ -86,7 +86,7 @@ export const removeFileFromCollectionOptions = mutationOptions({
   onSuccess: async (_, variables, _mutateResult, context) => {
     await Promise.all([
       context.client.invalidateQueries({
-        queryKey: fileOptions(variables.fileId).queryKey,
+        queryKey: fileCollectionsOptions(variables.fileId).queryKey,
       }),
       context.client.invalidateQueries({
         queryKey: collectionFilesOptions(variables.id).queryKey,

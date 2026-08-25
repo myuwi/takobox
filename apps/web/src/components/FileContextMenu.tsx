@@ -18,7 +18,7 @@ import {
   collectionsOptions,
   removeFileFromCollectionOptions,
 } from "@/queries/collections";
-import { deleteFileOptions, fileOptions, renameFileOptions } from "@/queries/files";
+import { deleteFileOptions, fileCollectionsOptions, renameFileOptions } from "@/queries/files";
 import { copyToClipboard } from "@/utils/clipboard";
 import { stopPropagation } from "@/utils/event";
 import { getThumbnailPath } from "@/utils/files";
@@ -49,8 +49,7 @@ export const FileContextMenu = ({
   const openRenameDialog = useSetAtom(openRenameDialogAtom);
 
   const { data: fileCollections = [] } = useQuery({
-    ...fileOptions(file.id),
-    select: (file) => file.collections,
+    ...fileCollectionsOptions(file.id),
     enabled: open,
   });
 
