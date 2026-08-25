@@ -16,6 +16,7 @@ const createFile = (index: number): File => ({
   filename: `file-${index}.txt`,
   size: (index + 1) * 100,
   createdAt: "2026-01-01T00:00:00Z",
+  thumbnailUrl: null,
 });
 
 const files = Array.from({ length: 3 }, (_, index) => createFile(index));

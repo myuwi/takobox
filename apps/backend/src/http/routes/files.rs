@@ -3,7 +3,6 @@ use std::{ffi::OsStr, path::PathBuf};
 use anyhow::anyhow;
 use salvo::{
     fs::NamedFile,
-    http::header::{self, HeaderValue},
     oapi::extract::{FormFile, JsonBody, PathParam, QueryParam},
     prelude::*,
 };
@@ -284,23 +283,22 @@ async fn download(
 #[endpoint(
     operation_id = "files.regenerateThumbnail",
     tags("Files"),
-    status_codes(201)
+    status_codes(200)
 )]
 async fn regenerate_thumbnail(
     depot: &mut Depot,
-    res: &mut Response,
     session: Session,
     id: PathParam<NanoId>,
-) -> Result<StatusCode, Error> {
+) -> Result<Json<FileResponse>, Error> {
     let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
 
     let file = File::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
-    let file_path = dirs.uploads_dir().join(file.filename);
+    let file_path = dirs.uploads_dir().join(&file.filename);
 
-    let thumb_file_name = generate_thumbnail(&file_path, dirs.thumbs_dir())
+    generate_thumbnail(&file_path, dirs.thumbs_dir())
         .await
         .map_err(|err| match err {
             ThumbnailError::UnsupportedFiletype => {
@@ -313,12 +311,7 @@ async fn regenerate_thumbnail(
             )),
         })?;
 
-    res.headers_mut().insert(
-        header::LOCATION,
-        HeaderValue::from_str(&format!("/thumbs/{}", thumb_file_name)).unwrap(),
-    );
-
-    Ok(StatusCode::CREATED)
+    Ok(Json(file.into()))
 }
 
 pub fn routes(state: &AppState) -> Router {

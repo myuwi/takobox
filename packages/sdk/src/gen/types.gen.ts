@@ -33,6 +33,7 @@ export type File = {
     id: NanoId;
     name: string;
     size: number;
+    thumbnailUrl: string | null;
 };
 
 export type NanoId = string;
@@ -653,10 +654,12 @@ export type FilesRegenerateThumbnailError = FilesRegenerateThumbnailErrors[keyof
 
 export type FilesRegenerateThumbnailResponses = {
     /**
-     * Created
+     * Response with json format data
      */
-    201: unknown;
+    200: File;
 };
+
+export type FilesRegenerateThumbnailResponse = FilesRegenerateThumbnailResponses[keyof FilesRegenerateThumbnailResponses];
 
 export type MeGetData = {
     body?: never;

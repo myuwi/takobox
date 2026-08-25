@@ -11,7 +11,7 @@ import { File } from "lucide-react";
 import type { File as FileModel } from "@takobox/sdk";
 import { cn } from "@/utils/cn";
 import { stopPropagation } from "@/utils/event";
-import { formatBytes, getThumbnailPath } from "@/utils/files";
+import { formatBytes } from "@/utils/files";
 import { FileContextMenu } from "./FileContextMenu";
 import { Checkbox } from "./primitives/Checkbox";
 
@@ -70,7 +70,7 @@ interface FileThumbnailProps {
 }
 
 const FileThumbnail = ({ file }: FileThumbnailProps) => {
-  const src = getThumbnailPath(file.filename);
+  const src = file.thumbnailUrl ?? undefined;
   const [loaded, setLoaded] = useState(!!src);
 
   const imgRef = useRef<HTMLImageElement>(null);

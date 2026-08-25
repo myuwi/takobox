@@ -21,7 +21,6 @@ import {
 import { deleteFileOptions, fileCollectionsOptions, renameFileOptions } from "@/queries/files";
 import { copyToClipboard } from "@/utils/clipboard";
 import { stopPropagation } from "@/utils/event";
-import { getThumbnailPath } from "@/utils/files";
 import { Button } from "./primitives/Button";
 import * as Menu from "./primitives/Menu";
 
@@ -79,7 +78,7 @@ export const FileContextMenu = ({
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const downloadUrl = `/api/files/${file.id}/download`;
-  const thumbnailPath = getThumbnailPath(file.filename);
+  const thumbnailPath = file.thumbnailUrl;
 
   const handleCopyToClipboard = async () => {
     try {

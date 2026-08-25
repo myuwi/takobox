@@ -1,5 +1,3 @@
-import { thumbnailExtensions } from "@/constants/extensions";
-
 export const formatBytes = (bytes: number) => {
   if (bytes === 0) return "0 bytes";
 
@@ -10,12 +8,4 @@ export const formatBytes = (bytes: number) => {
   const result = (bytes / k ** magnitude).toFixed(decimals);
   const suffix = ["bytes", "kB", "MB", "GB", "TB"][magnitude];
   return `${result} ${suffix}`;
-};
-
-export const getThumbnailPath = (filename: string) => {
-  const supportsThumbnail = thumbnailExtensions.some((ext) => filename.endsWith(`.${ext}`));
-
-  if (!supportsThumbnail) return undefined;
-
-  return `/thumbs/${filename.replace(/\.\w*$/, ".avif")}`;
 };

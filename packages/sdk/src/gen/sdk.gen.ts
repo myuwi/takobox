@@ -301,7 +301,11 @@ export class Files2 extends HeyApiClient {
      * Regenerate the thumbnail for a file belonging to the current user
      */
     public regenerateThumbnail<ThrowOnError extends boolean = true>(options: Options<FilesRegenerateThumbnailData, ThrowOnError>): RequestResult<FilesRegenerateThumbnailResponses, FilesRegenerateThumbnailErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<FilesRegenerateThumbnailResponses, FilesRegenerateThumbnailErrors, ThrowOnError>({ url: '/files/{id}/regenerate-thumbnail', ...options });
+        return (options.client ?? this.client).post<FilesRegenerateThumbnailResponses, FilesRegenerateThumbnailErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/files/{id}/regenerate-thumbnail',
+            ...options
+        });
     }
     
     private _collections?: Collections2;
