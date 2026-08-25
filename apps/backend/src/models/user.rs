@@ -1,11 +1,9 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
-use salvo::oapi::ToSchema;
-use serde::Serialize;
 use sqlx::{FromRow, SqliteExecutor};
 
-use crate::{serialize::serialize_timestamp, types::NanoId};
+use crate::types::NanoId;
 
 static VALID_USERNAME_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[a-z0-9_-]+$").unwrap());
@@ -37,20 +35,12 @@ impl TryFrom<String> for Username {
     }
 }
 
-#[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
-#[salvo(schema(name = User))]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, FromRow)]
 pub struct User {
-    #[serde(skip_serializing)]
     pub id: i64,
-    #[salvo(schema(rename = "id"))]
-    #[serde(rename(serialize = "id"))]
     pub public_id: NanoId,
     pub username: String,
-    #[serde(skip_serializing)]
     pub password: String,
-    #[salvo(schema(value_type = String))]
-    #[serde(serialize_with = "serialize_timestamp")]
     pub created_at: i64,
 }
 

@@ -17,6 +17,7 @@ use crate::{
         file::{File, FileName},
         session::Session,
     },
+    response::{CollectionResponse, FileResponse},
     services::thumbnails::{ThumbnailError, generate_thumbnail},
     state::AppState,
     types::NanoId,
@@ -26,11 +27,11 @@ use crate::{
 ///
 /// Get the files belonging to the current user
 #[endpoint(operation_id = "files.list", tags("Files"), status_codes(200))]
-async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<File>>, Error> {
+async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<FileResponse>>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
     let files = File::get_all_for_user(pool, session.user_id).await?;
 
-    Ok(Json(files))
+    Ok(Json(files.into_iter().map(Into::into).collect()))
 }
 
 /// Get file
@@ -41,13 +42,13 @@ async fn show(
     depot: &mut Depot,
     session: Session,
     id: PathParam<NanoId>,
-) -> Result<Json<File>, Error> {
+) -> Result<Json<FileResponse>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
     let file = File::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
-    Ok(Json(file))
+    Ok(Json(file.into()))
 }
 
 /// Get file collections
@@ -62,7 +63,7 @@ async fn collections(
     depot: &mut Depot,
     session: Session,
     id: PathParam<NanoId>,
-) -> Result<Json<Vec<Collection>>, Error> {
+) -> Result<Json<Vec<CollectionResponse>>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     let file = File::get_by_public_id(pool, session.user_id, &id)
@@ -71,7 +72,7 @@ async fn collections(
 
     let file_collections = Collection::get_all_for_file(pool, session.user_id, file.id).await?;
 
-    Ok(Json(file_collections))
+    Ok(Json(file_collections.into_iter().map(Into::into).collect()))
 }
 
 #[derive(Deserialize, Extractible, Debug)]
@@ -106,7 +107,7 @@ impl EndpointArgRegister for UploadFileSearchParams {
     tags("Files"),
     status_codes(201),
     responses(
-        (status_code = 201, description = "Response with json format data", body = File)
+        (status_code = 201, description = "Response with json format data", body = FileResponse)
     ),
 )]
 async fn upload(
@@ -116,7 +117,7 @@ async fn upload(
     // TODO: How to make this required?
     file: FormFile,
     query_params: UploadFileSearchParams,
-) -> Result<Json<File>, Error> {
+) -> Result<Json<FileResponse>, Error> {
     let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
     let UploadFileSearchParams { collection_id } = &query_params;
 
@@ -177,7 +178,7 @@ async fn upload(
 
     res.status_code(StatusCode::CREATED);
 
-    Ok(Json(file))
+    Ok(Json(file.into()))
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -195,7 +196,7 @@ async fn rename(
     session: Session,
     id: PathParam<NanoId>,
     body: JsonBody<RenameFilePayload>,
-) -> Result<Json<File>, Error> {
+) -> Result<Json<FileResponse>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     let name = FileName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
@@ -212,7 +213,7 @@ async fn rename(
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
-    Ok(Json(file))
+    Ok(Json(file.into()))
 }
 
 /// Delete file

@@ -2,7 +2,7 @@ use anyhow::ensure;
 use salvo::http::cookie::Key;
 use sqlx::SqlitePool;
 
-use crate::{directories::Directories, models::settings::Settings};
+use crate::{directories::Directories, settings::Settings};
 
 #[derive(Clone)]
 pub struct AppState {

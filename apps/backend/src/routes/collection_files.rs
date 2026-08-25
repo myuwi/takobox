@@ -6,7 +6,8 @@ use serde::Deserialize;
 
 use crate::{
     error::{Error, ResultExt},
-    models::{collection::Collection, file::File, session::Session},
+    models::{collection::Collection, session::Session},
+    response::FileResponse,
     state::AppState,
     types::NanoId,
 };
@@ -23,7 +24,7 @@ async fn index(
     depot: &mut Depot,
     session: Session,
     id: PathParam<NanoId>,
-) -> Result<Json<Vec<File>>, Error> {
+) -> Result<Json<Vec<FileResponse>>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
     if !Collection::exists(pool, session.user_id, &id).await? {
         return Err(Error::NotFound(
@@ -33,7 +34,7 @@ async fn index(
 
     let files = Collection::get_files(pool, session.user_id, &id).await?;
 
-    Ok(Json(files))
+    Ok(Json(files.into_iter().map(Into::into).collect()))
 }
 
 #[derive(Debug, Deserialize, ToSchema)]

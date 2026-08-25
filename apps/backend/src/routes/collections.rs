@@ -11,6 +11,7 @@ use crate::{
         collection::{Collection, CollectionName},
         session::Session,
     },
+    response::CollectionResponse,
     state::AppState,
     types::NanoId,
 };
@@ -23,11 +24,14 @@ use crate::{
     tags("Collections"),
     status_codes(200)
 )]
-async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<Collection>>, Error> {
+async fn index(
+    depot: &mut Depot,
+    session: Session,
+) -> Result<Json<Vec<CollectionResponse>>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
     let collections = Collection::get_all_for_user(pool, session.user_id).await?;
 
-    Ok(Json(collections))
+    Ok(Json(collections.into_iter().map(Into::into).collect()))
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -45,7 +49,7 @@ pub struct CreateCollectionPayload {
     tags("Collections"),
     status_codes(201),
     responses(
-        (status_code = 201, description = "Response with json format data", body = Collection)
+        (status_code = 201, description = "Response with json format data", body = CollectionResponse)
     ),
 )]
 async fn create(
@@ -53,7 +57,7 @@ async fn create(
     depot: &mut Depot,
     session: Session,
     body: JsonBody<CreateCollectionPayload>,
-) -> Result<Json<Collection>, Error> {
+) -> Result<Json<CollectionResponse>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     let name = CollectionName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
@@ -66,7 +70,7 @@ async fn create(
 
     res.status_code(StatusCode::CREATED);
 
-    Ok(Json(collection))
+    Ok(Json(collection.into()))
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -88,7 +92,7 @@ async fn rename(
     session: Session,
     id: PathParam<NanoId>,
     body: JsonBody<RenameCollectionPayload>,
-) -> Result<Json<Collection>, Error> {
+) -> Result<Json<CollectionResponse>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     let name = CollectionName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
@@ -100,7 +104,7 @@ async fn rename(
         })?
         .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
 
-    Ok(Json(collection))
+    Ok(Json(collection.into()))
 }
 
 /// Delete collection

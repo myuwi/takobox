@@ -1,5 +1,5 @@
 use salvo::Service;
-use takobox::{AppState, Directories, db, models::settings::Settings, router};
+use takobox::{AppState, Directories, Settings, db, router};
 use tempfile::TempDir;
 
 pub struct TestApp {

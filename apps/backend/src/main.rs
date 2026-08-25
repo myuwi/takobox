@@ -7,7 +7,7 @@ use tokio::signal::{
 mod env;
 
 use env::Env;
-use takobox::{AppState, Directories, db, models::settings::Settings, router};
+use takobox::{AppState, Directories, Settings, db, router};
 
 fn init_tracing() {
     tracing_subscriber::fmt().init();

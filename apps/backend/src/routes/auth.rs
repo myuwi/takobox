@@ -13,6 +13,7 @@ use crate::{
         session::Session,
         user::{User, Username},
     },
+    response::UserResponse,
     state::AppState,
 };
 
@@ -31,7 +32,7 @@ async fn login(
     body: JsonBody<AuthCredentials>,
     depot: &mut Depot,
     res: &mut Response,
-) -> Result<Json<User>, Error> {
+) -> Result<Json<UserResponse>, Error> {
     let AppState {
         pool,
         session_secret,
@@ -49,7 +50,7 @@ async fn login(
 
     res.cookies_mut().private_mut(session_secret).add(session);
 
-    Ok(Json(user))
+    Ok(Json(user.into()))
 }
 
 /// Register
@@ -59,7 +60,7 @@ async fn login(
     operation_id = "auth.register",
     tags("Auth"),
     responses(
-        (status_code = 201, description = "User created", body = User)
+        (status_code = 201, description = "User created", body = UserResponse)
     ),
     status_codes(201)
 )]
@@ -67,7 +68,7 @@ async fn register(
     body: JsonBody<AuthCredentials>,
     depot: &mut Depot,
     res: &mut Response,
-) -> Result<Json<User>, Error> {
+) -> Result<Json<UserResponse>, Error> {
     let AppState {
         settings,
         pool,
@@ -99,7 +100,7 @@ async fn register(
     res.headers_mut()
         .insert(header::LOCATION, HeaderValue::from_static("/api/me"));
 
-    Ok(Json(user))
+    Ok(Json(user.into()))
 }
 
 /// Logout

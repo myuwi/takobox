@@ -1,9 +1,7 @@
-use salvo::oapi::ToSchema;
-use serde::Serialize;
 use sqlx::{FromRow, SqliteExecutor, sqlite::SqliteRow};
 
 use super::file::File;
-use crate::{serialize::serialize_timestamp, types::NanoId};
+use crate::types::NanoId;
 
 #[derive(Debug)]
 pub struct CollectionName(String);
@@ -28,20 +26,12 @@ impl TryFrom<String> for CollectionName {
     }
 }
 
-#[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
-#[salvo(schema(name = Collection))]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, FromRow)]
 pub struct Collection {
-    #[serde(skip_serializing)]
     pub id: i64,
-    #[salvo(schema(rename = "id"))]
-    #[serde(rename(serialize = "id"))]
     pub public_id: NanoId,
-    #[serde(skip_serializing)]
     pub user_id: i64,
     pub name: String,
-    #[salvo(schema(value_type = String))]
-    #[serde(serialize_with = "serialize_timestamp")]
     pub created_at: i64,
 }
 

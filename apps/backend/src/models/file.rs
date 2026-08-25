@@ -1,11 +1,9 @@
 use std::{ffi::OsStr, path::Path};
 
-use salvo::oapi::ToSchema;
 use sanitize_filename::is_sanitized;
-use serde::Serialize;
 use sqlx::{FromRow, SqliteExecutor};
 
-use crate::{serialize::serialize_timestamp, types::NanoId};
+use crate::types::NanoId;
 
 #[derive(Debug)]
 pub struct FileName(String);
@@ -34,22 +32,14 @@ impl TryFrom<String> for FileName {
     }
 }
 
-#[derive(Clone, Debug, Serialize, FromRow, ToSchema)]
-#[salvo(schema(name = File))]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, FromRow)]
 pub struct File {
-    #[serde(skip_serializing)]
     pub id: i64,
-    #[salvo(schema(rename = "id"))]
-    #[serde(rename(serialize = "id"))]
     pub public_id: NanoId,
-    #[serde(skip_serializing)]
     pub user_id: i64,
     pub name: String,
     pub filename: String,
     pub size: i64,
-    #[salvo(schema(value_type = String))]
-    #[serde(serialize_with = "serialize_timestamp")]
     pub created_at: i64,
 }
 
