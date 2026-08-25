@@ -1,6 +1,6 @@
 use salvo::prelude::*;
 
-use crate::{error::Error, response::SettingsResponse, state::AppState};
+use crate::http::{error::Error, response::SettingsResponse, state::AppState};
 
 /// Get settings
 ///

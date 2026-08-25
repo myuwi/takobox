@@ -1,19 +1,12 @@
 mod auth;
 pub mod db;
 mod directories;
-mod error;
-mod middleware;
-pub mod models;
-mod response;
-mod routes;
-mod serialize;
+mod http;
+mod models;
 mod services;
-mod session;
 mod settings;
-mod state;
 mod types;
 
 pub use directories::Directories;
-pub use routes::router;
+pub use http::{routes::router, state::AppState};
 pub use settings::Settings;
-pub use state::AppState;

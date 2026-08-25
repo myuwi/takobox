@@ -32,6 +32,7 @@ impl TryFrom<String> for FileName {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Debug, FromRow)]
 pub struct File {
     pub id: i64,

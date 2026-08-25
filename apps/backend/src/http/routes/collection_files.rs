@@ -5,10 +5,12 @@ use salvo::{
 use serde::Deserialize;
 
 use crate::{
-    error::{Error, ResultExt},
+    http::{
+        error::{Error, ResultExt},
+        response::FileResponse,
+        state::AppState,
+    },
     models::{collection::Collection, session::Session},
-    response::FileResponse,
-    state::AppState,
     types::NanoId,
 };
 

@@ -9,7 +9,7 @@ use salvo::{
 use sqlx::SqlitePool;
 use time::OffsetDateTime;
 
-use crate::{error::Error, models::session::Session, types::NanoId};
+use crate::{http::error::Error, models::session::Session, types::NanoId};
 
 const COOKIE_NAME: &str = "session";
 

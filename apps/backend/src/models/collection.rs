@@ -26,6 +26,7 @@ impl TryFrom<String> for CollectionName {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Debug, FromRow)]
 pub struct Collection {
     pub id: i64,

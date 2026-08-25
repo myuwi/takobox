@@ -1,6 +1,9 @@
 use salvo::{Depot, Request, Writer, handler};
 
-use crate::{models::session::Session, session::resolve_session, state::AppState};
+use crate::{
+    http::{session::resolve_session, state::AppState},
+    models::session::Session,
+};
 
 #[handler]
 pub async fn inject_auth(depot: &mut Depot, req: &mut Request) {

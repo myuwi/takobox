@@ -1,10 +1,8 @@
 use salvo::prelude::*;
 
 use crate::{
-    error::Error,
+    http::{error::Error, response::UserResponse, state::AppState},
     models::{session::Session, user::User},
-    response::UserResponse,
-    state::AppState,
 };
 
 /// Get current user

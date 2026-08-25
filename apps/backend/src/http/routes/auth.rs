@@ -7,15 +7,17 @@ use serde::Deserialize;
 
 use crate::{
     auth::password::{Password, hash_password, verify_password},
-    error::{Error, ResultExt},
-    middleware::rate_limit::rate_limit,
+    http::{
+        error::{Error, ResultExt},
+        middleware::rate_limit::rate_limit,
+        response::UserResponse,
+        session::clear_session_cookie,
+        state::AppState,
+    },
     models::{
         session::Session,
         user::{User, Username},
     },
-    response::UserResponse,
-    session::clear_session_cookie,
-    state::AppState,
 };
 
 #[derive(Clone, Debug, Deserialize, ToSchema)]

@@ -11,15 +11,17 @@ use serde::Deserialize;
 use tracing::error;
 
 use crate::{
-    error::Error,
+    http::{
+        error::Error,
+        response::{CollectionResponse, FileResponse},
+        state::AppState,
+    },
     models::{
         collection::Collection,
         file::{File, FileName},
         session::Session,
     },
-    response::{CollectionResponse, FileResponse},
     services::thumbnails::{ThumbnailError, generate_thumbnail},
-    state::AppState,
     types::NanoId,
 };
 

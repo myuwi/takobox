@@ -11,7 +11,7 @@ mod files;
 mod me;
 mod settings;
 
-use crate::{
+use crate::http::{
     error::Error,
     middleware::{
         auth::{inject_auth, require_auth},

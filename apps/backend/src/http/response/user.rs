@@ -1,7 +1,7 @@
 use salvo::oapi::ToSchema;
 use serde::Serialize;
 
-use crate::{models::user::User, serialize::serialize_timestamp, types::NanoId};
+use crate::{http::serialize::serialize_timestamp, models::user::User, types::NanoId};
 
 #[derive(Clone, Debug, Serialize, ToSchema)]
 #[salvo(schema(name = User))]

@@ -6,13 +6,15 @@ use serde::Deserialize;
 
 use super::collection_files;
 use crate::{
-    error::{Error, ResultExt},
+    http::{
+        error::{Error, ResultExt},
+        response::CollectionResponse,
+        state::AppState,
+    },
     models::{
         collection::{Collection, CollectionName},
         session::Session,
     },
-    response::CollectionResponse,
-    state::AppState,
     types::NanoId,
 };
 
