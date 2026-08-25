@@ -14,6 +14,7 @@ use crate::{
         user::{User, Username},
     },
     response::UserResponse,
+    session::clear_session_cookie,
     state::AppState,
 };
 
@@ -116,7 +117,7 @@ async fn logout(
 
     Session::delete(pool, session.id).await?;
 
-    res.cookies_mut().add(Session::empty_cookie());
+    res.cookies_mut().add(clear_session_cookie());
 
     Ok(StatusCode::NO_CONTENT)
 }

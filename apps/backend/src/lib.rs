@@ -8,6 +8,7 @@ mod response;
 mod routes;
 mod serialize;
 mod services;
+mod session;
 mod settings;
 mod state;
 mod types;

@@ -1,9 +1,5 @@
-use salvo::{
-    http::cookie::{Cookie, SameSite},
-    oapi::{Components, EndpointArgRegister, Operation},
-};
 use sqlx::{FromRow, SqliteExecutor};
-use time::{Duration, OffsetDateTime, UtcDateTime};
+use time::{Duration, UtcDateTime};
 
 use crate::types::NanoId;
 
@@ -18,34 +14,6 @@ pub struct Session {
     pub user_id: i64,
     pub created_at: i64,
     pub expires_at: i64,
-}
-
-impl EndpointArgRegister for Session {
-    fn register(_components: &mut Components, _operation: &mut Operation, _arg: &str) {}
-}
-
-impl From<Session> for Cookie<'_> {
-    fn from(session: Session) -> Self {
-        Cookie::build(("session", session.public_id.to_string()))
-            .http_only(true)
-            .secure(cfg!(not(debug_assertions)))
-            .path("/")
-            .expires(OffsetDateTime::from_unix_timestamp(session.expires_at).unwrap())
-            .same_site(SameSite::Lax)
-            .build()
-    }
-}
-
-impl Session {
-    pub fn empty_cookie<'c>() -> Cookie<'c> {
-        Cookie::build(("session", ""))
-            .http_only(true)
-            .secure(cfg!(not(debug_assertions)))
-            .path("/")
-            .expires(OffsetDateTime::now_utc())
-            .same_site(SameSite::Lax)
-            .build()
-    }
 }
 
 impl Session {

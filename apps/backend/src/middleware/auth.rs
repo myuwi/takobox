@@ -1,22 +1,6 @@
-use std::fmt::Debug;
+use salvo::{Depot, Request, Writer, handler};
 
-use salvo::{
-    Depot, Request, Writer,
-    extract::{Extractible, Metadata},
-    handler,
-    http::cookie::{CookieJar, PrivateJar},
-};
-use sqlx::SqlitePool;
-
-use crate::{error::Error, models::session::Session, state::AppState, types::NanoId};
-
-async fn resolve_session(pool: &SqlitePool, jar: &PrivateJar<&CookieJar>) -> Option<Session> {
-    let session_id = jar
-        .get("session")
-        .and_then(|c| NanoId::try_from(c.value().to_string()).ok())?;
-
-    Session::get_by_public_id(pool, &session_id).await.ok()
-}
+use crate::{models::session::Session, session::resolve_session, state::AppState};
 
 #[handler]
 pub async fn inject_auth(depot: &mut Depot, req: &mut Request) {
@@ -33,20 +17,3 @@ pub async fn inject_auth(depot: &mut Depot, req: &mut Request) {
 
 #[handler]
 pub async fn require_auth(_session: Session) {}
-
-impl<'ex> Extractible<'ex> for Session {
-    fn metadata() -> &'static Metadata {
-        static METADATA: Metadata = Metadata::new("Session");
-        &METADATA
-    }
-
-    async fn extract(
-        req: &'ex mut Request,
-        _depot: &'ex mut Depot,
-    ) -> Result<Self, impl Writer + Send + Debug + 'static> {
-        req.extensions()
-            .get::<Session>()
-            .ok_or(Error::Unauthorized("Unauthorized"))
-            .cloned()
-    }
-}
