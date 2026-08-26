@@ -11,7 +11,7 @@
     "preinstall": "bunx only-allow bun",
     "dev": "concurrently -k \"bun:dev:*\"",
     "dev:web": "bun run --cwd apps/web dev",
-    "dev:server": "just --justfile apps/backend/Justfile dev --headless",
+    "dev:server": "bacon apps/backend -j run-long --headless",
     "dev:caddy": "docker compose --project-name takobox-dev -f docker-compose.dev.yml up",
     "test": "bun run --filter '*' test",
     "test:e2e": "bun run --cwd e2e test",

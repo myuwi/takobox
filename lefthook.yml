@@ -5,9 +5,12 @@ pre-commit:
       run: bun run fmt
     lint:
       run: bun run lint
+    nix-fmt:
+      glob: "*.nix"
+      run: nixfmt --check {staged_files}
     rust-fmt:
       root: "apps/backend/"
-      run: cargo +nightly fmt --check
+      run: cargo fmt --check
 
 pre-push:
   parallel: true

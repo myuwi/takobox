@@ -1,8 +1,0 @@
-list:
-  @just --list
-
-dev-deps:
-  cargo install bacon sqlx-cli
-
-dev *args:
-  bacon {{args}} -j run-long

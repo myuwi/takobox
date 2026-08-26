@@ -1,5 +1,0 @@
-[tools]
-rust = [
-  { version = "1.98.0", profile = "minimal", components = ["clippy", "rust-analyzer", "rust-src", "rustfmt"] },
-  { version = "nightly", profile = "minimal", components = ["rustfmt"] },
-]

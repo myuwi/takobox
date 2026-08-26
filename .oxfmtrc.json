@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
-  "ignorePatterns": ["**/*.gen.ts", "packages/sdk/src/gen/**", "mise.toml"],
+  "ignorePatterns": ["**/*.gen.ts", "packages/sdk/src/gen/**"],
   "overrides": [
     {
       "files": ["apps/web/**"],
@@ -8,14 +8,26 @@
         "sortImports": {
           "newlinesBetween": false,
           "customGroups": [
-            { "groupName": "bun", "elementNamePattern": ["bun", "bun:*"] },
-            { "groupName": "react", "elementNamePattern": ["react", "react-dom"] },
+            {
+              "groupName": "bun",
+              "elementNamePattern": ["bun", "bun:*"]
+            },
+            {
+              "groupName": "react",
+              "elementNamePattern": ["react", "react-dom"]
+            },
             {
               "groupName": "tanstack-start",
               "elementNamePattern": ["@tanstack/react-start", "@tanstack/react-start/**"]
             },
-            { "groupName": "tanstack", "elementNamePattern": ["@tanstack/**"] },
-            { "groupName": "workspace", "elementNamePattern": ["@takobox/**"] }
+            {
+              "groupName": "tanstack",
+              "elementNamePattern": ["@tanstack/**"]
+            },
+            {
+              "groupName": "workspace",
+              "elementNamePattern": ["@takobox/**"]
+            }
           ],
           "groups": [
             ["side_effect"],

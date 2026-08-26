@@ -20,11 +20,12 @@
 
 ## Development
 
-Install the development dependencies:
+The toolchain is provided by the Nix flake. With [direnv](https://direnv.net) (and optionally [nix-direnv](https://github.com/nix-community/nix-direnv)) installed, `direnv allow` loads it on entering the directory; otherwise run `nix develop`.
+
+Install dependencies:
 
 ```sh
 bun install
-just --justfile apps/backend/Justfile dev-deps
 ```
 
 Then start the web app, backend, and Caddy proxy together:
