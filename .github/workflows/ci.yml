@@ -25,6 +25,12 @@ jobs:
       - name: Install nix
         uses: cachix/install-nix-action@v31
 
+      - name: Use the fenix binary cache
+        uses: cachix/cachix-action@v17
+        with:
+          name: fenix
+          skipPush: true
+
       - name: Build the dev shell
         run: nix develop -c true
 
