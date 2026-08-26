@@ -29,10 +29,10 @@ jobs:
         run: nix develop -c true
 
       - name: Install workspace deps
-        run: nix develop -c bun install
+        run: nix develop -c bun install --frozen-lockfile
 
       - name: Install E2E deps
-        run: nix develop -c bun install --cwd e2e
+        run: nix develop -c bun install --cwd e2e --frozen-lockfile
 
       - name: Lint TypeScript
         run: nix develop -c bun run lint
@@ -53,11 +53,11 @@ jobs:
 
       - name: Run Clippy
         working-directory: apps/backend
-        run: nix develop -c cargo clippy --all-targets -- -D warnings
+        run: nix develop -c cargo clippy --locked --all-targets -- -D warnings
 
       - name: Test Rust
         working-directory: apps/backend
-        run: nix develop -c cargo test
+        run: nix develop -c cargo test --locked
 
   build-push:
     name: Build, Test and Push images
