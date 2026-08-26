@@ -25,6 +25,9 @@ jobs:
       - name: Install nix
         uses: cachix/install-nix-action@v31
 
+      - name: Build the dev shell
+        run: nix develop -c true
+
       - name: Install workspace deps
         run: nix develop -c bun install
 
