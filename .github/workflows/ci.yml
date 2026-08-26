@@ -60,6 +60,13 @@ jobs:
         working-directory: apps/backend
         run: cargo clippy --all-targets -- -D warnings
 
+      - name: Install ffmpeg
+        run: |
+          if ! command -v ffmpeg > /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+
       - name: Test Rust
         working-directory: apps/backend
         run: cargo test
