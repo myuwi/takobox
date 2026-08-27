@@ -1,4 +1,4 @@
-FROM rust:1.98.0-alpine AS builder
+FROM rust:1.98.0-alpine3.24 AS builder
 WORKDIR /app
 
 RUN apk add --no-cache \
@@ -18,7 +18,7 @@ RUN touch src/main.rs
 RUN cargo build --release
 
 # run the app
-FROM alpine:latest AS runner
+FROM alpine:3.24 AS runner
 RUN apk add --no-cache ca-certificates ffmpeg
 COPY --from=builder /app/target/release/takobox ./
 
