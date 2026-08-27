@@ -39,15 +39,21 @@
     {
       formatter.${system} = pkgs.nixfmt-tree;
 
-      devShells.${system}.default = pkgs.mkShell {
-        packages = [
-          bun
-          rust
-          pkgs.bacon
-          pkgs.ffmpeg
-          pkgs.nixfmt
-          pkgs.sqlx-cli
-        ];
+      devShells.${system} = {
+        default = pkgs.mkShell {
+          packages = [
+            bun
+            rust
+            pkgs.bacon
+            pkgs.ffmpeg
+            pkgs.nixfmt
+            pkgs.sqlx-cli
+          ];
+        };
+
+        e2e = pkgs.mkShell {
+          packages = [ bun ];
+        };
       };
     };
 }

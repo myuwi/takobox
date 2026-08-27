@@ -11,7 +11,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BUN_VERSION: 1.4.0
   CARGO_INCREMENTAL: 0
 
 jobs:
@@ -122,19 +121,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
+      - name: Install nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Build the dev shell
+        run: nix develop .#e2e -c true
 
       - name: Install E2E deps and browsers
-        run: bun run test:e2e:install
+        run: nix develop .#e2e -c bun run test:e2e:install
 
       - name: Run E2E tests
         env:
           E2E_SKIP_BUILD: "1"
           TAKOBOX_IMAGE_TAG: sha-${{ github.sha }}
-        run: bun run test:e2e
+        run: nix develop .#e2e -c bun run test:e2e
 
       - name: Upload E2E artifacts
         if: failure()
