@@ -13,12 +13,18 @@ use crate::{http::error::Error, models::session::Session, types::NanoId};
 
 const COOKIE_NAME: &str = "session";
 
-pub async fn resolve_session(pool: &SqlitePool, jar: &PrivateJar<&CookieJar>) -> Option<Session> {
-    let session_id = jar
+pub async fn resolve_session(
+    pool: &SqlitePool,
+    jar: &PrivateJar<&CookieJar>,
+) -> Result<Option<Session>, Error> {
+    let Some(session_id) = jar
         .get(COOKIE_NAME)
-        .and_then(|c| NanoId::try_from(c.value().to_string()).ok())?;
+        .and_then(|c| NanoId::try_from(c.value().to_string()).ok())
+    else {
+        return Ok(None);
+    };
 
-    Session::get_by_public_id(pool, &session_id).await.ok()
+    Ok(Session::get_by_public_id(pool, &session_id).await?)
 }
 
 fn build_cookie(value: String, expires: OffsetDateTime) -> Cookie<'static> {

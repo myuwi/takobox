@@ -1,9 +1,12 @@
 use salvo::Service;
+use sqlx::SqlitePool;
 use takobox::{AppState, Directories, Settings, db, router};
 use tempfile::TempDir;
 
 pub struct TestApp {
     pub service: Service,
+    #[allow(dead_code)]
+    pub pool: SqlitePool,
     _data_dir: TempDir,
 }
 
@@ -19,7 +22,7 @@ impl TestApp {
             .unwrap();
         let state = AppState::try_from(
             "test-session-secret".repeat(4),
-            pool,
+            pool.clone(),
             dirs,
             Settings {
                 enable_account_creation: true,
@@ -30,6 +33,7 @@ impl TestApp {
 
         Self {
             service: router(state),
+            pool,
             _data_dir: data_dir,
         }
     }

@@ -39,10 +39,10 @@ impl Session {
     pub async fn get_by_public_id(
         conn: impl SqliteExecutor<'_>,
         session_id: &NanoId,
-    ) -> Result<Session, sqlx::Error> {
+    ) -> Result<Option<Session>, sqlx::Error> {
         sqlx::query_as("select * from sessions where public_id = $1 and expires_at > unixepoch()")
             .bind(session_id)
-            .fetch_one(conn)
+            .fetch_optional(conn)
             .await
     }
 
