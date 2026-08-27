@@ -5,7 +5,7 @@ import { meOptions } from "@/queries/me";
 
 export const Route = createFileRoute("/(auth)")({
   beforeLoad: async ({ context }) => {
-    const user = await context.queryClient.fetchQuery(meOptions);
+    const user = await context.queryClient.ensureQueryData(meOptions).catch(() => null);
     if (user) {
       throw redirect({ to: "/home" });
     }

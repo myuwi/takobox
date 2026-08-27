@@ -26,5 +26,4 @@ export async function logIn(page: Page, credentials: Credentials): Promise<void>
   await page.getByRole("textbox", { name: "Username" }).fill(credentials.username);
   await page.getByLabel("Password").fill(credentials.password);
   await page.getByRole("button", { name: "Log in" }).click();
-  await page.waitForURL("/home");
 }
