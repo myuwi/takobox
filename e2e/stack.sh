@@ -38,6 +38,8 @@ trap 'exit 0' INT TERM
 declare -a up_args=(--force-recreate)
 if [[ "${E2E_SKIP_BUILD:-}" != "1" ]]; then
 	up_args+=(--build)
+else
+	"${compose[@]}" pull
 fi
 
 "${compose[@]}" up "${up_args[@]}" &

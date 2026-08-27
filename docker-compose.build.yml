@@ -1,6 +1,6 @@
 services:
   takobox_web:
-    image: ghcr.io/myuwi/takobox-web:dev
+    image: ghcr.io/myuwi/takobox-web:main
     build:
       context: .
       dockerfile: apps/web/Dockerfile
@@ -12,7 +12,7 @@ services:
     restart: unless-stopped
 
   takobox_server:
-    image: ghcr.io/myuwi/takobox-server:dev
+    image: ghcr.io/myuwi/takobox-server:main
     build:
       context: .
       dockerfile: apps/backend/Dockerfile

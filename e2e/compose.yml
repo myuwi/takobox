@@ -1,6 +1,6 @@
 services:
   takobox_web:
-    image: ghcr.io/myuwi/takobox-web:dev
+    image: ghcr.io/myuwi/takobox-web:${TAKOBOX_IMAGE_TAG:-main}
     build:
       context: ..
       dockerfile: apps/web/Dockerfile
@@ -14,7 +14,7 @@ services:
       retries: 12
 
   takobox_server:
-    image: ghcr.io/myuwi/takobox-server:dev
+    image: ghcr.io/myuwi/takobox-server:${TAKOBOX_IMAGE_TAG:-main}
     build:
       context: ..
       dockerfile: apps/backend/Dockerfile

@@ -1,6 +1,6 @@
 services:
   takobox_web:
-    image: ghcr.io/myuwi/takobox-web:dev
+    image: ghcr.io/myuwi/takobox-web:main
     environment:
       - TAKOBOX_INTERNAL_API_URL=http://takobox_server:8000/api
       - TAKOBOX_DISABLE_LANDING_PAGE=true
@@ -9,7 +9,7 @@ services:
     restart: unless-stopped
 
   takobox_server:
-    image: ghcr.io/myuwi/takobox-server:dev
+    image: ghcr.io/myuwi/takobox-server:main
     environment:
       - TAKOBOX_SESSION_SECRET="<super_secret_session_secret_please_change_pretty_please_i_beg_you>"
       - TAKOBOX_ENABLE_ACCOUNT_CREATION=false
