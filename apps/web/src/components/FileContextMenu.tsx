@@ -23,6 +23,7 @@ import { copyToClipboard } from "@/utils/clipboard";
 import { stopPropagation } from "@/utils/event";
 import { Button } from "./primitives/Button";
 import * as Menu from "./primitives/Menu";
+import { toastError } from "./primitives/Toast";
 
 interface FileContextMenuProps {
   file: File;
@@ -91,13 +92,18 @@ export const FileContextMenu = ({
 
   const handleRegenerateThumbnail = async () => {
     if (!thumbnailPath) return;
-    await client.files.regenerateThumbnail({ path: { id: file.id } });
-    await fetch(thumbnailPath, { cache: "reload" });
-    document.body
-      .querySelectorAll<HTMLImageElement>(`img[src="${thumbnailPath}"]`)
-      .forEach((img) => {
-        img.src = thumbnailPath;
-      });
+
+    try {
+      await client.files.regenerateThumbnail({ path: { id: file.id } });
+      await fetch(thumbnailPath, { cache: "reload" });
+      document.body
+        .querySelectorAll<HTMLImageElement>(`img[src="${thumbnailPath}"]`)
+        .forEach((img) => {
+          img.src = thumbnailPath;
+        });
+    } catch (err) {
+      toastError("Couldn't regenerate thumbnail", err);
+    }
   };
 
   const handleRename = async (name: string) => {
@@ -105,8 +111,12 @@ export const FileContextMenu = ({
   };
 
   const handleDelete = async () => {
-    await deleteFile(file.id);
-    onDeleted(file.id);
+    try {
+      await deleteFile(file.id);
+      onDeleted(file.id);
+    } catch (err) {
+      toastError(`Couldn't delete "${file.name}"`, err);
+    }
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -169,16 +179,25 @@ export const FileContextMenu = ({
                   const handleCheckedChange = async (checked: boolean) => {
                     if (pending) return;
 
-                    if (checked) {
-                      await addToCollection({
-                        id: collection.id,
-                        fileId: file.id,
-                      });
-                    } else {
-                      await removeFromCollection({
-                        id: collection.id,
-                        fileId: file.id,
-                      });
+                    try {
+                      if (checked) {
+                        await addToCollection({
+                          id: collection.id,
+                          fileId: file.id,
+                        });
+                      } else {
+                        await removeFromCollection({
+                          id: collection.id,
+                          fileId: file.id,
+                        });
+                      }
+                    } catch (err) {
+                      toastError(
+                        checked
+                          ? `Couldn't add to "${collection.name}"`
+                          : `Couldn't remove from "${collection.name}"`,
+                        err,
+                      );
                     }
                   };
 

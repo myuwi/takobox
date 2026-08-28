@@ -8,6 +8,7 @@ import { openConfirmationDialogAtom, openRenameDialogAtom } from "@/atoms/dialog
 import { deleteCollectionOptions, renameCollectionOptions } from "@/queries/collections";
 import { Button } from "./primitives/Button";
 import * as Menu from "./primitives/Menu";
+import { toastError } from "./primitives/Toast";
 
 interface CollectionMenuProps {
   collection: Collection;
@@ -38,7 +39,9 @@ export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
           search: (prev) => ({ ...prev, collection: undefined }),
         });
       }
-    } catch (_) {}
+    } catch (err) {
+      toastError(`Couldn't delete "${collection.name}"`, err);
+    }
   };
 
   const menuTriggerRef = useRef<HTMLButtonElement>(null);

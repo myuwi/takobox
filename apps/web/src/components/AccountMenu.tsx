@@ -4,6 +4,7 @@ import type { User } from "@takobox/sdk";
 import { client } from "@/api/client";
 import { Button } from "@/components/primitives/Button";
 import * as Menu from "@/components/primitives/Menu";
+import { toastError } from "@/components/primitives/Toast";
 
 interface AccountMenuProps {
   user: User;
@@ -13,11 +14,15 @@ export const AccountMenu = ({ user }: AccountMenuProps) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await client.auth.logout();
-    await navigate({
-      to: "/",
-      reloadDocument: true,
-    });
+    try {
+      await client.auth.logout();
+      await navigate({
+        to: "/",
+        reloadDocument: true,
+      });
+    } catch (err) {
+      toastError("Couldn't log out", err);
+    }
   };
 
   return (

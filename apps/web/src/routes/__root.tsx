@@ -5,6 +5,7 @@ import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Dialogs } from "@/components/Dialogs";
+import { Toaster } from "@/components/primitives/Toast";
 import { meOptions } from "@/queries/me";
 import { settingsOptions } from "@/queries/settings";
 import css from "../index.css?url";
@@ -46,6 +47,7 @@ function Root() {
         <StrictMode>
           <Outlet />
           <Dialogs />
+          <Toaster />
           <Scripts />
           <TanStackDevtools
             plugins={[

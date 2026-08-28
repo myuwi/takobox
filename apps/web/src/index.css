@@ -13,7 +13,7 @@
   --color-primary-foreground: var(--color-zinc-700);
   --color-accent: var(--color-zinc-100);
   --color-accent-foreground: var(--color-zinc-700);
-  --color-destructive: var(--color-red-500);
+  --color-destructive: oklch(0.637 0.19 25.331);
   --color-destructive-foreground: #fff;
   --color-muted: var(--color-zinc-200);
   --color-muted-foreground: var(--color-zinc-500);
