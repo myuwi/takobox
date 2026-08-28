@@ -39,6 +39,12 @@ jobs:
       - name: Install E2E deps
         run: nix develop -c bun install --cwd e2e --frozen-lockfile
 
+      - name: Check TypeScript formatting
+        run: nix develop -c bun run fmt
+
+      - name: Check Nix formatting
+        run: nix develop -c nixfmt --check $(git ls-files '*.nix')
+
       - name: Check the SDK matches the OpenAPI spec
         run: |
           nix develop -c bun run --cwd packages/sdk generate
