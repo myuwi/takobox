@@ -11,10 +11,6 @@ pre-commit:
     rust-fmt:
       root: "apps/backend/"
       run: cargo fmt --check
-
-pre-push:
-  parallel: true
-  commands:
     rust-clippy:
       root: "apps/backend/"
       run: cargo clippy --all-targets -- -D warnings
