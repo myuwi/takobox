@@ -4,6 +4,7 @@ pre-commit:
     fmt:
       run: bun run fmt
     lint:
+      glob: "*.{ts,tsx,js,jsx,json,css}"
       run: bun run lint
     nix-fmt:
       glob: "*.nix"
