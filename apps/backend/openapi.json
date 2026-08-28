@@ -1,0 +1,1184 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Takobox API Reference",
+    "description": "The Takobox API Reference",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login",
+        "description": "Log in to a user account",
+        "operationId": "auth.login",
+        "requestBody": {
+          "description": "Extract json format data from request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthCredentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Logout",
+        "description": "Log out of a user account, invalidating the login session",
+        "operationId": "auth.logout",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Register",
+        "description": "Register a user account",
+        "operationId": "auth.register",
+        "requestBody": {
+          "description": "Extract json format data from request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthCredentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections": {
+      "get": {
+        "tags": [
+          "Collections"
+        ],
+        "summary": "Get collections",
+        "description": "Get the current user's collections",
+        "operationId": "collections.list",
+        "responses": {
+          "200": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Collection"
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Collections"
+        ],
+        "summary": "Create collection",
+        "description": "Create a collection",
+        "operationId": "collections.create",
+        "requestBody": {
+          "description": "Extract json format data from request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCollectionPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Collection"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections/{id}": {
+      "delete": {
+        "tags": [
+          "Collections"
+        ],
+        "summary": "Delete collection",
+        "description": "Delete a collection belonging to the current user",
+        "operationId": "collections.delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Get parameter `id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Collections"
+        ],
+        "summary": "Rename collection",
+        "description": "Rename a collection belonging to the current user",
+        "operationId": "collections.rename",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Get parameter `id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Extract json format data from request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameCollectionPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Collection"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections/{id}/files": {
+      "get": {
+        "tags": [
+          "Collections"
+        ],
+        "summary": "Get files",
+        "description": "Get the files belonging to the current user",
+        "operationId": "collections.files.list",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Get parameter `id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/File"
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections/{id}/files/{file_id}": {
+      "put": {
+        "tags": [
+          "Collections"
+        ],
+        "summary": "Add file to collection",
+        "description": "Add a file to a collection belonging to the current user",
+        "operationId": "collections.files.add",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Get parameter `id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          },
+          {
+            "name": "file_id",
+            "in": "path",
+            "description": "Get parameter `file_id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Collections"
+        ],
+        "summary": "Remove file from collection",
+        "description": "Remove a file from a collection belonging to the current user",
+        "operationId": "collections.files.remove",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Get parameter `id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          },
+          {
+            "name": "file_id",
+            "in": "path",
+            "description": "Get parameter `file_id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files": {
+      "get": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Get files",
+        "description": "Get the files belonging to the current user",
+        "operationId": "files.list",
+        "responses": {
+          "200": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/File"
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Upload file",
+        "description": "Upload a file",
+        "operationId": "files.upload",
+        "parameters": [
+          {
+            "name": "collectionId",
+            "in": "query",
+            "description": "Get parameter `collectionId` from request url query.",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Upload a file.",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/File"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/{id}": {
+      "get": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Get file",
+        "description": "Get a file belonging to the current user",
+        "operationId": "files.get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Get parameter `id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/File"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Delete file",
+        "description": "Delete a file belonging to the current user",
+        "operationId": "files.delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Get parameter `id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Rename file",
+        "description": "Rename a file belonging to the current user",
+        "operationId": "files.rename",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Get parameter `id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Extract json format data from request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameFilePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/File"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/{id}/collections": {
+      "get": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Get file collections",
+        "description": "Get the collections containing a file belonging to the current user",
+        "operationId": "files.collections.list",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Get parameter `id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Collection"
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/{id}/download": {
+      "get": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Download file",
+        "description": "Download a file belonging to the current user",
+        "operationId": "files.download",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Get parameter `id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/{id}/regenerate-thumbnail": {
+      "post": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Regenerate thumbnail",
+        "description": "Regenerate the thumbnail for a file belonging to the current user",
+        "operationId": "files.regenerateThumbnail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Get parameter `id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/File"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get current user",
+        "description": "Get information about the currently logged in user",
+        "operationId": "me.get",
+        "responses": {
+          "200": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Get settings",
+        "description": "Get settings for the Takobox instance",
+        "operationId": "settings.get",
+        "responses": {
+          "200": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuthCredentials": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "password": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "Collection": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "createdAt"
+        ],
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/NanoId"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateCollectionPayload": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "File": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "filename",
+          "size",
+          "createdAt",
+          "thumbnailUrl"
+        ],
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/NanoId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "thumbnailUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "NanoId": {
+        "type": "string"
+      },
+      "RenameCollectionPayload": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "RenameFilePayload": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Settings": {
+        "type": "object",
+        "required": [
+          "enableAccountCreation",
+          "maxFileSize"
+        ],
+        "properties": {
+          "enableAccountCreation": {
+            "type": "boolean"
+          },
+          "maxFileSize": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "createdAt"
+        ],
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/NanoId"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

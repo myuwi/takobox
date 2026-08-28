@@ -39,6 +39,11 @@ jobs:
       - name: Install E2E deps
         run: nix develop -c bun install --cwd e2e --frozen-lockfile
 
+      - name: Check the SDK matches the OpenAPI spec
+        run: |
+          nix develop -c bun run --cwd packages/sdk generate
+          git diff --exit-code packages/sdk/src/gen
+
       - name: Lint TypeScript
         run: nix develop -c bun run lint
 
