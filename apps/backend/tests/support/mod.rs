@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use salvo::Service;
 use sqlx::SqlitePool;
 use takobox::{AppState, Directories, Settings, db, router};
@@ -5,7 +7,7 @@ use tempfile::TempDir;
 
 pub struct TestApp {
     pub service: Service,
-    #[allow(dead_code)]
+    pub state: AppState,
     pub pool: SqlitePool,
     _data_dir: TempDir,
 }
@@ -32,7 +34,8 @@ impl TestApp {
         .unwrap();
 
         Self {
-            service: router(state),
+            service: router(state.clone()),
+            state,
             pool,
             _data_dir: data_dir,
         }

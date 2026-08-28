@@ -12,6 +12,7 @@ use tracing::error;
 use crate::{
     http::{
         error::Error,
+        middleware::size_limit::limit_upload_size,
         response::{CollectionResponse, FileResponse},
         state::AppState,
     },
@@ -324,12 +325,10 @@ async fn regenerate_thumbnail(
     Ok(Json(file.into()))
 }
 
-pub fn routes(state: &AppState) -> Router {
-    let AppState { settings, .. } = state;
-
+pub fn routes() -> Router {
     Router::new()
         .get(index)
-        .push(Router::with_hoop(max_size(settings.max_file_size as u64)).post(upload))
+        .push(Router::with_hoop(limit_upload_size).post(upload))
         .push(
             Router::with_path("{id}")
                 .get(show)

@@ -16,6 +16,9 @@ pub enum Error {
     #[error("{0}")]
     Conflict(&'static str),
 
+    #[error("Uploaded file is too large.")]
+    PayloadTooLarge,
+
     #[error("{0}")]
     UnprocessableEntity(&'static str),
 
@@ -64,6 +67,7 @@ impl Error {
             Self::Unauthorized(_) => StatusCode::UNAUTHORIZED,
             Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::Conflict(_) => StatusCode::CONFLICT,
+            Self::PayloadTooLarge => StatusCode::PAYLOAD_TOO_LARGE,
             Self::UnprocessableEntity(_) => StatusCode::UNPROCESSABLE_ENTITY,
             Self::TooManyRequests => StatusCode::TOO_MANY_REQUESTS,
             Self::Status { status, .. } => *status,
