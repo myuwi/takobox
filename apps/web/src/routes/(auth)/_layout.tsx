@@ -15,7 +15,7 @@ export const Route = createFileRoute("/(auth)")({
 
 function Layout() {
   return (
-    <main className="relative mx-auto flex max-w-screen-xl items-center justify-center px-6 py-48">
+    <main className="relative mx-auto flex max-w-7xl items-center justify-center px-6 py-48">
       <nav className="absolute top-8 left-8">
         <Button variant="ghost" size="icon" render={<Link to="/" />}>
           <ArrowLeft />

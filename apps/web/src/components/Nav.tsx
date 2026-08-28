@@ -11,7 +11,7 @@ export const Nav = () => {
   const { data: user } = useQuery(meOptions);
 
   return (
-    <nav className="mx-auto flex w-full max-w-screen-xl items-center justify-between gap-4 p-4">
+    <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 p-4">
       <div className="flex items-center gap-2">
         <Link to="/">
           <Logo />

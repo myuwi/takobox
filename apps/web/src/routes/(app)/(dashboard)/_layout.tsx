@@ -49,10 +49,10 @@ function RouteComponent() {
   };
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-screen-xl items-stretch overflow-hidden">
+    <div className="mx-auto flex size-full max-w-7xl items-stretch overflow-hidden">
       <Sidebar />
       <div className="flex w-full flex-col">
-        <nav className="flex w-full max-w-screen-xl items-center gap-4 p-4">
+        <nav className="flex w-full max-w-7xl items-center gap-4 p-4">
           <div className="flex items-center gap-2 md:hidden">
             <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
               <Menu />
