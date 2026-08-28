@@ -8,5 +8,8 @@ mod settings;
 mod types;
 
 pub use directories::Directories;
-pub use http::{routes::router, state::AppState};
+pub use http::{
+    routes::{openapi, router},
+    state::AppState,
+};
 pub use settings::Settings;
