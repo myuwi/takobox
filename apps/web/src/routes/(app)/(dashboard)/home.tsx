@@ -5,15 +5,12 @@ import { CloudUpload, X } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import * as z from "zod";
 import { FileGrid } from "@/components/FileGrid";
-import { Alert } from "@/components/primitives/Alert";
 import { Button } from "@/components/primitives/Button";
 import { Progress } from "@/components/primitives/Progress";
 import { Spinner } from "@/components/primitives/Spinner";
 import { useUploads } from "@/hooks/useUploads";
 import { collectionFilesOptions, collectionsOptions } from "@/queries/collections";
 import { filesOptions } from "@/queries/files";
-import { settingsOptions } from "@/queries/settings";
-import { formatBytes } from "@/utils/files";
 
 const homeSearchSchema = z.object({
   collection: z.string().optional().catch(undefined),
@@ -27,7 +24,6 @@ export const Route = createFileRoute("/(app)/(dashboard)/home")({
 function RouteComponent() {
   const navigate = Route.useNavigate();
   const { collection: collectionId, q } = Route.useSearch();
-  const { data: settings } = useQuery(settingsOptions);
   const {
     data: rawFiles,
     isPending,
@@ -44,7 +40,7 @@ function RouteComponent() {
     enabled: !!collectionId,
   });
 
-  const { uploads, uploadFiles, abortUpload, fileRejections, resetFileRejections } = useUploads();
+  const { uploads, uploadFiles, abortUpload } = useUploads();
 
   useEffect(() => {
     if (collectionId && error?.status === 404) {
@@ -55,12 +51,8 @@ function RouteComponent() {
     }
   }, [collectionId, error?.status, navigate]);
 
-  useEffect(() => {
-    return () => resetFileRejections();
-  }, [collectionId, resetFileRejections]);
-
   const { open, getInputProps, getRootProps, isDragActive } = useDropzone({
-    onDrop: (files) => uploadFiles(files, collectionId),
+    onDrop: (files) => uploadFiles(files, { collectionId }),
     noClick: true,
     noKeyboard: true,
   });
@@ -71,16 +63,8 @@ function RouteComponent() {
     <main className="flex size-full flex-col gap-4 px-2 pb-4 *:mx-2 max-md:px-4">
       <h1 className="text-base font-medium">{headerText}</h1>
 
-      {/* TODO: replace with a list of rejected files. also show failed uploads there */}
-      {fileRejections.length > 0 && (
-        <Alert onDismiss={() => resetFileRejections()}>
-          Some of the selected files exceed the maximum file size limit of{" "}
-          {formatBytes(settings!.maxFileSize)}.
-        </Alert>
-      )}
-
       {uploads.map(({ id, file, url, progress }) => {
-        const handleAbort = () => abortUpload(file);
+        const handleAbort = () => abortUpload(id);
 
         return (
           <div key={id} className="flex gap-4">
