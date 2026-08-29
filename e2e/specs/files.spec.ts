@@ -7,6 +7,8 @@ test.beforeEach(async ({ page, request }, testInfo) => {
   await logIn(page, credentials);
 });
 
+const ABOVE_BACKEND_FORM_PARSE_LIMIT = 128 * 1024;
+
 test("uploads a file and displays it in the grid", async ({ page }) => {
   const fileChooserPromise = page.waitForEvent("filechooser");
   await page.getByRole("button", { name: "Browse files" }).click();
@@ -14,7 +16,7 @@ test("uploads a file and displays it in the grid", async ({ page }) => {
   await fileChooser.setFiles({
     name: "e2e-upload.txt",
     mimeType: "text/plain",
-    buffer: Buffer.from("Uploaded by the Takobox end-to-end test."),
+    buffer: Buffer.alloc(ABOVE_BACKEND_FORM_PARSE_LIMIT, "takobox"),
   });
 
   await expect(page.getByRole("gridcell", { name: "e2e-upload.txt" })).toBeVisible();

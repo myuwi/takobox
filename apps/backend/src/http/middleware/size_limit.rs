@@ -14,5 +14,7 @@ pub async fn limit_upload_size(req: &mut Request, depot: &mut Depot) -> Result<(
         return Err(Error::PayloadTooLarge);
     }
 
+    req.set_secure_max_size(settings.max_file_size);
+
     Ok(())
 }
