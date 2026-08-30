@@ -1,17 +1,32 @@
 import type { PropsWithChildren } from "react";
-import { CircleAlert, X } from "lucide-react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { CircleAlert, Info, X } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { Button } from "./Button";
 
-export interface AlertProps extends PropsWithChildren {
+const alertVariants = cva("flex gap-3 rounded-md px-3 py-2.5", {
+  variants: {
+    variant: {
+      error: "border border-destructive/20 bg-destructive/10 text-destructive",
+      info: "border border-border text-foreground",
+    },
+  },
+  defaultVariants: {
+    variant: "error",
+  },
+});
+
+export interface AlertProps extends PropsWithChildren, VariantProps<typeof alertVariants> {
   className?: string;
   onDismiss?: () => void;
 }
 
-export const Alert = ({ className, children, onDismiss }: AlertProps) => {
+export const Alert = ({ className, variant, children, onDismiss }: AlertProps) => {
+  const Icon = variant === "info" ? Info : CircleAlert;
+
   return (
-    <div className={cn("flex gap-3 rounded-md bg-red-300/20 px-4 py-3 text-red-500", className)}>
-      <CircleAlert size={20} className="h-lh" />
+    <div className={cn(alertVariants({ variant, className }))}>
+      <Icon size={18} className="h-lh" />
       {children}
       {onDismiss && (
         <Button variant="ghost" size="icon-sm" className="ml-auto p-0" onClick={onDismiss}>

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import type { AuthCredentials } from "@takobox/sdk";
@@ -7,7 +7,6 @@ import { Button } from "@/components/primitives/Button";
 import { Input } from "@/components/primitives/Input";
 import { Label } from "@/components/primitives/Label";
 import { loginOptions } from "@/queries/login";
-import { meOptions } from "@/queries/me";
 import { formatError } from "@/utils/error";
 
 export const Route = createFileRoute("/(auth)/login")({
@@ -17,15 +16,11 @@ export const Route = createFileRoute("/(auth)/login")({
 function Login() {
   const { register, handleSubmit } = useForm<AuthCredentials>();
   const navigate = useNavigate();
-  const { error: sessionError } = useQuery(meOptions);
   const { sessionExpired } = useLocation().state;
   const { mutateAsync: loginMutation, error } = useMutation(loginOptions);
 
   const getAlert = () => {
     if (error) return formatError(error);
-
-    if (sessionError)
-      return "Couldn't reach the server. If you're signed in, reloading will restore your session.";
 
     if (sessionExpired) return "Your session has expired. Please log in again.";
 

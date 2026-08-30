@@ -1,6 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type { AuthCredentials } from "@takobox/sdk";
 import { Alert } from "@/components/primitives/Alert";
@@ -21,21 +20,7 @@ function SignUp() {
   const navigate = useNavigate();
   const { mutateAsync: registerMutation, error } = useMutation(registerOptions);
 
-  if (!settings?.enableAccountCreation) {
-    return (
-      <div className="flex max-w-xs flex-col gap-6">
-        <Lock size={64} className="mx-auto opacity-60" />
-        <Alert>
-          <div className="flex flex-col items-start gap-2">
-            <p>Account creation is currently disabled for this instance.</p>
-            <Link className="not-hover:underline" to="/login">
-              Log in instead
-            </Link>
-          </div>
-        </Alert>
-      </div>
-    );
-  }
+  const accountCreationDisabled = !!settings && !settings.enableAccountCreation;
 
   const onSubmit = async (values: AuthCredentials) => {
     await registerMutation(values);
@@ -46,10 +31,18 @@ function SignUp() {
     <form onSubmit={handleSubmit(onSubmit)} className="flex w-full max-w-xs flex-col gap-6">
       <h1 className="text-2xl">Create account</h1>
       <div className="flex flex-col gap-4">
+        {accountCreationDisabled && (
+          <Alert variant="info">Account creation is currently disabled for this instance.</Alert>
+        )}
         {error && <Alert>{formatError(error)}</Alert>}
         <Label className="flex flex-col gap-2">
           Username
-          <Input {...register("username", { required: true })} type="text" placeholder="Username" />
+          <Input
+            {...register("username", { required: true })}
+            type="text"
+            placeholder="Username"
+            disabled={accountCreationDisabled}
+          />
         </Label>
         <Label className="flex flex-col gap-2">
           Password
@@ -57,10 +50,13 @@ function SignUp() {
             {...register("password", { required: true })}
             type="password"
             placeholder="Password"
+            disabled={accountCreationDisabled}
           />
         </Label>
       </div>
-      <Button type="submit">Create account</Button>
+      <Button type="submit" disabled={accountCreationDisabled}>
+        Create account
+      </Button>
       <span className="text-center text-muted-foreground">
         Already have an account?{" "}
         <Link className="text-foreground hover:underline" to="/login">
