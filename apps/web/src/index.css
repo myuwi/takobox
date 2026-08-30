@@ -24,14 +24,6 @@
   --color-ring: var(--color-foreground);
 }
 
-@utility icon {
-  @apply size-[1lh] p-px;
-}
-
-@utility glyph-sm {
-  @apply p-0.5;
-}
-
 @layer base {
   *,
   ::before,
@@ -48,6 +40,15 @@
   }
 
   .lucide:not([class*="size-"]) {
-    @apply icon;
+    @apply size-[1lh] p-px;
+    stroke-width: 1.5px;
+
+    * {
+      vector-effect: non-scaling-stroke;
+    }
   }
+}
+
+@utility glyph-sm {
+  padding: 2px;
 }
