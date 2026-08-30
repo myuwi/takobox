@@ -21,7 +21,7 @@ export const Input = ({
       )}
     >
       {leadingIcon && (
-        <span className="absolute top-1/2 left-3 shrink-0 -translate-y-1/2 text-muted-foreground [&_svg]:shrink-0 [&_svg:not([class*='pointer-events-'])]:pointer-events-none [&_svg:not([class*='size-'])]:size-4">
+        <span className="absolute top-1/2 left-3 shrink-0 -translate-y-1/2 text-muted-foreground [&_svg:not([class*='pointer-events-'])]:pointer-events-none [&_svg:not([class*='size-'])]:glyph-sm">
           {leadingIcon}
         </span>
       )}
@@ -35,7 +35,7 @@ export const Input = ({
         {...props}
       />
       {trailingIcon && (
-        <span className="absolute top-1/2 right-3 shrink-0 -translate-y-1/2 text-muted-foreground [&_svg]:shrink-0 [&_svg:not([class*='pointer-events-'])]:pointer-events-none [&_svg:not([class*='size-'])]:size-4">
+        <span className="absolute top-1/2 right-3 shrink-0 -translate-y-1/2 text-muted-foreground [&_svg:not([class*='pointer-events-'])]:pointer-events-none [&_svg:not([class*='size-'])]:glyph-sm">
           {trailingIcon}
         </span>
       )}

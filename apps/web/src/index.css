@@ -24,6 +24,14 @@
   --color-ring: var(--color-foreground);
 }
 
+@utility icon {
+  @apply size-[1lh] p-px;
+}
+
+@utility glyph-sm {
+  @apply p-0.5;
+}
+
 @layer base {
   *,
   ::before,
@@ -37,5 +45,9 @@
 
   svg {
     @apply shrink-0;
+  }
+
+  .lucide:not([class*="size-"]) {
+    @apply icon;
   }
 }

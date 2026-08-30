@@ -56,7 +56,7 @@ export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
             className="ml-auto opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-muted data-popup-open:bg-muted data-popup-open:opacity-100"
             onClick={(e) => e.preventDefault()}
           >
-            <MoreHorizontal className="p-0.5" />
+            <MoreHorizontal className="glyph-sm" />
             <span className="sr-only">Actions for {collection.name}</span>
           </Button>
         }

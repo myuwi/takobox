@@ -50,7 +50,7 @@ export const CreateCollectionDialog = () => {
       <Dialog.Trigger
         render={
           <Button variant="ghost" size="icon-sm" className="mr-1">
-            <Plus className="p-0.5" />
+            <Plus className="glyph-sm" />
             <span className="sr-only">Create collection</span>
           </Button>
         }

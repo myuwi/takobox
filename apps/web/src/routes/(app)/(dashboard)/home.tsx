@@ -117,7 +117,7 @@ function RouteComponent() {
                 <p>No files matching "{q}" were found.</p>
               ) : (
                 <>
-                  <CloudUpload />
+                  <CloudUpload className="size-6" />
                   <p>Drag and drop or browse files to upload</p>
                   <Button variant="outline" onClick={open}>
                     Browse files

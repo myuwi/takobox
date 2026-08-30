@@ -137,7 +137,7 @@ export const FileContextMenu = ({
             onClick={stopPropagation}
             onDoubleClick={stopPropagation}
           >
-            <EllipsisVertical className="size-4" />
+            <EllipsisVertical className="glyph-sm" />
             <span className="sr-only">Actions for {file.name}</span>
           </Button>
         }

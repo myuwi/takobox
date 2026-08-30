@@ -52,7 +52,7 @@ export const Sidebar = () => {
               />
             }
           >
-            <Files className="p-0.5" />
+            <Files className="glyph-sm" />
             <span>All files</span>
           </Button>
         </SidebarGroupContent>
@@ -80,7 +80,7 @@ export const Sidebar = () => {
                     />
                   }
                 >
-                  <Folder className="p-0.5" />
+                  <Folder className="glyph-sm" />
                   <span>{collection.name}</span>
                   <CollectionMenu collection={collection} />
                 </Button>

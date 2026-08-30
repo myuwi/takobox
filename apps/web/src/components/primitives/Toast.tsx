@@ -29,7 +29,7 @@ function ToastList() {
       className="flex max-w-[min(24rem,calc(100vw-2rem))] gap-6 rounded-md border border-border bg-popover px-3 py-2.5 shadow-md transition-all duration-200 data-ending-style:opacity-0 data-starting-style:translate-y-2 data-starting-style:opacity-0"
     >
       <div className="flex min-w-0 gap-3">
-        {toast.type === "error" && <CircleX size={18} className="h-lh text-destructive" />}
+        {toast.type === "error" && <CircleX className="text-destructive" />}
 
         <div className="flex min-w-0 flex-col gap-1">
           <ToastPrimitive.Title className="font-medium data-[type=error]:text-destructive" />
@@ -41,7 +41,7 @@ function ToastList() {
         render={<Button variant="ghost" size="icon-sm" className="size-[1lh] self-start" />}
         aria-label="Dismiss"
       >
-        <X size={18} />
+        <X />
       </ToastPrimitive.Close>
     </ToastPrimitive.Root>
   ));

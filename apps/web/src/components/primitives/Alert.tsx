@@ -26,10 +26,10 @@ export const Alert = ({ className, variant, children, onDismiss }: AlertProps) =
 
   return (
     <div className={cn(alertVariants({ variant, className }))}>
-      <Icon size={18} className="h-lh" />
+      <Icon />
       {children}
       {onDismiss && (
-        <Button variant="ghost" size="icon-sm" className="ml-auto p-0" onClick={onDismiss}>
+        <Button variant="ghost" size="icon-sm" className="ml-auto" onClick={onDismiss}>
           <X />
         </Button>
       )}
