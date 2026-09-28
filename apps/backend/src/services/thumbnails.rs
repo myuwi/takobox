@@ -12,7 +12,7 @@ pub enum ThumbnailError {
     CommandFailed { status: ExitStatus, stderr: String },
 }
 
-const IMAGE_EXTENSIONS: [&str; 7] = ["avif", "png", "jpg", "jpeg", "gif", "webp", "svg"];
+const IMAGE_EXTENSIONS: [&str; 6] = ["avif", "png", "jpg", "jpeg", "gif", "webp"];
 const VIDEO_EXTENSIONS: [&str; 3] = ["mp4", "webm", "mkv"];
 
 pub fn thumbnail_file_name(filename: &str) -> Option<String> {
