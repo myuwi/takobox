@@ -14,16 +14,6 @@
       pkgs = nixpkgs.legacyPackages.${system};
       fenixPkgs = fenix.packages.${system};
 
-      bun = pkgs.bun.overrideAttrs (
-        finalAttrs: _: {
-          version = "1.4.0";
-          src = pkgs.fetchurl {
-            url = "https://github.com/oven-sh/bun/releases/download/bun-v${finalAttrs.version}/bun-linux-x64-baseline.zip";
-            hash = "sha256-GE+0WV8NQBohfPfHjBvEMLqDMU2reouUgFurv3+nCX8=";
-          };
-        }
-      );
-
       rust = fenixPkgs.combine [
         (fenixPkgs.stable.withComponents [
           "cargo"
@@ -42,7 +32,7 @@
       devShells.${system} = {
         default = pkgs.mkShell {
           packages = [
-            bun
+            pkgs.bun
             rust
             pkgs.bacon
             pkgs.ffmpeg
@@ -52,7 +42,7 @@
         };
 
         e2e = pkgs.mkShell {
-          packages = [ bun ];
+          packages = [ pkgs.bun ];
         };
       };
     };
