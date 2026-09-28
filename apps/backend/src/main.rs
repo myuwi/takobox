@@ -46,6 +46,7 @@ async fn main() -> anyhow::Result<()> {
     let settings = Settings {
         enable_account_creation: env.enable_account_creation,
         max_file_size: env.max_file_size,
+        enable_rate_limit: env.enable_rate_limit,
     };
 
     let app_state = AppState::try_from(env.session_secret, pool, dirs, settings)?;

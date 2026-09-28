@@ -13,6 +13,10 @@ fn default_max_file_size() -> usize {
     32_000_000
 }
 
+fn default_enable_rate_limit() -> bool {
+    true
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct Env {
     pub session_secret: String,
@@ -25,6 +29,9 @@ pub struct Env {
 
     #[serde(default = "default_max_file_size")]
     pub max_file_size: usize,
+
+    #[serde(default = "default_enable_rate_limit")]
+    pub enable_rate_limit: bool,
 }
 
 impl Env {

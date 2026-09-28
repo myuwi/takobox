@@ -22,20 +22,11 @@ services:
       TAKOBOX_SESSION_SECRET: e2e-only-session-secret-that-is-long-enough-to-sign-test-session-tokens-safely
       TAKOBOX_DATA_DIR: /takobox_data
       TAKOBOX_ENABLE_ACCOUNT_CREATION: "true"
+      TAKOBOX_ENABLE_RATE_LIMIT: "false"
     volumes:
       - e2e-data:/takobox_data
     healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "-q",
-          "-O",
-          "/dev/null",
-          "--header",
-          "X-Forwarded-For: 127.0.0.1",
-          "http://127.0.0.1:8000/api/settings",
-        ]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8000/api/settings"]
       interval: 2s
       timeout: 3s
       retries: 12

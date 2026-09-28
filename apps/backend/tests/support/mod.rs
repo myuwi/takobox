@@ -29,6 +29,7 @@ impl TestApp {
             Settings {
                 enable_account_creation: true,
                 max_file_size: 32_000_000,
+                enable_rate_limit: true,
             },
         )
         .unwrap();
