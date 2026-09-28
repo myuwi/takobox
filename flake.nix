@@ -23,7 +23,7 @@
             # rustfmt.toml uses nightly-only options
             (pkgs.rustfmt.override { asNightly = true; })
             pkgs.bacon
-            pkgs.ffmpeg
+            pkgs.ffmpeg-headless
             pkgs.nixfmt
             pkgs.sqlx-cli
           ];
