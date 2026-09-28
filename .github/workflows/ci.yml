@@ -132,7 +132,7 @@ jobs:
       - name: Build the dev shell
         run: nix develop .#e2e -c true
 
-      - name: Install E2E deps and browsers
+      - name: Install E2E deps
         run: nix develop .#e2e -c bun run test:e2e:install
 
       - name: Run E2E tests

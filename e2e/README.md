@@ -8,11 +8,13 @@ Running the suite locally requires Bun and Docker with the Compose plugin.
 
 Run the following commands from the repository root.
 
-Install the E2E dependencies and Chromium once:
+Install the E2E dependencies once:
 
 ```sh
 bun run test:e2e:install
 ```
+
+The Nix dev shell provides the playwright browsers. Outside nix, download browsers with `bun run --cwd e2e install:browsers`.
 
 Run the suite:
 
