@@ -3,12 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/primitives/Button";
+import { env } from "@/env.server";
 import { meOptions } from "@/queries/me";
 import { settingsOptions } from "@/queries/settings";
 
 const getRuntimeSettings = createServerFn({ method: "GET" }).handler(() => {
   return {
-    disableLandingPage: process.env.TAKOBOX_DISABLE_LANDING_PAGE === "true",
+    disableLandingPage: env.TAKOBOX_DISABLE_LANDING_PAGE,
   };
 });
 

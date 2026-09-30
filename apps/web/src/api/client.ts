@@ -2,6 +2,7 @@ import { createServerOnlyFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import axios, { type AxiosError, isAxiosError } from "axios";
 import { createTakoboxClient, type ErrorResponse } from "@takobox/sdk";
+import { env } from "@/env.server";
 import { isServer } from "@/utils/env";
 
 let unauthorizedHandler: (() => void) | undefined;
@@ -10,10 +11,12 @@ export const setUnauthorizedHandler = (handler: () => void) => {
   unauthorizedHandler = handler;
 };
 
+const getServerBaseUrl = createServerOnlyFn(() => env.TAKOBOX_INTERNAL_API_URL);
+
 const axiosInstance = axios.create({
   // Firefox doesn't support upload progress on fetch; hence xhr.
   adapter: isServer ? "fetch" : "xhr",
-  baseURL: isServer ? process.env.TAKOBOX_INTERNAL_API_URL : "/api",
+  baseURL: isServer ? getServerBaseUrl() : "/api",
 });
 
 const getServerHeaders = createServerOnlyFn(() =>
