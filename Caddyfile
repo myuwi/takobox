@@ -15,9 +15,17 @@
 			}
 		}
 
-		file_server {
+		@uploads file {
 			root /srv/takobox/uploads
-			pass_thru
+		}
+		route @uploads {
+			@uploads_html path *.html *.htm *.xhtml *.xht *.xml *.svg
+			header X-Content-Type-Options nosniff
+			header @uploads_html Content-Type "text/plain; charset=utf-8"
+
+			file_server {
+				root /srv/takobox/uploads
+			}
 		}
 
 		reverse_proxy http://takobox_web:3000
