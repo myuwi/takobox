@@ -22,6 +22,7 @@
   --color-border: --alpha(var(--color-black) / 10%);
   --color-input: var(--color-border);
   --color-ring: var(--color-foreground);
+  --color-drop-target: var(--color-blue-500);
 }
 
 @layer base {
@@ -46,6 +47,20 @@
     * {
       vector-effect: non-scaling-stroke;
     }
+  }
+}
+
+@layer components {
+  [data-drop-state] {
+    @apply bg-accent!;
+  }
+
+  [data-drop-state="available"] {
+    @apply inset-ring inset-ring-border;
+  }
+
+  [data-drop-state="over"] {
+    @apply ring-2 ring-drop-target/80;
   }
 }
 

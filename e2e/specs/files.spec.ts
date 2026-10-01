@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { createCredentials, logIn, registerUser } from "../support/auth";
+import { createCollection } from "../support/collections";
 
 test.beforeEach(async ({ page, request }, testInfo) => {
   const credentials = createCredentials(testInfo);
@@ -20,4 +21,18 @@ test("uploads a file and displays it in the grid", async ({ page }) => {
   });
 
   await expect(page.getByRole("gridcell", { name: "e2e-upload.txt" })).toBeVisible();
+});
+
+test("uploads a file dropped on a sidebar collection into that collection", async ({ page }) => {
+  const collectionName = "Test collection";
+  await createCollection(page, collectionName);
+
+  const collectionLink = page.getByRole("link", { name: collectionName });
+  await collectionLink.drop({
+    files: { name: "e2e-drop.txt", mimeType: "text/plain", buffer: Buffer.from("takobox") },
+  });
+
+  await collectionLink.click();
+  await expect(page.getByRole("heading", { name: collectionName })).toBeVisible();
+  await expect(page.getByRole("gridcell", { name: "e2e-drop.txt" })).toBeVisible();
 });

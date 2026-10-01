@@ -2,12 +2,12 @@ import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { CloudUpload, X } from "lucide-react";
-import { useDropzone } from "react-dropzone";
 import * as z from "zod";
 import { FileGrid } from "@/components/FileGrid";
 import { Button } from "@/components/primitives/Button";
 import { Progress } from "@/components/primitives/Progress";
 import { Spinner } from "@/components/primitives/Spinner";
+import { useUploadDropzone } from "@/hooks/useUploadDropzone";
 import { useUploads } from "@/hooks/useUploads";
 import { collectionFilesOptions, collectionsOptions } from "@/queries/collections";
 import { filesOptions } from "@/queries/files";
@@ -40,7 +40,7 @@ function RouteComponent() {
     enabled: !!collectionId,
   });
 
-  const { uploads, uploadFiles, abortUpload } = useUploads();
+  const { uploads, abortUpload } = useUploads();
 
   useEffect(() => {
     if (collectionId && error?.status === 404) {
@@ -51,11 +51,7 @@ function RouteComponent() {
     }
   }, [collectionId, error?.status, navigate]);
 
-  const { open, getInputProps, getRootProps, isDragActive } = useDropzone({
-    onDrop: (files) => uploadFiles(files, { collectionId }),
-    noClick: true,
-    noKeyboard: true,
-  });
+  const { open, getInputProps, dropTargetProps } = useUploadDropzone(collectionId);
 
   const headerText = (collectionId && collection?.name) || "All files";
 
@@ -104,9 +100,8 @@ function RouteComponent() {
         </div>
       ) : (
         <div
-          className="mx-0! -mt-2 flex w-full grow flex-col items-center justify-center overflow-hidden rounded-md inset-ring inset-ring-transparent data-[dragging=true]:bg-accent data-[dragging=true]:inset-ring-border"
-          data-dragging={isDragActive}
-          {...getRootProps()}
+          className="mx-0! -mt-2 flex w-full grow flex-col items-center justify-center overflow-hidden rounded-md"
+          {...dropTargetProps}
         >
           <input {...getInputProps({ hidden: true })} />
           {files && files.length > 0 ? (

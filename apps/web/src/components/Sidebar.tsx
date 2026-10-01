@@ -4,8 +4,9 @@ import { useAtom } from "jotai";
 import { Files, Folder, Plus } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { sidebarOpenMobileAtom } from "@/atoms/sidebar";
-import { Button } from "@/components/primitives/Button";
+import { Button, type ButtonProps } from "@/components/primitives/Button";
 import * as Sheet from "@/components/primitives/Sheet";
+import { useUploadDropzone } from "@/hooks/useUploadDropzone";
 import { useUploads } from "@/hooks/useUploads";
 import { collectionsOptions } from "@/queries/collections";
 import { tw } from "@/utils/tw";
@@ -17,6 +18,16 @@ const SidebarContent = tw.div`flex flex-col gap-4`;
 const SidebarGroup = tw.div`flex flex-col gap-1`;
 const SidebarGroupLabel = tw.div`flex h-8 items-center justify-between gap-1 pl-3`;
 const SidebarGroupContent = tw.div`flex flex-col gap-1`;
+
+interface SidebarItemProps extends ButtonProps {
+  collectionId?: string;
+}
+
+const SidebarItem = ({ collectionId, ...props }: SidebarItemProps) => {
+  const { dropTargetProps } = useUploadDropzone(collectionId);
+
+  return <Button variant="ghost" {...dropTargetProps} {...props} />;
+};
 
 export const Sidebar = () => {
   const { uploadFiles } = useUploads();
@@ -41,9 +52,8 @@ export const Sidebar = () => {
 
       <SidebarContent>
         <SidebarGroupContent>
-          <Button
+          <SidebarItem
             className="justify-start data-[status=active]:bg-accent/80 data-[status=active]:hover:bg-accent"
-            variant="ghost"
             render={
               <Link
                 to="/home"
@@ -54,7 +64,7 @@ export const Sidebar = () => {
           >
             <Files className="glyph-sm" />
             <span>All files</span>
-          </Button>
+          </SidebarItem>
         </SidebarGroupContent>
 
         <SidebarGroup>
@@ -66,10 +76,10 @@ export const Sidebar = () => {
           <SidebarGroupContent>
             {collections?.map((collection) => {
               return (
-                <Button
+                <SidebarItem
                   key={collection.id}
+                  collectionId={collection.id}
                   className="group justify-start pr-1 focus-within:bg-accent/80 has-data-popup-open:bg-accent data-[status=active]:bg-accent/80 data-[status=active]:hover:bg-accent"
-                  variant="ghost"
                   render={
                     <Link
                       to="/home"
@@ -83,7 +93,7 @@ export const Sidebar = () => {
                   <Folder className="glyph-sm" />
                   <span>{collection.name}</span>
                   <CollectionMenu collection={collection} />
-                </Button>
+                </SidebarItem>
               );
             })}
           </SidebarGroupContent>
