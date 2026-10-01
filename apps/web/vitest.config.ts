@@ -10,5 +10,8 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     restoreMocks: true,
+    env: {
+      TAKOBOX_INTERNAL_API_URL: "http://localhost",
+    },
   },
 });
