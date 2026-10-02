@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient.ensureQueryData(meOptions).catch(() => null);
     if (user) {
-      throw redirect({ to: "/home" });
+      throw redirect({ to: "/files" });
     }
 
     const { disableLandingPage } = await getRuntimeSettings();

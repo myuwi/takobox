@@ -56,7 +56,7 @@ export const Sidebar = () => {
             className="justify-start data-[status=active]:bg-accent/80 data-[status=active]:hover:bg-accent"
             render={
               <Link
-                to="/home"
+                to="/files"
                 search={(prev) => ({ ...prev, collection: undefined })}
                 activeOptions={{ explicitUndefined: true }}
               />
@@ -82,7 +82,7 @@ export const Sidebar = () => {
                   className="group justify-start pr-1 focus-within:bg-accent/80 has-data-popup-open:bg-accent data-[status=active]:bg-accent/80 data-[status=active]:hover:bg-accent"
                   render={
                     <Link
-                      to="/home"
+                      to="/files"
                       search={(prev) => ({
                         ...prev,
                         collection: collection.id,

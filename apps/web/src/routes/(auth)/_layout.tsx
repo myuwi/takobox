@@ -7,7 +7,7 @@ export const Route = createFileRoute("/(auth)")({
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient.ensureQueryData(meOptions).catch(() => null);
     if (user) {
-      throw redirect({ to: "/home" });
+      throw redirect({ to: "/files" });
     }
   },
   component: Layout,

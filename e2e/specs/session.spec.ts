@@ -24,7 +24,7 @@ test("stays logged in when the backend is unreachable", async ({ page, request }
 
   await logIn(page, credentials);
 
-  await expect(page).toHaveURL("/home");
+  await expect(page).toHaveURL("/files");
   await expect(page.getByRole("button", { name: /Logged in as/ })).toBeVisible();
   expect(fileRequestCount()).toBeGreaterThan(0);
 });

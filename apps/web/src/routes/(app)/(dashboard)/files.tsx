@@ -12,12 +12,12 @@ import { useUploads } from "@/hooks/useUploads";
 import { collectionFilesOptions, collectionsOptions } from "@/queries/collections";
 import { filesOptions } from "@/queries/files";
 
-const homeSearchSchema = z.object({
+const filesSearchSchema = z.object({
   collection: z.string().optional().catch(undefined),
 });
 
-export const Route = createFileRoute("/(app)/(dashboard)/home")({
-  validateSearch: homeSearchSchema,
+export const Route = createFileRoute("/(app)/(dashboard)/files")({
+  validateSearch: filesSearchSchema,
   component: RouteComponent,
 });
 
