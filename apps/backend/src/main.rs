@@ -3,6 +3,7 @@ use tokio::signal::{
     self,
     unix::{SignalKind, signal},
 };
+use tracing_subscriber::{EnvFilter, filter::LevelFilter};
 
 mod env;
 
@@ -10,7 +11,17 @@ use env::Env;
 use takobox::{AppState, Directories, Settings, db, router};
 
 fn init_tracing() {
-    tracing_subscriber::fmt().init();
+    let filter = EnvFilter::builder()
+        .with_default_directive(LevelFilter::INFO.into())
+        .from_env_lossy();
+
+    tracing_subscriber::fmt()
+        .with_env_filter(filter)
+        .json()
+        .flatten_event(true)
+        .with_current_span(true)
+        .with_span_list(false)
+        .init();
 }
 
 async fn shutdown_signal(handle: ServerHandle) {

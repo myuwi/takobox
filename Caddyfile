@@ -8,10 +8,27 @@
 }
 
 :80 {
+	log {
+		format filter {
+			wrap json
+			fields {
+				request>headers delete
+				resp_headers delete
+				uuid rename request_id
+				# Caddy's own auth user, which takobox doesn't use.
+				user_id delete
+			}
+		}
+	}
+
 	route {
+		@noise path /assets/* /thumbs/*
+		log_skip @noise
+
 		@backend path /api/* /docs*
 		reverse_proxy @backend {$TAKOBOX_SERVER_UPSTREAM:127.0.0.1:8000} {
 			header_up X-Forwarded-For {client_ip}
+			header_up X-Request-Id {http.request.uuid}
 		}
 
 		handle_path /thumbs/* {
@@ -35,6 +52,7 @@
 
 		reverse_proxy {$TAKOBOX_WEB_UPSTREAM:127.0.0.1:3000} {
 			header_up X-Forwarded-For {client_ip}
+			header_up X-Request-Id {http.request.uuid}
 		}
 	}
 }

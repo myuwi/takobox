@@ -16,6 +16,7 @@ use crate::http::{
     middleware::{
         auth::{inject_auth, require_auth},
         rate_limit::rate_limit,
+        request_span::request_span,
     },
     state::AppState,
 };
@@ -86,6 +87,6 @@ pub fn router(app_state: AppState) -> Service {
         );
 
     Service::new(router)
-        .hoop(Logger::new())
+        .hoop(request_span)
         .catcher(Catcher::new(catcher))
 }

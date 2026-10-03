@@ -174,14 +174,14 @@ async fn upload(
     match generate_thumbnail(&file_path, dirs.thumbs_dir()).await {
         Ok(()) | Err(ThumbnailError::UnsupportedFiletype) => (),
         Err(ThumbnailError::ShellError(err)) => {
-            error!("Error creating thumbnail for \"{:?}\": {}", file_path, err)
+            error!("Error creating thumbnail for {:?}: {}", file_path, err)
         }
         Err(ThumbnailError::CommandFailed { status, stderr }) => error!(
-            "ffmpeg exited with {} creating thumbnail for \"{:?}\": {}",
+            "ffmpeg exited with {} creating thumbnail for {:?}: {}",
             status, file_path, stderr
         ),
         Err(ThumbnailError::TimedOut) => {
-            error!("Timed out creating thumbnail for \"{:?}\"", file_path)
+            error!("Timed out creating thumbnail for {:?}", file_path)
         }
     }
 
@@ -313,20 +313,19 @@ async fn regenerate_thumbnail(
                 Error::BadRequest("Filetype doesn't support thumbnails.")
             }
             ThumbnailError::ShellError(err) => Error::Internal(anyhow!(
-                "Error creating thumbnail for \"{:?}\": {}",
+                "Error creating thumbnail for {:?}: {}",
                 file_path,
                 err
             )),
             ThumbnailError::CommandFailed { status, stderr } => Error::Internal(anyhow!(
-                "ffmpeg exited with {} creating thumbnail for \"{:?}\": {}",
+                "ffmpeg exited with {} creating thumbnail for {:?}: {}",
                 status,
                 file_path,
                 stderr
             )),
-            ThumbnailError::TimedOut => Error::Internal(anyhow!(
-                "Timed out creating thumbnail for \"{:?}\"",
-                file_path
-            )),
+            ThumbnailError::TimedOut => {
+                Error::Internal(anyhow!("Timed out creating thumbnail for {:?}", file_path))
+            }
         })?;
 
     Ok(Json(file.into()))

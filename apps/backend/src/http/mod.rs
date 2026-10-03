@@ -1,3 +1,4 @@
+pub mod client_ip;
 pub mod error;
 pub mod middleware;
 pub mod response;

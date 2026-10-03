@@ -14,6 +14,7 @@ pub async fn inject_auth(depot: &mut Depot, req: &mut Request) -> Result<(), Err
     } = depot.get_typed::<AppState>().unwrap();
 
     if let Some(session) = resolve_session(pool, &req.cookies().private(session_secret)).await? {
+        tracing::Span::current().record("user_id", session.user_id);
         req.extensions_mut().insert(session);
     }
 
