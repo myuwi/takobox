@@ -19,7 +19,8 @@
   ],
   "settings": {
     "better-tailwindcss": {
-      "entryPoint": "apps/web/src/index.css"
+      "cwd": "apps/web",
+      "entryPoint": "src/index.css"
     }
   },
   "rules": {
