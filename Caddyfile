@@ -3,13 +3,16 @@
 
 	servers {
 		trusted_proxies static private_ranges
+		trusted_proxies_strict
 	}
 }
 
 :80 {
 	route {
-		reverse_proxy /api/* {$TAKOBOX_SERVER_UPSTREAM:127.0.0.1:8000}
-		reverse_proxy /docs* {$TAKOBOX_SERVER_UPSTREAM:127.0.0.1:8000}
+		@backend path /api/* /docs*
+		reverse_proxy @backend {$TAKOBOX_SERVER_UPSTREAM:127.0.0.1:8000} {
+			header_up X-Forwarded-For {client_ip}
+		}
 
 		handle_path /thumbs/* {
 			file_server {
@@ -30,6 +33,8 @@
 			}
 		}
 
-		reverse_proxy {$TAKOBOX_WEB_UPSTREAM:127.0.0.1:3000}
+		reverse_proxy {$TAKOBOX_WEB_UPSTREAM:127.0.0.1:3000} {
+			header_up X-Forwarded-For {client_ip}
+		}
 	}
 }
