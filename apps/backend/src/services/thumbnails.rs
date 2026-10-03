@@ -2,6 +2,7 @@ use std::{
     ffi::OsStr,
     path::Path,
     process::{ExitStatus, Stdio},
+    time::Duration,
 };
 
 use tokio::process::Command;
@@ -10,10 +11,14 @@ pub enum ThumbnailError {
     UnsupportedFiletype,
     ShellError(tokio::io::Error),
     CommandFailed { status: ExitStatus, stderr: String },
+    TimedOut,
 }
 
 const IMAGE_EXTENSIONS: [&str; 6] = ["avif", "png", "jpg", "jpeg", "gif", "webp"];
 const VIDEO_EXTENSIONS: [&str; 3] = ["mp4", "webm", "mkv"];
+
+/// Uploads are untrusted, so a file that makes ffmpeg hang must not keep it running forever.
+const TIMEOUT: Duration = Duration::from_secs(30);
 
 pub fn thumbnail_file_name(filename: &str) -> Option<String> {
     let (stem, ext) = filename.rsplit_once('.')?;
@@ -37,7 +42,7 @@ pub async fn generate_thumbnail(
 
     let thumb_path = output_dir.join(&thumb_file_name);
 
-    let output = Command::new("ffmpeg")
+    let command = Command::new("ffmpeg")
         .args(["-nostdin", "-hide_banner"])
         .args([OsStr::new("-i"), input_file_path.as_os_str()])
         .args(["-vf", "scale=256:-1"])
@@ -45,9 +50,14 @@ pub async fn generate_thumbnail(
         .args(["-frames:v", "1"])
         .arg(&thumb_path)
         .stdin(Stdio::null())
-        .output()
-        .await
-        .map_err(ThumbnailError::ShellError)?;
+        .kill_on_drop(true)
+        .output();
+
+    let Ok(output) = tokio::time::timeout(TIMEOUT, command).await else {
+        let _ = tokio::fs::remove_file(&thumb_path).await;
+        return Err(ThumbnailError::TimedOut);
+    };
+    let output = output.map_err(ThumbnailError::ShellError)?;
 
     if !output.status.success() {
         let _ = tokio::fs::remove_file(&thumb_path).await;
@@ -85,6 +95,7 @@ mod tests {
             }
             Err(ThumbnailError::UnsupportedFiletype) => panic!("png should be supported"),
             Err(ThumbnailError::ShellError(e)) => panic!("spawn failed: {e}"),
+            Err(ThumbnailError::TimedOut) => panic!("ffmpeg should fail quickly on a broken png"),
             Ok(()) => panic!("expected failure, got Ok"),
         }
 

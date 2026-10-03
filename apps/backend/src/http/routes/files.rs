@@ -169,6 +169,8 @@ async fn upload(
         .await
         .map_err(|e| Error::Internal(e.into()))?;
 
+    transaction.commit().await?;
+
     match generate_thumbnail(&file_path, dirs.thumbs_dir()).await {
         Ok(()) | Err(ThumbnailError::UnsupportedFiletype) => (),
         Err(ThumbnailError::ShellError(err)) => {
@@ -178,9 +180,10 @@ async fn upload(
             "ffmpeg exited with {} creating thumbnail for \"{:?}\": {}",
             status, file_path, stderr
         ),
+        Err(ThumbnailError::TimedOut) => {
+            error!("Timed out creating thumbnail for \"{:?}\"", file_path)
+        }
     }
-
-    transaction.commit().await?;
 
     res.status_code(StatusCode::CREATED);
 
@@ -319,6 +322,10 @@ async fn regenerate_thumbnail(
                 status,
                 file_path,
                 stderr
+            )),
+            ThumbnailError::TimedOut => Error::Internal(anyhow!(
+                "Timed out creating thumbnail for \"{:?}\"",
+                file_path
             )),
         })?;
 
