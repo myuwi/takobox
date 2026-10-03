@@ -1,5 +1,6 @@
 services:
   takobox:
+    container_name: takobox
     image: ghcr.io/myuwi/takobox:main
     environment:
       - TAKOBOX_SESSION_SECRET=super-secret-session-secret-please-change-pretty-please-i-beg-you
