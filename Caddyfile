@@ -1,22 +1,24 @@
 {
+	admin off
+
 	servers {
 		trusted_proxies static private_ranges
 	}
 }
 
-{$BASE_URL} {
+:80 {
 	route {
-		reverse_proxy /api/* http://takobox_server:8000
-		reverse_proxy /docs* http://takobox_server:8000
+		reverse_proxy /api/* {$TAKOBOX_SERVER_UPSTREAM:127.0.0.1:8000}
+		reverse_proxy /docs* {$TAKOBOX_SERVER_UPSTREAM:127.0.0.1:8000}
 
 		handle_path /thumbs/* {
 			file_server {
-				root /srv/takobox/thumbs
+				root {$TAKOBOX_DATA_DIR:/takobox_data}/thumbs
 			}
 		}
 
 		@uploads file {
-			root /srv/takobox/uploads
+			root {$TAKOBOX_DATA_DIR:/takobox_data}/uploads
 		}
 		route @uploads {
 			@uploads_html path *.html *.htm *.xhtml *.xht *.xml *.svg
@@ -24,10 +26,10 @@
 			header @uploads_html Content-Type "text/plain; charset=utf-8"
 
 			file_server {
-				root /srv/takobox/uploads
+				root {$TAKOBOX_DATA_DIR:/takobox_data}/uploads
 			}
 		}
 
-		reverse_proxy http://takobox_web:3000
+		reverse_proxy {$TAKOBOX_WEB_UPSTREAM:127.0.0.1:3000}
 	}
 }

@@ -1,29 +1,12 @@
 services:
-  takobox_web:
-    image: ghcr.io/myuwi/takobox-web:main
+  takobox:
+    image: ghcr.io/myuwi/takobox:main
     environment:
-      - TAKOBOX_INTERNAL_API_URL=http://takobox_server:8000/api
-      - TAKOBOX_DISABLE_LANDING_PAGE=true
-    depends_on:
-      - takobox_server
-    restart: unless-stopped
-
-  takobox_server:
-    image: ghcr.io/myuwi/takobox-server:main
-    environment:
-      - TAKOBOX_SESSION_SECRET="<super_secret_session_secret_please_change_pretty_please_i_beg_you>"
+      - TAKOBOX_SESSION_SECRET=super-secret-session-secret-please-change-pretty-please-i-beg-you
       - TAKOBOX_ENABLE_ACCOUNT_CREATION=false
+      - TAKOBOX_DISABLE_LANDING_PAGE=true
     volumes:
       - ./takobox_data:/takobox_data
-    restart: unless-stopped
-
-  caddy:
-    image: caddy:2-alpine
-    environment:
-      - BASE_URL=":80"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./takobox_data:/srv/takobox:ro
     ports:
       - 8080:80
     restart: unless-stopped

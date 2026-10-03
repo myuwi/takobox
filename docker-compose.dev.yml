@@ -3,10 +3,11 @@ services:
     image: caddy:2-alpine
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./takobox_data:/srv/takobox:ro
+      - ./takobox_data:/takobox_data:ro
     ports:
       - 80:80
     extra_hosts:
-      - "takobox_web takobox_server:host-gateway"
+      - "host.docker.internal:host-gateway"
     environment:
-      - BASE_URL=":80"
+      - TAKOBOX_SERVER_UPSTREAM=host.docker.internal:8000
+      - TAKOBOX_WEB_UPSTREAM=host.docker.internal:3000
