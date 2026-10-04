@@ -11,3 +11,4 @@ services:
     environment:
       - TAKOBOX_SERVER_UPSTREAM=host.docker.internal:8000
       - TAKOBOX_WEB_UPSTREAM=host.docker.internal:3000
+      - TAKOBOX_LOG_SKIP_EXTRA=/src/* /@* /__*

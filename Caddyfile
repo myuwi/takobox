@@ -22,7 +22,7 @@
 	}
 
 	route {
-		@noise path /assets/* /thumbs/*
+		@noise path /assets/* /thumbs/* {$TAKOBOX_LOG_SKIP_EXTRA}
 		log_skip @noise
 
 		@backend path /api/* /docs*
