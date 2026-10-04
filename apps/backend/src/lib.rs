@@ -10,6 +10,6 @@ mod types;
 pub use directories::Directories;
 pub use http::{
     routes::{openapi, router},
-    state::AppState,
+    state::{AppState, SessionSecret},
 };
 pub use settings::Settings;

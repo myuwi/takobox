@@ -19,7 +19,7 @@ fn default_enable_rate_limit() -> bool {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Env {
-    pub session_secret: String,
+    pub session_secret: Option<String>,
 
     #[serde(default = "default_data_dir")]
     pub data_dir: String,

@@ -4,7 +4,6 @@ services:
     build:
       context: ..
     environment:
-      TAKOBOX_SESSION_SECRET: e2e-only-session-secret-that-is-long-enough-to-sign-test-session-tokens-safely
       TAKOBOX_ENABLE_ACCOUNT_CREATION: "true"
       TAKOBOX_ENABLE_RATE_LIMIT: "false"
       TAKOBOX_DISABLE_LANDING_PAGE: "true"

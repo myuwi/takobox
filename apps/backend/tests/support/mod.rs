@@ -2,7 +2,7 @@
 
 use salvo::Service;
 use sqlx::SqlitePool;
-use takobox::{AppState, Directories, Settings, db, router};
+use takobox::{AppState, Directories, SessionSecret, Settings, db, router};
 use tempfile::TempDir;
 
 pub struct TestApp {
@@ -22,8 +22,8 @@ impl TestApp {
         let pool = db::init_pool(database_path.to_str().unwrap())
             .await
             .unwrap();
-        let state = AppState::try_from(
-            "test-session-secret".repeat(4),
+        let state = AppState::new(
+            SessionSecret::try_from("test-session-secret".repeat(4).as_str()).unwrap(),
             pool.clone(),
             dirs,
             Settings {
@@ -31,8 +31,7 @@ impl TestApp {
                 max_file_size: 32_000_000,
                 enable_rate_limit: true,
             },
-        )
-        .unwrap();
+        );
 
         Self {
             service: router(state.clone()),

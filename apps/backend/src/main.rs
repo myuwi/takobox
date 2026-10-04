@@ -6,9 +6,11 @@ use tokio::signal::{
 use tracing_subscriber::{EnvFilter, filter::LevelFilter};
 
 mod env;
+mod session_secret;
 
+use anyhow::Context;
 use env::Env;
-use takobox::{AppState, Directories, Settings, db, router};
+use takobox::{AppState, Directories, SessionSecret, Settings, db, router};
 
 fn init_tracing() {
     let filter = EnvFilter::builder()
@@ -60,7 +62,14 @@ async fn main() -> anyhow::Result<()> {
         enable_rate_limit: env.enable_rate_limit,
     };
 
-    let app_state = AppState::try_from(env.session_secret, pool, dirs, settings)?;
+    let session_secret = match env.session_secret {
+        Some(secret) => {
+            SessionSecret::try_from(secret.as_str()).context("invalid TAKOBOX_SESSION_SECRET")?
+        }
+        None => session_secret::load_or_create(dirs.data_dir()).await?,
+    };
+
+    let app_state = AppState::new(session_secret, pool, dirs, settings);
     let app = router(app_state);
 
     let server = Server::new(TcpListener::new("0.0.0.0:8000").bind().await);

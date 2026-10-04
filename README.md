@@ -42,14 +42,14 @@ Takobox can be configured using the following environment variables.
 
 ### Backend
 
-| Variable                          | Description                                                            | Default            |
-| --------------------------------- | ---------------------------------------------------------------------- | ------------------ |
-| `TAKOBOX_SESSION_SECRET`          | A secret key used sign session tokens. Must be at least 64 bytes long. | unset              |
-| `TAKOBOX_DATA_DIR`                | Directory to store data, such as uploads and thumbnails.               | `takobox_data`     |
-| `TAKOBOX_ENABLE_ACCOUNT_CREATION` | Whether to allow new user accounts to be created.                      | `false`            |
-| `TAKOBOX_MAX_FILE_SIZE`           | Maximum file size in bytes.                                            | `32000000` (32 MB) |
-| `TAKOBOX_ENABLE_RATE_LIMIT`       | Whether to rate limit API requests per client IP.                      | `true`             |
-| `RUST_LOG`                        | Backend log filter.                                                    | `info`             |
+| Variable                          | Description                                                               | Default                                                                       |
+| --------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `TAKOBOX_SESSION_SECRET`          | A secret key used encrypt session tokens. Must be at least 64 bytes long. | generated on first start and stored as `session-secret` in the data directory |
+| `TAKOBOX_DATA_DIR`                | Directory to store data, such as uploads and thumbnails.                  | `takobox_data`                                                                |
+| `TAKOBOX_ENABLE_ACCOUNT_CREATION` | Whether to allow new user accounts to be created.                         | `false`                                                                       |
+| `TAKOBOX_MAX_FILE_SIZE`           | Maximum file size in bytes.                                               | `32000000` (32 MB)                                                            |
+| `TAKOBOX_ENABLE_RATE_LIMIT`       | Whether to rate limit API requests per client IP.                         | `true`                                                                        |
+| `RUST_LOG`                        | Backend log filter.                                                       | `info`                                                                        |
 
 For debugging, set `RUST_LOG=info,takobox=debug` to enable debug logs for Takobox while keeping dependencies at info level.
 
