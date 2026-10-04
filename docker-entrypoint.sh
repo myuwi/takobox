@@ -9,7 +9,6 @@ chmod o-rwx "${TAKOBOX_DATA_DIR}"
 
 su-exec web env -i \
   NO_COLOR=1 \
-  TAKOBOX_INTERNAL_API_URL=http://127.0.0.1:8000/api \
   TAKOBOX_DISABLE_LANDING_PAGE="${TAKOBOX_DISABLE_LANDING_PAGE:-false}" \
   /usr/local/bin/bun /app/web/server/index.mjs &
 
