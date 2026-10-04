@@ -3,6 +3,7 @@ use tokio::signal::{
     self,
     unix::{SignalKind, signal},
 };
+use tracing::info;
 use tracing_subscriber::{EnvFilter, filter::LevelFilter};
 
 mod env;
@@ -53,6 +54,9 @@ async fn main() -> anyhow::Result<()> {
     let dirs = Directories::new(&env.data_dir);
     dirs.create_all().await?;
 
+    let data_dir = tokio::fs::canonicalize(dirs.data_dir()).await?;
+    info!(data_dir = %data_dir.display(), "starting takobox");
+
     let database_path = dirs.data_dir().join("database.sqlite");
     let pool = db::init_pool(database_path.to_str().unwrap()).await?;
 
@@ -66,7 +70,7 @@ async fn main() -> anyhow::Result<()> {
         Some(secret) => {
             SessionSecret::try_from(secret.as_str()).context("invalid TAKOBOX_SESSION_SECRET")?
         }
-        None => session_secret::load_or_create(dirs.data_dir()).await?,
+        None => session_secret::load_or_create(&data_dir).await?,
     };
 
     let app_state = AppState::new(session_secret, pool, dirs, settings);
