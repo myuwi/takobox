@@ -18,24 +18,6 @@
 - Tailwind CSS - CSS Framework
 - SQLite - Database
 
-## Development
-
-The toolchain is provided by the Nix flake. With [direnv](https://direnv.net) (and optionally [nix-direnv](https://github.com/nix-community/nix-direnv)) installed, `direnv allow` loads it on entering the directory; otherwise run `nix develop`.
-
-Install dependencies:
-
-```sh
-bun install
-```
-
-Then start the web app, backend, and Caddy proxy together:
-
-```sh
-bun dev
-```
-
-Takobox is available at <http://localhost>. Press Ctrl+C to stop the development stack.
-
 ## Configuration
 
 Takobox can be configured using the following environment variables.
@@ -59,3 +41,23 @@ For debugging, set `RUST_LOG=info,takobox=debug` to enable debug logs for Takobo
 | ------------------------------ | ------------------------------------------------------ | --------------------------- |
 | `TAKOBOX_INTERNAL_API_URL`     | The internal URL of the backend service. Used for SSR. | `http://127.0.0.1:8000/api` |
 | `TAKOBOX_DISABLE_LANDING_PAGE` | Can be used to disable the landing page.               | `false`                     |
+
+## Development
+
+The toolchain is provided by the Nix flake. With [direnv](https://direnv.net) (and optionally [nix-direnv](https://github.com/nix-community/nix-direnv)) installed, `direnv allow` loads it on entering the directory; otherwise run `nix develop`.
+
+The development environment variables are in `.env.development`, which direnv loads together with an untracked `.env` for personal overrides. Without direnv, load them into your environment yourself.
+
+Install dependencies:
+
+```sh
+bun install
+```
+
+Then start the web app, backend, and Caddy proxy together:
+
+```sh
+bun dev
+```
+
+Takobox is available at <http://localhost>. Press Ctrl+C to stop the development stack.
