@@ -35,7 +35,10 @@ pub enum Error {
     Sqlx(#[from] sqlx::Error),
 
     #[error("Internal Server Error")]
-    Internal(#[from] anyhow::Error),
+    Internal {
+        context: &'static str,
+        source: anyhow::Error,
+    },
 }
 
 impl EndpointOutRegister for Error {
@@ -71,7 +74,14 @@ impl Error {
             Self::UnprocessableEntity(_) => StatusCode::UNPROCESSABLE_ENTITY,
             Self::TooManyRequests => StatusCode::TOO_MANY_REQUESTS,
             Self::Status { status, .. } => *status,
-            Self::Sqlx(_) | Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::Sqlx(_) | Self::Internal { .. } => StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
+
+    pub fn internal(context: &'static str, source: impl Into<anyhow::Error>) -> Self {
+        Self::Internal {
+            context,
+            source: source.into(),
         }
     }
 
@@ -90,8 +100,11 @@ impl Error {
 impl Writer for Error {
     async fn write(mut self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         match self {
-            Self::Sqlx(ref e) => error!(error = ?e, "request failed"),
-            Self::Internal(ref e) => error!(error = ?e, "request failed"),
+            Self::Sqlx(ref e) => error!(error = ?e, "database operation failed"),
+            Self::Internal {
+                context,
+                ref source,
+            } => error!(error = ?source, "{context}"),
             _ => (),
         }
 

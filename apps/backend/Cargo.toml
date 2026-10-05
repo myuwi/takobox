@@ -12,7 +12,7 @@ figment = { version = "0.10.19", features = ["env"] }
 futures-util = "0.3.34"
 nanoid = "0.5.0"
 regex = "1.13.1"
-salvo = { version = "0.95.2", features = ["affix-state", "logging", "oapi", "rate-limiter", "size-limiter"] }
+salvo = { version = "0.95.2", features = ["affix-state", "oapi", "rate-limiter", "size-limiter"] }
 sanitize-filename = "0.6.0"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"

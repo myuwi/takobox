@@ -89,7 +89,8 @@ async fn register(
     let username = Username::try_from(body.username.clone()).map_err(Error::UnprocessableEntity)?;
     let password = Password::try_from(body.password.clone()).map_err(Error::UnprocessableEntity)?;
 
-    let password_hash = hash_password(&password).map_err(|e| Error::Internal(e.into()))?;
+    let password_hash =
+        hash_password(&password).map_err(|e| Error::internal("failed to hash password", e))?;
 
     let user = User::create(pool, &username, &password_hash)
         .await

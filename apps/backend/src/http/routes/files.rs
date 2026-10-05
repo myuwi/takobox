@@ -166,7 +166,7 @@ async fn upload(
 
     tokio::fs::copy(temp_path, &file_path)
         .await
-        .map_err(|e| Error::Internal(e.into()))?;
+        .map_err(|e| Error::internal("failed to store upload", e))?;
 
     transaction.commit().await?;
 
@@ -250,9 +250,7 @@ async fn delete(
     if let Err(err) = tokio::fs::remove_file(&thumb_path).await
         && err.kind() != std::io::ErrorKind::NotFound
     {
-        return Err(Error::Internal(
-            anyhow::Error::new(err).context("failed to delete thumbnail"),
-        ));
+        return Err(Error::internal("failed to delete thumbnail", err));
     }
     match tokio::fs::remove_file(&file_path).await {
         Ok(()) => (),
@@ -261,9 +259,7 @@ async fn delete(
             error!(path = %file_path.display(), "tried to delete a missing file");
         }
         Err(err) => {
-            return Err(Error::Internal(
-                anyhow::Error::new(err).context("failed to delete file"),
-            ));
+            return Err(Error::internal("failed to delete file", err));
         }
     }
 
@@ -295,7 +291,7 @@ async fn download(
         .attached_name(file.name)
         .build()
         .await
-        .map_err(|e| Error::Internal(e.into()))?;
+        .map_err(|e| Error::internal("failed to open file", e))?;
 
     file.send(req.headers(), res).await;
 
@@ -329,9 +325,7 @@ async fn regenerate_thumbnail(
             return Err(Error::BadRequest("Filetype doesn't support thumbnails."));
         }
         Err(ThumbnailError::ShellError(err)) => {
-            return Err(Error::Internal(
-                anyhow::Error::new(err).context("failed to run ffmpeg"),
-            ));
+            return Err(Error::internal("failed to run ffmpeg", err));
         }
         Err(ThumbnailError::CommandFailed { status, stderr }) => {
             warn!(path = %file_path.display(), %status, %stderr, "failed to create thumbnail");
