@@ -69,14 +69,18 @@ async fn run() -> anyhow::Result<()> {
     let dirs = Directories::new(&env.data_dir);
     dirs.create_all().await?;
 
-    let data_dir = tokio::fs::canonicalize(dirs.data_dir()).await?;
+    let data_dir = tokio::fs::canonicalize(dirs.data_dir())
+        .await
+        .with_context(|| format!("failed to resolve {}", dirs.data_dir().display()))?;
     info!(data_dir = %data_dir.display(), "starting takobox");
 
     let database_path = dirs.data_dir().join("database.sqlite");
     let database_path = database_path
         .to_str()
         .context("data directory path must be valid UTF-8")?;
-    let pool = db::init_pool(database_path).await?;
+    let pool = db::init_pool(database_path)
+        .await
+        .with_context(|| format!("failed to set up the database at {database_path}"))?;
 
     let settings = Settings {
         enable_account_creation: env.enable_account_creation,

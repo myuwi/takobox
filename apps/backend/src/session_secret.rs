@@ -21,22 +21,30 @@ pub async fn load_or_create(data_dir: &Path) -> anyhow::Result<SessionSecret> {
                 )
             });
         }
-        Err(err) if err.kind() != io::ErrorKind::NotFound => return Err(err.into()),
+        Err(err) if err.kind() != io::ErrorKind::NotFound => {
+            return Err(err).with_context(|| format!("failed to read {}", path.display()));
+        }
         Err(_) => {}
     }
 
     let secret = nanoid!(LENGTH);
+    write_new(&path, &secret)
+        .await
+        .with_context(|| format!("failed to write {}", path.display()))?;
+    info!(path = %path.display(), "generated a new session secret");
+
+    SessionSecret::try_from(secret.as_str())
+}
+
+async fn write_new(path: &Path, secret: &str) -> io::Result<()> {
     let mut file = fs::OpenOptions::new()
         .write(true)
         .create_new(true)
         .mode(0o600)
-        .open(&path)
+        .open(path)
         .await?;
     file.write_all(secret.as_bytes()).await?;
-    file.sync_all().await?;
-    info!(path = %path.display(), "generated a new session secret");
-
-    SessionSecret::try_from(secret.as_str())
+    file.sync_all().await
 }
 
 #[cfg(test)]

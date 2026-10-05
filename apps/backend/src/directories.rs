@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 
+use anyhow::Context;
 use tokio::fs;
 
 #[derive(Clone, Debug)]
@@ -32,11 +33,12 @@ impl Directories {
         self.thumbs_dir.as_path()
     }
 
-    pub async fn create_all(&self) -> Result<(), std::io::Error> {
-        tokio::try_join!(
-            fs::create_dir_all(self.uploads_dir()),
-            fs::create_dir_all(self.thumbs_dir()),
-        )?;
+    pub async fn create_all(&self) -> anyhow::Result<()> {
+        for dir in [self.uploads_dir(), self.thumbs_dir()] {
+            fs::create_dir_all(dir)
+                .await
+                .with_context(|| format!("failed to create {}", dir.display()))?;
+        }
         Ok(())
     }
 }
