@@ -15,6 +15,7 @@ use crate::http::{
     error::Error,
     middleware::{
         auth::{inject_auth, require_auth},
+        catch_panic::catch_panic,
         rate_limit::rate_limit,
         request_span::request_span,
     },
@@ -87,6 +88,7 @@ pub fn router(app_state: AppState) -> Service {
         );
 
     Service::new(router)
+        .hoop(catch_panic)
         .hoop(request_span)
         .catcher(Catcher::new(catcher))
 }

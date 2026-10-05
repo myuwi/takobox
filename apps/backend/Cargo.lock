@@ -3102,6 +3102,7 @@ dependencies = [
  "anyhow",
  "argon2",
  "figment",
+ "futures-util",
  "nanoid",
  "regex",
  "salvo",
