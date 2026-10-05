@@ -47,8 +47,12 @@ async fn login(
         .await?
         .ok_or_else(|| Error::Unauthorized("Invalid username or password"))?;
 
-    verify_password(&body.password, &user.password)
-        .map_err(|_| Error::Unauthorized("Invalid username or password"))?;
+    verify_password(&body.password, &user.password).map_err(|e| match e {
+        argon2::password_hash::Error::Password => {
+            Error::Unauthorized("Invalid username or password")
+        }
+        e => Error::internal("failed to verify password", e),
+    })?;
 
     let session = Session::create(pool, user.id).await?;
 
