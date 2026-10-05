@@ -220,15 +220,15 @@ export class Files2 extends HeyApiClient {
      *
      * Upload a file
      */
-    public upload<ThrowOnError extends boolean = true>(options?: Options<FilesUploadData, ThrowOnError>): RequestResult<FilesUploadResponses, FilesUploadErrors, ThrowOnError> {
-        return (options?.client ?? this.client).post<FilesUploadResponses, FilesUploadErrors, ThrowOnError>({
+    public upload<ThrowOnError extends boolean = true>(options: Options<FilesUploadData, ThrowOnError>): RequestResult<FilesUploadResponses, FilesUploadErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<FilesUploadResponses, FilesUploadErrors, ThrowOnError>({
             ...formDataBodySerializer,
             responseType: 'json',
             url: '/files',
             ...options,
             headers: {
                 'Content-Type': null,
-                ...options?.headers
+                ...options.headers
             }
         });
     }

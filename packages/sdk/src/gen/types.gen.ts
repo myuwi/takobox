@@ -47,6 +47,10 @@ export type Settings = {
     maxFileSize: number;
 };
 
+export type UploadFilePayload = {
+    file: Blob | File;
+};
+
 export type User = {
     createdAt: string;
     id: NanoId;
@@ -421,9 +425,7 @@ export type FilesUploadData = {
     /**
      * Upload a file.
      */
-    body?: {
-        file?: Blob | File;
-    };
+    body: UploadFilePayload;
     path?: never;
     query?: {
         /**

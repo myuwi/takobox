@@ -98,6 +98,15 @@ impl EndpointArgRegister for UploadFileSearchParams {
     }
 }
 
+// Only describes the multipart body for the OpenAPI schema; `FormFile` parses it.
+#[derive(ToSchema)]
+#[salvo(schema(name = UploadFilePayload))]
+struct UploadFilePayload {
+    #[expect(dead_code)]
+    #[salvo(schema(value_type = String, format = Binary))]
+    file: String,
+}
+
 // TODO: Fix oapi status code
 // TODO: Upload quota per user
 /// Upload file
@@ -106,6 +115,7 @@ impl EndpointArgRegister for UploadFileSearchParams {
 #[endpoint(
     operation_id = "files.upload",
     tags("Files"),
+    request_body(content = UploadFilePayload, content_type = "multipart/form-data"),
     status_codes(201),
     responses(
         (status_code = 201, description = "Response with json format data", body = FileResponse)
@@ -115,7 +125,6 @@ async fn upload(
     res: &mut Response,
     depot: &mut Depot,
     session: Session,
-    // TODO: How to make this required?
     file: FormFile,
     query_params: UploadFileSearchParams,
 ) -> Result<Json<FileResponse>, Error> {

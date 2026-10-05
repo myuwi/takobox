@@ -583,16 +583,11 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
+                "$ref": "#/components/schemas/UploadFilePayload"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "201": {
@@ -1157,6 +1152,18 @@
           "maxFileSize": {
             "type": "integer",
             "minimum": 0
+          }
+        }
+      },
+      "UploadFilePayload": {
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
           }
         }
       },
