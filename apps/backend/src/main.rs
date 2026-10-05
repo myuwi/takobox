@@ -1,9 +1,11 @@
+use std::process::ExitCode;
+
 use salvo::{Listener, Server, conn::TcpListener, server::ServerHandle};
 use tokio::signal::{
     self,
     unix::{SignalKind, signal},
 };
-use tracing::info;
+use tracing::{error, info};
 use tracing_subscriber::{EnvFilter, filter::LevelFilter};
 
 mod env;
@@ -25,6 +27,11 @@ fn init_tracing() {
         .with_current_span(true)
         .with_span_list(false)
         .init();
+
+    // Log panics through tracing too
+    std::panic::set_hook(Box::new(|info| {
+        error!(panic = %info, "panicked");
+    }));
 }
 
 async fn shutdown_signal(handle: ServerHandle) {
@@ -34,21 +41,29 @@ async fn shutdown_signal(handle: ServerHandle) {
             .expect("Failed to register CTRL+C handler");
     };
     let mut term = signal(SignalKind::terminate()).expect("Failed to register SIGTERM handler");
-    let mut interrupt = signal(SignalKind::interrupt()).expect("Failed to register SIGINT handler");
 
     tokio::select! {
         _ = ctrl_c => {}
         _ = term.recv() => {},
-        _ = interrupt.recv() => {},
     };
 
     handle.stop_graceful(None);
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> ExitCode {
     init_tracing();
 
+    // Report through tracing, so a fatal error is logged like everything else.
+    if let Err(err) = run().await {
+        error!(error = ?err, "exiting due to an error");
+        return ExitCode::FAILURE;
+    }
+
+    ExitCode::SUCCESS
+}
+
+async fn run() -> anyhow::Result<()> {
     let env = Env::parse()?;
 
     let dirs = Directories::new(&env.data_dir);
@@ -58,7 +73,10 @@ async fn main() -> anyhow::Result<()> {
     info!(data_dir = %data_dir.display(), "starting takobox");
 
     let database_path = dirs.data_dir().join("database.sqlite");
-    let pool = db::init_pool(database_path.to_str().unwrap()).await?;
+    let database_path = database_path
+        .to_str()
+        .context("data directory path must be valid UTF-8")?;
+    let pool = db::init_pool(database_path).await?;
 
     let settings = Settings {
         enable_account_creation: env.enable_account_creation,
@@ -76,7 +94,11 @@ async fn main() -> anyhow::Result<()> {
     let app_state = AppState::new(session_secret, pool, dirs, settings);
     let app = router(app_state);
 
-    let server = Server::new(TcpListener::new("0.0.0.0:8000").bind().await);
+    let acceptor = TcpListener::new("0.0.0.0:8000")
+        .try_bind()
+        .await
+        .context("failed to listen on 0.0.0.0:8000")?;
+    let server = Server::new(acceptor);
     let handle = server.handle();
 
     tokio::spawn(shutdown_signal(handle));

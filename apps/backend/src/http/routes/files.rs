@@ -1,13 +1,12 @@
 use std::{ffi::OsStr, path::PathBuf};
 
-use anyhow::anyhow;
 use salvo::{
     fs::NamedFile,
     oapi::extract::{FormFile, JsonBody, PathParam, QueryParam},
     prelude::*,
 };
 use serde::Deserialize;
-use tracing::error;
+use tracing::{error, warn};
 
 use crate::{
     http::{
@@ -174,14 +173,13 @@ async fn upload(
     match generate_thumbnail(&file_path, dirs.thumbs_dir()).await {
         Ok(()) | Err(ThumbnailError::UnsupportedFiletype) => (),
         Err(ThumbnailError::ShellError(err)) => {
-            error!("Error creating thumbnail for {:?}: {}", file_path, err)
+            error!(path = %file_path.display(), error = %err, "failed to run ffmpeg");
         }
-        Err(ThumbnailError::CommandFailed { status, stderr }) => error!(
-            "ffmpeg exited with {} creating thumbnail for {:?}: {}",
-            status, file_path, stderr
-        ),
+        Err(ThumbnailError::CommandFailed { status, stderr }) => {
+            warn!(path = %file_path.display(), %status, %stderr, "failed to create thumbnail");
+        }
         Err(ThumbnailError::TimedOut) => {
-            error!("Timed out creating thumbnail for {:?}", file_path)
+            warn!(path = %file_path.display(), "timed out creating thumbnail");
         }
     }
 
@@ -245,12 +243,14 @@ async fn delete(
     let file_path = dirs.uploads_dir().join(&file.filename);
     let thumb_path = dirs.thumbs_dir().join(thumb_name);
 
-    let _ = tokio::fs::remove_file(&file_path)
-        .await
-        .inspect_err(|err| error!("Error deleting file \"{:?}\": {}", file_path, err));
-    let _ = tokio::fs::remove_file(&thumb_path)
-        .await
-        .inspect_err(|err| error!("Error deleting file \"{:?}\": {}", thumb_path, err));
+    if let Err(err) = tokio::fs::remove_file(&file_path).await {
+        error!(path = %file_path.display(), error = %err, "failed to delete file");
+    }
+    if let Err(err) = tokio::fs::remove_file(&thumb_path).await
+        && err.kind() != std::io::ErrorKind::NotFound
+    {
+        error!(path = %thumb_path.display(), error = %err, "failed to delete thumbnail");
+    }
 
     Ok(StatusCode::NO_CONTENT)
 }
@@ -306,27 +306,29 @@ async fn regenerate_thumbnail(
 
     let file_path = dirs.uploads_dir().join(&file.filename);
 
-    generate_thumbnail(&file_path, dirs.thumbs_dir())
-        .await
-        .map_err(|err| match err {
-            ThumbnailError::UnsupportedFiletype => {
-                Error::BadRequest("Filetype doesn't support thumbnails.")
-            }
-            ThumbnailError::ShellError(err) => Error::Internal(anyhow!(
-                "Error creating thumbnail for {:?}: {}",
-                file_path,
-                err
-            )),
-            ThumbnailError::CommandFailed { status, stderr } => Error::Internal(anyhow!(
-                "ffmpeg exited with {} creating thumbnail for {:?}: {}",
-                status,
-                file_path,
-                stderr
-            )),
-            ThumbnailError::TimedOut => {
-                Error::Internal(anyhow!("Timed out creating thumbnail for {:?}", file_path))
-            }
-        })?;
+    match generate_thumbnail(&file_path, dirs.thumbs_dir()).await {
+        Ok(()) => (),
+        Err(ThumbnailError::UnsupportedFiletype) => {
+            return Err(Error::BadRequest("Filetype doesn't support thumbnails."));
+        }
+        Err(ThumbnailError::ShellError(err)) => {
+            return Err(Error::Internal(
+                anyhow::Error::new(err).context("failed to run ffmpeg"),
+            ));
+        }
+        Err(ThumbnailError::CommandFailed { status, stderr }) => {
+            warn!(path = %file_path.display(), %status, %stderr, "failed to create thumbnail");
+            return Err(Error::UnprocessableEntity(
+                "Couldn't create a thumbnail for this file.",
+            ));
+        }
+        Err(ThumbnailError::TimedOut) => {
+            warn!(path = %file_path.display(), "timed out creating thumbnail");
+            return Err(Error::UnprocessableEntity(
+                "Couldn't create a thumbnail for this file.",
+            ));
+        }
+    }
 
     Ok(Json(file.into()))
 }

@@ -90,8 +90,8 @@ impl Error {
 impl Writer for Error {
     async fn write(mut self, _req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         match self {
-            Self::Sqlx(ref e) => error!("{:?}", e),
-            Self::Internal(ref e) => error!("{:?}", e),
+            Self::Sqlx(ref e) => error!(error = ?e, "request failed"),
+            Self::Internal(ref e) => error!(error = ?e, "request failed"),
             _ => (),
         }
 

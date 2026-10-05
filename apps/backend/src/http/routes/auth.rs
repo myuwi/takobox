@@ -4,6 +4,7 @@ use salvo::{
     prelude::*,
 };
 use serde::Deserialize;
+use tracing::info;
 
 use crate::{
     auth::password::{Password, hash_password, verify_password},
@@ -95,6 +96,7 @@ async fn register(
         .map_constraint_err("users.username", |_| {
             Error::Conflict("Username is already taken.")
         })?;
+    info!(user_id = user.id, "account created");
 
     let session = Session::create(pool, user.id).await?;
 
