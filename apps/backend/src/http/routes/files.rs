@@ -234,7 +234,9 @@ async fn delete(
 ) -> Result<StatusCode, Error> {
     let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
 
-    let file = File::delete(pool, session.user_id, &id)
+    let mut transaction = pool.begin().await?;
+
+    let file = File::delete(&mut *transaction, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -243,14 +245,29 @@ async fn delete(
     let file_path = dirs.uploads_dir().join(&file.filename);
     let thumb_path = dirs.thumbs_dir().join(thumb_name);
 
-    if let Err(err) = tokio::fs::remove_file(&file_path).await {
-        error!(path = %file_path.display(), error = %err, "failed to delete file");
-    }
+    // Removing a file can't be rolled back, so remove the thumbnail first, as it can be
+    // regenerated if removing the file fails.
     if let Err(err) = tokio::fs::remove_file(&thumb_path).await
         && err.kind() != std::io::ErrorKind::NotFound
     {
-        error!(path = %thumb_path.display(), error = %err, "failed to delete thumbnail");
+        return Err(Error::Internal(
+            anyhow::Error::new(err).context("failed to delete thumbnail"),
+        ));
     }
+    match tokio::fs::remove_file(&file_path).await {
+        Ok(()) => (),
+        // An invalid state, but the file is gone either way, so finish deleting it.
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+            error!(path = %file_path.display(), "tried to delete a missing file");
+        }
+        Err(err) => {
+            return Err(Error::Internal(
+                anyhow::Error::new(err).context("failed to delete file"),
+            ));
+        }
+    }
+
+    transaction.commit().await?;
 
     Ok(StatusCode::NO_CONTENT)
 }
