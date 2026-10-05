@@ -85,7 +85,7 @@ async fn register(
     } = depot.get_typed::<AppState>().unwrap();
 
     if !settings.enable_account_creation {
-        return Err(Error::Unauthorized(
+        return Err(Error::Forbidden(
             "Account creation is currently disabled for this instance.",
         ));
     }

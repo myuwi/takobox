@@ -11,6 +11,9 @@ pub enum Error {
     Unauthorized(&'static str),
 
     #[error("{0}")]
+    Forbidden(&'static str),
+
+    #[error("{0}")]
     NotFound(&'static str),
 
     #[error("{0}")]
@@ -68,6 +71,7 @@ impl Error {
         match self {
             Self::BadRequest(_) => StatusCode::BAD_REQUEST,
             Self::Unauthorized(_) => StatusCode::UNAUTHORIZED,
+            Self::Forbidden(_) => StatusCode::FORBIDDEN,
             Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::Conflict(_) => StatusCode::CONFLICT,
             Self::PayloadTooLarge => StatusCode::PAYLOAD_TOO_LARGE,
