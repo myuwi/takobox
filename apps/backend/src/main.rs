@@ -68,6 +68,7 @@ async fn run() -> anyhow::Result<()> {
 
     let dirs = Directories::new(&env.data_dir);
     dirs.create_all().await?;
+    dirs.clear_tmp_dir().await?;
 
     let data_dir = tokio::fs::canonicalize(dirs.data_dir())
         .await

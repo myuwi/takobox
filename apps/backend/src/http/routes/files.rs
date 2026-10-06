@@ -1,4 +1,7 @@
-use std::{ffi::OsStr, path::PathBuf};
+use std::{
+    ffi::OsStr,
+    path::{Path, PathBuf},
+};
 
 use salvo::{
     fs::NamedFile,
@@ -6,6 +9,7 @@ use salvo::{
     prelude::*,
 };
 use serde::Deserialize;
+use tempfile::NamedTempFile;
 use tracing::{error, warn};
 
 use crate::{
@@ -126,9 +130,19 @@ async fn upload(
         .unwrap_or("".to_string());
 
     let file_name = file_id.to_string() + &ext;
-    let file_path = dirs.uploads_dir().join(&file_name);
     let file_size = file.size() as usize;
     let temp_path = file.path();
+
+    let file_path = dirs.uploads_dir().join(&file_name);
+
+    // salvo's temp file may be on another filesystem, so copy it here to move it in atomically.
+    // Note: tempfile's calls are blocking.
+    let staged = NamedTempFile::new_in(dirs.tmp_dir())
+        .map_err(|e| Error::internal("failed to stage upload", e))?
+        .into_temp_path();
+    tokio::fs::copy(temp_path, &staged)
+        .await
+        .map_err(|e| Error::internal("failed to stage upload", e))?;
 
     let mut transaction = pool.begin().await?;
 
@@ -153,11 +167,14 @@ async fn upload(
         .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
     }
 
-    tokio::fs::copy(temp_path, &file_path)
-        .await
-        .map_err(|e| Error::internal("failed to store upload", e))?;
+    staged
+        .persist(&file_path)
+        .map_err(|e| Error::internal("failed to store upload", e.error))?;
 
-    transaction.commit().await?;
+    if let Err(err) = transaction.commit().await {
+        remove_failed_upload(&file_path).await;
+        return Err(err.into());
+    }
 
     match generate_thumbnail(&file_path, dirs.thumbs_dir()).await {
         Ok(()) | Err(ThumbnailError::UnsupportedFiletype) => (),
@@ -175,6 +192,14 @@ async fn upload(
     res.status_code(StatusCode::CREATED);
 
     Ok(Json(file.into()))
+}
+
+async fn remove_failed_upload(path: &Path) {
+    if let Err(err) = tokio::fs::remove_file(path).await
+        && err.kind() != std::io::ErrorKind::NotFound
+    {
+        warn!(path = %path.display(), error = %err, "failed to remove a failed upload");
+    }
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
