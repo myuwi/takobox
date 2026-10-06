@@ -61,7 +61,7 @@ export type AuthLoginData = {
     /**
      * Extract json format data from request.
      */
-    body?: AuthCredentials;
+    body: AuthCredentials;
     path?: never;
     query?: never;
     url: '/auth/login';
@@ -122,7 +122,7 @@ export type AuthRegisterData = {
     /**
      * Extract json format data from request.
      */
-    body?: AuthCredentials;
+    body: AuthCredentials;
     path?: never;
     query?: never;
     url: '/auth/register';
@@ -183,7 +183,7 @@ export type CollectionsCreateData = {
     /**
      * Extract json format data from request.
      */
-    body?: CreateCollectionPayload;
+    body: CreateCollectionPayload;
     path?: never;
     query?: never;
     url: '/collections';
@@ -249,7 +249,7 @@ export type CollectionsRenameData = {
     /**
      * Extract json format data from request.
      */
-    body?: RenameCollectionPayload;
+    body: RenameCollectionPayload;
     path: {
         /**
          * Get parameter `id` from request url path.
@@ -428,9 +428,6 @@ export type FilesUploadData = {
     body: UploadFilePayload;
     path?: never;
     query?: {
-        /**
-         * Get parameter `collectionId` from request url query.
-         */
         collectionId?: NanoId;
     };
     url: '/files';
@@ -530,7 +527,7 @@ export type FilesRenameData = {
     /**
      * Extract json format data from request.
      */
-    body?: RenameFilePayload;
+    body: RenameFilePayload;
     path: {
         /**
          * Get parameter `id` from request url path.
@@ -624,7 +621,7 @@ export type FilesDownloadError = FilesDownloadErrors[keyof FilesDownloadErrors];
 
 export type FilesDownloadResponses = {
     /**
-     * OK
+     * Ok
      */
     200: unknown;
 };

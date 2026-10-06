@@ -2,7 +2,7 @@ use std::{ffi::OsStr, path::PathBuf};
 
 use salvo::{
     fs::NamedFile,
-    oapi::extract::{FormFile, JsonBody, PathParam, QueryParam},
+    oapi::extract::{FormFile, JsonBody, PathParam},
     prelude::*,
 };
 use serde::Deserialize;
@@ -27,7 +27,7 @@ use crate::{
 /// Get files
 ///
 /// Get the files belonging to the current user
-#[endpoint(operation_id = "files.list", tags("Files"), status_codes(200))]
+#[endpoint(operation_id = "files.list", tags("Files"))]
 async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<FileResponse>>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
     let files = File::get_all_for_user(pool, session.user_id).await?;
@@ -38,7 +38,7 @@ async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<FileRespo
 /// Get file
 ///
 /// Get a file belonging to the current user
-#[endpoint(operation_id = "files.get", tags("Files"), status_codes(200))]
+#[endpoint(operation_id = "files.get", tags("Files"))]
 async fn show(
     depot: &mut Depot,
     session: Session,
@@ -55,11 +55,7 @@ async fn show(
 /// Get file collections
 ///
 /// Get the collections containing a file belonging to the current user
-#[endpoint(
-    operation_id = "files.collections.list",
-    tags("Files"),
-    status_codes(200)
-)]
+#[endpoint(operation_id = "files.collections.list", tags("Files"))]
 async fn collections(
     depot: &mut Depot,
     session: Session,
@@ -76,26 +72,11 @@ async fn collections(
     Ok(Json(file_collections.into_iter().map(Into::into).collect()))
 }
 
-#[derive(Deserialize, Extractible, Debug)]
-#[salvo(extract(default_source(from = "query")))]
+#[derive(Deserialize, ToParameters, Debug)]
+#[salvo(parameters(default_parameter_in = Query, rename_all = "camelCase"))]
 #[serde(rename_all = "camelCase")]
 struct UploadFileSearchParams {
     collection_id: Option<NanoId>,
-}
-
-// TODO: Any way to automate this?
-impl EndpointArgRegister for UploadFileSearchParams {
-    fn register(
-        components: &mut salvo::oapi::Components,
-        operation: &mut salvo::oapi::Operation,
-        _arg: &str,
-    ) {
-        <QueryParam<NanoId, false> as EndpointArgRegister>::register(
-            components,
-            operation,
-            "collectionId",
-        );
-    }
 }
 
 // Only describes the multipart body for the OpenAPI schema; `FormFile` parses it.
@@ -107,7 +88,6 @@ struct UploadFilePayload {
     file: String,
 }
 
-// TODO: Fix oapi status code
 // TODO: Upload quota per user
 /// Upload file
 ///
@@ -119,7 +99,7 @@ struct UploadFilePayload {
     status_codes(201),
     responses(
         (status_code = 201, description = "Response with json format data", body = FileResponse)
-    ),
+    )
 )]
 async fn upload(
     res: &mut Response,
@@ -206,7 +186,11 @@ pub struct RenameFilePayload {
 /// Rename file
 ///
 /// Rename a file belonging to the current user
-#[endpoint(operation_id = "files.rename", tags("Files"), status_codes(200))]
+#[endpoint(
+    operation_id = "files.rename",
+    tags("Files"),
+    request_body = RenameFilePayload
+)]
 async fn rename(
     depot: &mut Depot,
     session: Session,
@@ -280,14 +264,14 @@ async fn delete(
 /// Download file
 ///
 /// Download a file belonging to the current user
-#[endpoint(operation_id = "files.download", tags("Files"), status_codes(200))]
+#[endpoint(operation_id = "files.download", tags("Files"))]
 async fn download(
     req: &Request,
     res: &mut Response,
     depot: &mut Depot,
     session: Session,
     id: PathParam<NanoId>,
-) -> Result<StatusCode, Error> {
+) -> Result<(), Error> {
     let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
 
     let file = File::get_by_public_id(pool, session.user_id, &id)
@@ -304,17 +288,13 @@ async fn download(
 
     file.send(req.headers(), res).await;
 
-    Ok(StatusCode::OK)
+    Ok(())
 }
 
 /// Regenerate thumbnail
 ///
 /// Regenerate the thumbnail for a file belonging to the current user
-#[endpoint(
-    operation_id = "files.regenerateThumbnail",
-    tags("Files"),
-    status_codes(200)
-)]
+#[endpoint(operation_id = "files.regenerateThumbnail", tags("Files"))]
 async fn regenerate_thumbnail(
     depot: &mut Depot,
     session: Session,

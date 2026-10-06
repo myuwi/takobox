@@ -31,7 +31,11 @@ struct AuthCredentials {
 /// Login
 ///
 /// Log in to a user account
-#[endpoint(operation_id = "auth.login", tags("Auth"), status_codes(200))]
+#[endpoint(
+    operation_id = "auth.login",
+    tags("Auth"),
+    request_body = AuthCredentials
+)]
 async fn login(
     body: JsonBody<AuthCredentials>,
     depot: &mut Depot,
@@ -67,10 +71,11 @@ async fn login(
 #[endpoint(
     operation_id = "auth.register",
     tags("Auth"),
+    request_body = AuthCredentials,
+    status_codes(201),
     responses(
         (status_code = 201, description = "User created", body = UserResponse)
-    ),
-    status_codes(201)
+    )
 )]
 async fn register(
     body: JsonBody<AuthCredentials>,

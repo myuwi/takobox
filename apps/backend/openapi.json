@@ -27,7 +27,8 @@
                 "$ref": "#/components/schemas/AuthCredentials"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -114,7 +115,8 @@
                 "$ref": "#/components/schemas/AuthCredentials"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "201": {
@@ -209,7 +211,8 @@
                 "$ref": "#/components/schemas/CreateCollectionPayload"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "201": {
@@ -316,7 +319,8 @@
                 "$ref": "#/components/schemas/RenameCollectionPayload"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -571,7 +575,6 @@
           {
             "name": "collectionId",
             "in": "query",
-            "description": "Get parameter `collectionId` from request url query.",
             "required": false,
             "schema": {
               "$ref": "#/components/schemas/NanoId"
@@ -745,7 +748,8 @@
                 "$ref": "#/components/schemas/RenameFilePayload"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -858,7 +862,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Ok"
           },
           "4XX": {
             "description": "Error response",

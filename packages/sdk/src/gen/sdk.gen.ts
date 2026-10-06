@@ -51,14 +51,14 @@ export class Auth extends HeyApiClient {
      *
      * Log in to a user account
      */
-    public login<ThrowOnError extends boolean = true>(options?: Options<AuthLoginData, ThrowOnError>): RequestResult<AuthLoginResponses, AuthLoginErrors, ThrowOnError> {
-        return (options?.client ?? this.client).post<AuthLoginResponses, AuthLoginErrors, ThrowOnError>({
+    public login<ThrowOnError extends boolean = true>(options: Options<AuthLoginData, ThrowOnError>): RequestResult<AuthLoginResponses, AuthLoginErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<AuthLoginResponses, AuthLoginErrors, ThrowOnError>({
             responseType: 'json',
             url: '/auth/login',
             ...options,
             headers: {
                 'Content-Type': 'application/json',
-                ...options?.headers
+                ...options.headers
             }
         });
     }
@@ -77,14 +77,14 @@ export class Auth extends HeyApiClient {
      *
      * Register a user account
      */
-    public register<ThrowOnError extends boolean = true>(options?: Options<AuthRegisterData, ThrowOnError>): RequestResult<AuthRegisterResponses, AuthRegisterErrors, ThrowOnError> {
-        return (options?.client ?? this.client).post<AuthRegisterResponses, AuthRegisterErrors, ThrowOnError>({
+    public register<ThrowOnError extends boolean = true>(options: Options<AuthRegisterData, ThrowOnError>): RequestResult<AuthRegisterResponses, AuthRegisterErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<AuthRegisterResponses, AuthRegisterErrors, ThrowOnError>({
             responseType: 'json',
             url: '/auth/register',
             ...options,
             headers: {
                 'Content-Type': 'application/json',
-                ...options?.headers
+                ...options.headers
             }
         });
     }
@@ -142,14 +142,14 @@ export class Collections extends HeyApiClient {
      *
      * Create a collection
      */
-    public create<ThrowOnError extends boolean = true>(options?: Options<CollectionsCreateData, ThrowOnError>): RequestResult<CollectionsCreateResponses, CollectionsCreateErrors, ThrowOnError> {
-        return (options?.client ?? this.client).post<CollectionsCreateResponses, CollectionsCreateErrors, ThrowOnError>({
+    public create<ThrowOnError extends boolean = true>(options: Options<CollectionsCreateData, ThrowOnError>): RequestResult<CollectionsCreateResponses, CollectionsCreateErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<CollectionsCreateResponses, CollectionsCreateErrors, ThrowOnError>({
             responseType: 'json',
             url: '/collections',
             ...options,
             headers: {
                 'Content-Type': 'application/json',
-                ...options?.headers
+                ...options.headers
             }
         });
     }

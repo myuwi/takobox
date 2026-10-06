@@ -21,11 +21,7 @@ use crate::{
 /// Get collections
 ///
 /// Get the current user's collections
-#[endpoint(
-    operation_id = "collections.list",
-    tags("Collections"),
-    status_codes(200)
-)]
+#[endpoint(operation_id = "collections.list", tags("Collections"))]
 async fn index(
     depot: &mut Depot,
     session: Session,
@@ -49,10 +45,11 @@ pub struct CreateCollectionPayload {
 #[endpoint(
     operation_id = "collections.create",
     tags("Collections"),
+    request_body = CreateCollectionPayload,
     status_codes(201),
     responses(
         (status_code = 201, description = "Response with json format data", body = CollectionResponse)
-    ),
+    )
 )]
 async fn create(
     res: &mut Response,
@@ -87,7 +84,7 @@ pub struct RenameCollectionPayload {
 #[endpoint(
     operation_id = "collections.rename",
     tags("Collections"),
-    status_codes(200)
+    request_body = RenameCollectionPayload
 )]
 async fn rename(
     depot: &mut Depot,

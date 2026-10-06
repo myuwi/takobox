@@ -9,11 +9,7 @@ use crate::{
 /// Get files
 ///
 /// Get the files belonging to the current user
-#[endpoint(
-    operation_id = "collections.files.list",
-    tags("Collections"),
-    status_codes(200)
-)]
+#[endpoint(operation_id = "collections.files.list", tags("Collections"))]
 async fn index(
     depot: &mut Depot,
     session: Session,
