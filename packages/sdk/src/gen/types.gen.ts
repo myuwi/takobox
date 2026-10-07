@@ -245,6 +245,40 @@ export type CollectionsDeleteResponses = {
 
 export type CollectionsDeleteResponse = CollectionsDeleteResponses[keyof CollectionsDeleteResponses];
 
+export type CollectionsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Get parameter `id` from request url path.
+         */
+        id: NanoId;
+    };
+    query?: never;
+    url: '/collections/{id}';
+};
+
+export type CollectionsGetErrors = {
+    /**
+     * Error response
+     */
+    '4XX': ErrorResponse;
+    /**
+     * Server error response
+     */
+    '5XX': ErrorResponse;
+};
+
+export type CollectionsGetError = CollectionsGetErrors[keyof CollectionsGetErrors];
+
+export type CollectionsGetResponses = {
+    /**
+     * Response with json format data
+     */
+    200: Collection;
+};
+
+export type CollectionsGetResponse = CollectionsGetResponses[keyof CollectionsGetResponses];
+
 export type CollectionsRenameData = {
     /**
      * Extract json format data from request.

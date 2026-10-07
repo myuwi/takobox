@@ -265,6 +265,57 @@
       }
     },
     "/collections/{id}": {
+      "get": {
+        "tags": [
+          "Collections"
+        ],
+        "summary": "Get collection",
+        "description": "Get a collection belonging to the current user",
+        "operationId": "collections.get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Get parameter `id` from request url path.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NanoId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response with json format data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Collection"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "tags": [
           "Collections"

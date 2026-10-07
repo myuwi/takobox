@@ -33,6 +33,23 @@ async fn index(
     Ok(Json(collections.into_iter().map(Into::into).collect()))
 }
 
+/// Get collection
+///
+/// Get a collection belonging to the current user
+#[endpoint(operation_id = "collections.get", tags("Collections"))]
+async fn show(
+    depot: &mut Depot,
+    session: Session,
+    id: PathParam<NanoId>,
+) -> Result<Json<CollectionResponse>, Error> {
+    let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
+    let collection = Collection::get_by_public_id(pool, session.user_id, &id)
+        .await?
+        .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
+
+    Ok(Json(collection.into()))
+}
+
 #[derive(Debug, Deserialize, ToSchema)]
 #[salvo(schema(name = CreateCollectionPayload))]
 pub struct CreateCollectionPayload {
@@ -123,6 +140,7 @@ async fn delete(
 pub fn routes() -> Router {
     Router::new().get(index).post(create).push(
         Router::with_path("{id}")
+            .get(show)
             .patch(rename)
             .delete(delete)
             .push(Router::with_path("files").push(collection_files::routes())),

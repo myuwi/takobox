@@ -68,6 +68,21 @@ impl Collection {
         .await
     }
 
+    pub async fn get_by_public_id(
+        conn: impl SqliteExecutor<'_>,
+        user_id: i64,
+        id: &NanoId,
+    ) -> Result<Option<Collection>, sqlx::Error> {
+        sqlx::query_as(
+            "select * from collections
+            where public_id = $1 and user_id = $2",
+        )
+        .bind(id)
+        .bind(user_id)
+        .fetch_optional(conn)
+        .await
+    }
+
     pub async fn exists(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,
