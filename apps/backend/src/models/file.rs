@@ -81,6 +81,24 @@ impl File {
         .await
     }
 
+    pub async fn get_all_for_collection(
+        conn: impl SqliteExecutor<'_>,
+        user_id: i64,
+        collection_id: &NanoId,
+    ) -> Result<Vec<File>, sqlx::Error> {
+        sqlx::query_as(
+            "select f.* from collection_files cf
+            join files f on cf.file_id = f.id
+            join collections c on cf.collection_id = c.id
+            where c.public_id = $1 and c.user_id = $2
+            order by id desc",
+        )
+        .bind(collection_id)
+        .bind(user_id)
+        .fetch_all(conn)
+        .await
+    }
+
     pub async fn get_by_public_id(
         conn: impl SqliteExecutor<'_>,
         user_id: i64,

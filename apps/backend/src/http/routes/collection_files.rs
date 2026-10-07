@@ -2,7 +2,7 @@ use salvo::{oapi::extract::PathParam, prelude::*};
 
 use crate::{
     http::{error::Error, response::FileResponse, state::AppState, status::NoContent},
-    models::{collection::Collection, session::Session},
+    models::{collection::Collection, file::File, session::Session},
     types::NanoId,
 };
 
@@ -22,7 +22,7 @@ async fn index(
         ));
     }
 
-    let files = Collection::get_files(pool, session.user_id, &id).await?;
+    let files = File::get_all_for_collection(pool, session.user_id, &id).await?;
 
     Ok(Json(files.into_iter().map(Into::into).collect()))
 }
