@@ -143,7 +143,7 @@ export type AuthRegisterError = AuthRegisterErrors[keyof AuthRegisterErrors];
 
 export type AuthRegisterResponses = {
     /**
-     * User created
+     * Created
      */
     201: User;
 };
@@ -204,7 +204,7 @@ export type CollectionsCreateError = CollectionsCreateErrors[keyof CollectionsCr
 
 export type CollectionsCreateResponses = {
     /**
-     * Response with json format data
+     * Created
      */
     201: Collection;
 };
@@ -448,7 +448,7 @@ export type FilesUploadError = FilesUploadErrors[keyof FilesUploadErrors];
 
 export type FilesUploadResponses = {
     /**
-     * Response with json format data
+     * Created
      */
     201: File;
 };

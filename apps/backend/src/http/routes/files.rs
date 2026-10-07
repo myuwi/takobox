@@ -18,6 +18,7 @@ use crate::{
         middleware::size_limit::limit_upload_size,
         response::{CollectionResponse, FileResponse},
         state::AppState,
+        status::{Created, NoContent},
     },
     models::{
         collection::Collection,
@@ -99,19 +100,14 @@ struct UploadFilePayload {
 #[endpoint(
     operation_id = "files.upload",
     tags("Files"),
-    request_body(content = UploadFilePayload, content_type = "multipart/form-data"),
-    status_codes(201),
-    responses(
-        (status_code = 201, description = "Response with json format data", body = FileResponse)
-    )
+    request_body(content = UploadFilePayload, content_type = "multipart/form-data")
 )]
 async fn upload(
-    res: &mut Response,
     depot: &mut Depot,
     session: Session,
     file: FormFile,
     query_params: UploadFileSearchParams,
-) -> Result<Json<FileResponse>, Error> {
+) -> Result<Created<Json<FileResponse>>, Error> {
     let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
     let UploadFileSearchParams { collection_id } = &query_params;
 
@@ -189,9 +185,10 @@ async fn upload(
         }
     }
 
-    res.status_code(StatusCode::CREATED);
-
-    Ok(Json(file.into()))
+    Ok(Created::new(
+        format!("/api/files/{file_id}"),
+        Json(file.into()),
+    ))
 }
 
 async fn remove_failed_upload(path: &Path) {
@@ -244,12 +241,12 @@ async fn rename(
 /// Delete file
 ///
 /// Delete a file belonging to the current user
-#[endpoint(operation_id = "files.delete", tags("Files"), status_codes(204))]
+#[endpoint(operation_id = "files.delete", tags("Files"))]
 async fn delete(
     depot: &mut Depot,
     session: Session,
     id: PathParam<NanoId>,
-) -> Result<StatusCode, Error> {
+) -> Result<NoContent, Error> {
     let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
 
     let mut transaction = pool.begin().await?;
@@ -283,7 +280,7 @@ async fn delete(
 
     transaction.commit().await?;
 
-    Ok(StatusCode::NO_CONTENT)
+    Ok(NoContent)
 }
 
 /// Download file

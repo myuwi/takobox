@@ -1,7 +1,7 @@
 use salvo::{oapi::extract::PathParam, prelude::*};
 
 use crate::{
-    http::{error::Error, response::FileResponse, state::AppState},
+    http::{error::Error, response::FileResponse, state::AppState, status::NoContent},
     models::{collection::Collection, session::Session},
     types::NanoId,
 };
@@ -30,17 +30,13 @@ async fn index(
 /// Add file to collection
 ///
 /// Add a file to a collection belonging to the current user
-#[endpoint(
-    operation_id = "collections.files.add",
-    tags("Collections"),
-    status_codes(204)
-)]
+#[endpoint(operation_id = "collections.files.add", tags("Collections"))]
 async fn add(
     depot: &mut Depot,
     session: Session,
     id: PathParam<NanoId>,
     file_id: PathParam<NanoId>,
-) -> Result<StatusCode, Error> {
+) -> Result<NoContent, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     if !Collection::exists(pool, session.user_id, &id).await? {
@@ -53,23 +49,19 @@ async fn add(
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
-    Ok(StatusCode::NO_CONTENT)
+    Ok(NoContent)
 }
 
 /// Remove file from collection
 ///
 /// Remove a file from a collection belonging to the current user
-#[endpoint(
-    operation_id = "collections.files.remove",
-    tags("Collections"),
-    status_codes(204)
-)]
+#[endpoint(operation_id = "collections.files.remove", tags("Collections"))]
 async fn remove(
     depot: &mut Depot,
     session: Session,
     id: PathParam<NanoId>,
     file_id: PathParam<NanoId>,
-) -> Result<StatusCode, Error> {
+) -> Result<NoContent, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     if !Collection::exists(pool, session.user_id, &id).await? {
@@ -82,7 +74,7 @@ async fn remove(
         .await?
         .ok_or_else(|| Error::NotFound("File not found in collection."))?;
 
-    Ok(StatusCode::NO_CONTENT)
+    Ok(NoContent)
 }
 
 pub fn routes() -> Router {

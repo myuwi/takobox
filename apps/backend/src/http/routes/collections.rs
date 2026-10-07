@@ -10,6 +10,7 @@ use crate::{
         error::{Error, ResultExt},
         response::CollectionResponse,
         state::AppState,
+        status::{Created, NoContent},
     },
     models::{
         collection::{Collection, CollectionName},
@@ -38,25 +39,19 @@ pub struct CreateCollectionPayload {
     pub name: String,
 }
 
-// TODO: Correct response struct
 /// Create collection
 ///
 /// Create a collection
 #[endpoint(
     operation_id = "collections.create",
     tags("Collections"),
-    request_body = CreateCollectionPayload,
-    status_codes(201),
-    responses(
-        (status_code = 201, description = "Response with json format data", body = CollectionResponse)
-    )
+    request_body = CreateCollectionPayload
 )]
 async fn create(
-    res: &mut Response,
     depot: &mut Depot,
     session: Session,
     body: JsonBody<CreateCollectionPayload>,
-) -> Result<Json<CollectionResponse>, Error> {
+) -> Result<Created<Json<CollectionResponse>>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     let name = CollectionName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
@@ -67,9 +62,10 @@ async fn create(
             Error::Conflict("A collection with this name already exists. Please try another name.")
         })?;
 
-    res.status_code(StatusCode::CREATED);
-
-    Ok(Json(collection.into()))
+    Ok(Created::new(
+        format!("/api/collections/{}", collection.public_id),
+        Json(collection.into()),
+    ))
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -109,23 +105,19 @@ async fn rename(
 /// Delete collection
 ///
 /// Delete a collection belonging to the current user
-#[endpoint(
-    operation_id = "collections.delete",
-    tags("Collections"),
-    status_codes(204)
-)]
+#[endpoint(operation_id = "collections.delete", tags("Collections"))]
 async fn delete(
     depot: &mut Depot,
     session: Session,
     id: PathParam<NanoId>,
-) -> Result<StatusCode, Error> {
+) -> Result<NoContent, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     Collection::delete(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
 
-    Ok(StatusCode::NO_CONTENT)
+    Ok(NoContent)
 }
 
 pub fn routes() -> Router {

@@ -1,8 +1,4 @@
-use salvo::{
-    http::header::{self, HeaderValue},
-    oapi::extract::JsonBody,
-    prelude::*,
-};
+use salvo::{oapi::extract::JsonBody, prelude::*};
 use serde::Deserialize;
 use tracing::info;
 
@@ -14,6 +10,7 @@ use crate::{
         response::UserResponse,
         session::clear_session_cookie,
         state::AppState,
+        status::{Created, NoContent},
     },
     models::{
         session::Session,
@@ -71,17 +68,13 @@ async fn login(
 #[endpoint(
     operation_id = "auth.register",
     tags("Auth"),
-    request_body = AuthCredentials,
-    status_codes(201),
-    responses(
-        (status_code = 201, description = "User created", body = UserResponse)
-    )
+    request_body = AuthCredentials
 )]
 async fn register(
     body: JsonBody<AuthCredentials>,
     depot: &mut Depot,
     res: &mut Response,
-) -> Result<Json<UserResponse>, Error> {
+) -> Result<Created<Json<UserResponse>>, Error> {
     let AppState {
         settings,
         pool,
@@ -111,29 +104,26 @@ async fn register(
     let session = Session::create(pool, user.id).await?;
 
     res.cookies_mut().private_mut(session_secret).add(session);
-    res.status_code(StatusCode::CREATED);
-    res.headers_mut()
-        .insert(header::LOCATION, HeaderValue::from_static("/api/me"));
 
-    Ok(Json(user.into()))
+    Ok(Created::new("/api/me", Json(user.into())))
 }
 
 /// Logout
 ///
 /// Log out of a user account, invalidating the login session
-#[endpoint(operation_id = "auth.logout", tags("Auth"), status_codes(204))]
+#[endpoint(operation_id = "auth.logout", tags("Auth"))]
 async fn logout(
     depot: &mut Depot,
     res: &mut Response,
     session: Session,
-) -> Result<StatusCode, Error> {
+) -> Result<NoContent, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
     Session::delete(pool, session.id).await?;
 
     res.cookies_mut().add(clear_session_cookie());
 
-    Ok(StatusCode::NO_CONTENT)
+    Ok(NoContent)
 }
 
 pub fn routes() -> Router {

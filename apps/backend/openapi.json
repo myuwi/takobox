@@ -120,7 +120,15 @@
         },
         "responses": {
           "201": {
-            "description": "User created",
+            "description": "Created",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The URL of the created resource."
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -216,7 +224,15 @@
         },
         "responses": {
           "201": {
-            "description": "Response with json format data",
+            "description": "Created",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The URL of the created resource."
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -594,7 +610,15 @@
         },
         "responses": {
           "201": {
-            "description": "Response with json format data",
+            "description": "Created",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The URL of the created resource."
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {

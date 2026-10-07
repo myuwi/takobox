@@ -6,3 +6,4 @@ pub mod routes;
 pub mod serialize;
 pub mod session;
 pub mod state;
+pub mod status;
