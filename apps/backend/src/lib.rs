@@ -1,8 +1,8 @@
 mod auth;
 pub mod db;
 mod directories;
+mod domain;
 mod http;
-mod models;
 mod services;
 mod settings;
 mod types;

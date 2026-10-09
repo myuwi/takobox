@@ -1,6 +1,6 @@
 use sqlx::{FromRow, SqliteExecutor};
 
-use crate::{models::collection::CollectionName, types::NanoId};
+use crate::{domain::collection::CollectionName, types::NanoId};
 
 #[derive(Clone, Debug, FromRow)]
 pub struct Collection {

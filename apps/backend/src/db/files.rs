@@ -1,7 +1,7 @@
 use sqlx::{FromRow, SqliteExecutor};
 
 use crate::{
-    models::file::{FileName, RenameTo},
+    domain::file::{FileName, FileRename},
     types::NanoId,
 };
 
@@ -72,7 +72,7 @@ pub async fn rename(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
     id: &NanoId,
-    name: RenameTo,
+    rename: FileRename,
 ) -> Result<Option<File>, sqlx::Error> {
     sqlx::query_as(
         "update files
@@ -80,7 +80,7 @@ pub async fn rename(
         where public_id = $2 and user_id = $3
         returning *",
     )
-    .bind(name.as_str())
+    .bind(rename.name().as_str())
     .bind(id)
     .bind(user_id)
     .fetch_optional(conn)

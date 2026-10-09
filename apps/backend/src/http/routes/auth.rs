@@ -5,6 +5,7 @@ use tracing::info;
 use crate::{
     auth::password::{Password, hash_password, verify_password},
     db::{self, sessions::Session},
+    domain::user::Username,
     http::{
         error::{Error, ResultExt},
         middleware::rate_limit::rate_limit,
@@ -13,7 +14,6 @@ use crate::{
         state::AppState,
         status::{Created, NoContent},
     },
-    models::user::Username,
 };
 
 #[derive(Clone, Debug, Deserialize, ToSchema)]

@@ -7,13 +7,13 @@ use serde::Deserialize;
 use super::collection_files;
 use crate::{
     db::{self, sessions::Session},
+    domain::collection::CollectionName,
     http::{
         error::{Error, ResultExt},
         response::CollectionResponse,
         state::AppState,
         status::{Created, NoContent},
     },
-    models::collection::CollectionName,
     types::NanoId,
 };
 

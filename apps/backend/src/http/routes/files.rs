@@ -14,6 +14,7 @@ use tracing::{error, warn};
 
 use crate::{
     db::{self, sessions::Session},
+    domain::file::{FileName, FileRename},
     http::{
         error::Error,
         middleware::size_limit::limit_upload_size,
@@ -21,7 +22,6 @@ use crate::{
         state::AppState,
         status::{Created, NoContent},
     },
-    models::file::FileName,
     services::thumbnails::{ThumbnailError, generate_thumbnail},
     types::NanoId,
 };
@@ -225,11 +225,9 @@ async fn rename(
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
-    let new_name = file
-        .parse_rename(name)
-        .map_err(Error::UnprocessableEntity)?;
+    let file_rename = FileRename::new(&file.filename, name).map_err(Error::UnprocessableEntity)?;
 
-    let file = db::files::rename(pool, session.user_id, &id, new_name)
+    let file = db::files::rename(pool, session.user_id, &id, file_rename)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 

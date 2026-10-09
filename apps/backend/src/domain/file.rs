@@ -2,8 +2,6 @@ use std::{ffi::OsStr, path::Path};
 
 use sanitize_filename::is_sanitized;
 
-use crate::db::files::File;
-
 #[derive(Debug)]
 pub struct FileName(String);
 
@@ -31,24 +29,22 @@ impl TryFrom<String> for FileName {
     }
 }
 
-impl File {
-    pub fn parse_rename(&self, new: FileName) -> Result<RenameTo, &'static str> {
+pub struct FileRename(FileName);
+
+impl FileRename {
+    pub fn new(filename: &str, name: FileName) -> Result<Self, &'static str> {
         fn extension(name: &str) -> Option<&str> {
             Path::new(name).extension().and_then(OsStr::to_str)
         }
 
-        if extension(new.as_str()) != extension(&self.filename) {
+        if extension(name.as_str()) != extension(filename) {
             return Err("New file extension must match the old one.");
         }
 
-        Ok(RenameTo(new))
+        Ok(Self(name))
     }
-}
 
-pub struct RenameTo(FileName);
-
-impl RenameTo {
-    pub fn as_str(&self) -> &str {
-        self.0.as_str()
+    pub fn name(&self) -> &FileName {
+        &self.0
     }
 }
