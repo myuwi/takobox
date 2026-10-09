@@ -70,11 +70,14 @@ async fn create(
 
     let name = CollectionName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
 
-    let collection = db::collections::create(pool, session.user_id, &name)
-        .await
-        .map_constraint_err("collections.user_id, collections.name", |_| {
-            Error::Conflict("A collection with this name already exists. Please try another name.")
-        })?;
+    let collection =
+        db::collections::create(pool, session.user_id, &CollectionId::generate(6), &name)
+            .await
+            .map_constraint_err("collections.user_id, collections.name", |_| {
+                Error::Conflict(
+                    "A collection with this name already exists. Please try another name.",
+                )
+            })?;
 
     Ok(Created::new(
         format!("/api/collections/{}", collection.public_id),

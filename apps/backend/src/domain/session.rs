@@ -1,10 +1,16 @@
 use std::fmt;
 
 use sqlx::Type;
+use time::{Duration, UtcDateTime};
 
 use super::id;
 
 const LENGTH: usize = 32;
+const LIFETIME: Duration = Duration::days(30);
+
+pub fn expires_at(start: UtcDateTime) -> UtcDateTime {
+    start + LIFETIME
+}
 
 #[derive(Clone, PartialEq, Eq, Type)]
 #[sqlx(transparent)]

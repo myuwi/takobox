@@ -7,11 +7,11 @@ use salvo::{
     oapi::{Components, EndpointArgRegister, Operation},
 };
 use sqlx::SqlitePool;
-use time::OffsetDateTime;
+use time::{OffsetDateTime, UtcDateTime};
 
 use crate::{
     db::{self, sessions::Session},
-    domain::session::SessionToken,
+    domain::{self, session::SessionToken},
     http::error::Error,
 };
 
@@ -29,6 +29,13 @@ pub async fn resolve_session(
     };
 
     Ok(db::sessions::get_by_public_id(pool, &token).await?)
+}
+
+pub async fn create_session(pool: &SqlitePool, user_id: i64) -> Result<Session, Error> {
+    let token = SessionToken::generate();
+    let expires_at = domain::session::expires_at(UtcDateTime::now());
+
+    Ok(db::sessions::create(pool, user_id, &token, expires_at).await?)
 }
 
 fn build_cookie(value: String, expires: OffsetDateTime) -> Cookie<'static> {

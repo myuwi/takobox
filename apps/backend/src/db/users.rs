@@ -13,15 +13,14 @@ pub struct User {
 
 pub async fn create(
     conn: impl SqliteExecutor<'_>,
+    id: &UserId,
     username: &Username,
     password_hash: &PasswordHash,
 ) -> Result<User, sqlx::Error> {
-    let public_id = UserId::generate(6);
-
     sqlx::query_as(
         "insert into users (public_id, username, password) values ($1, $2, $3) returning *",
     )
-    .bind(public_id)
+    .bind(id)
     .bind(username.as_str())
     .bind(password_hash)
     .fetch_one(conn)

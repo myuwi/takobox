@@ -60,16 +60,15 @@ pub async fn exists(
 pub async fn create(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
+    id: &CollectionId,
     name: &CollectionName,
 ) -> Result<Collection, sqlx::Error> {
-    let public_id = CollectionId::generate(6);
-
     sqlx::query_as(
         "insert into collections (public_id, user_id, name)
         values ($1, $2, $3)
         returning *",
     )
-    .bind(public_id)
+    .bind(id)
     .bind(user_id)
     .bind(name.as_str())
     .fetch_one(conn)

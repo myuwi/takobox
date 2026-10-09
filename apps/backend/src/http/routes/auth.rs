@@ -4,12 +4,12 @@ use tracing::info;
 
 use crate::{
     db::{self, sessions::Session},
-    domain::user::{Password, Username, hash_password, verify_password},
+    domain::user::{Password, UserId, Username, hash_password, verify_password},
     http::{
         error::{Error, ResultExt},
         middleware::rate_limit::rate_limit,
         response::UserResponse,
-        session::clear_session_cookie,
+        session::{clear_session_cookie, create_session},
         state::AppState,
         status::{Created, NoContent},
     },
@@ -52,7 +52,7 @@ async fn login(
         e => Error::internal("failed to verify password", e),
     })?;
 
-    let session = db::sessions::create(pool, user.id).await?;
+    let session = create_session(pool, user.id).await?;
 
     res.cookies_mut().private_mut(session_secret).add(session);
 
@@ -91,14 +91,14 @@ async fn register(
     let password_hash =
         hash_password(&password).map_err(|e| Error::internal("failed to hash password", e))?;
 
-    let user = db::users::create(pool, &username, &password_hash)
+    let user = db::users::create(pool, &UserId::generate(6), &username, &password_hash)
         .await
         .map_constraint_err("users.username", |_| {
             Error::Conflict("Username is already taken.")
         })?;
     info!(user_id = user.id, "account created");
 
-    let session = db::sessions::create(pool, user.id).await?;
+    let session = create_session(pool, user.id).await?;
 
     res.cookies_mut().private_mut(session_secret).add(session);
 
