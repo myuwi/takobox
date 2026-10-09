@@ -1,7 +1,7 @@
 use sqlx::{FromRow, SqliteExecutor};
 use time::{Duration, UtcDateTime};
 
-use crate::auth::session_token::SessionToken;
+use crate::domain::session::SessionToken;
 
 // TODO: Clear expired sessions?
 

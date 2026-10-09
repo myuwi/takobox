@@ -3,9 +3,8 @@ use serde::Deserialize;
 use tracing::info;
 
 use crate::{
-    auth::password::{Password, hash_password, verify_password},
     db::{self, sessions::Session},
-    domain::user::Username,
+    domain::user::{Password, Username, hash_password, verify_password},
     http::{
         error::{Error, ResultExt},
         middleware::rate_limit::rate_limit,

@@ -2,7 +2,7 @@ use std::fmt;
 
 use sqlx::Type;
 
-use crate::domain::id;
+use super::id;
 
 const LENGTH: usize = 32;
 

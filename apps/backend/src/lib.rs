@@ -1,4 +1,3 @@
-mod auth;
 pub mod db;
 mod directories;
 mod domain;

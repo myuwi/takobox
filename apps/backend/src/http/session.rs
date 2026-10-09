@@ -10,8 +10,8 @@ use sqlx::SqlitePool;
 use time::OffsetDateTime;
 
 use crate::{
-    auth::session_token::SessionToken,
     db::{self, sessions::Session},
+    domain::session::SessionToken,
     http::error::Error,
 };
 
