@@ -14,7 +14,10 @@ use tracing::{error, warn};
 
 use crate::{
     db::{self, sessions::Session},
-    domain::file::{FileName, FileRename},
+    domain::{
+        collection::CollectionId,
+        file::{FileId, FileName, FileRename},
+    },
     http::{
         error::Error,
         middleware::size_limit::limit_upload_size,
@@ -23,7 +26,6 @@ use crate::{
         status::{Created, NoContent},
     },
     services::thumbnails::{ThumbnailError, generate_thumbnail},
-    types::NanoId,
 };
 
 /// Get files
@@ -44,7 +46,7 @@ async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<FileRespo
 async fn show(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<NanoId>,
+    id: PathParam<FileId>,
 ) -> Result<Json<FileResponse>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
     let file = db::files::get_by_public_id(pool, session.user_id, &id)
@@ -61,7 +63,7 @@ async fn show(
 async fn collections(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<NanoId>,
+    id: PathParam<FileId>,
 ) -> Result<Json<Vec<CollectionResponse>>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
@@ -79,7 +81,7 @@ async fn collections(
 #[salvo(parameters(default_parameter_in = Query, rename_all = "camelCase"))]
 #[serde(rename_all = "camelCase")]
 struct UploadFileSearchParams {
-    collection_id: Option<NanoId>,
+    collection_id: Option<CollectionId>,
 }
 
 // Only describes the multipart body for the OpenAPI schema; `FormFile` parses it.
@@ -116,7 +118,7 @@ async fn upload(
     let name = FileName::try_from(original_name.to_owned()).map_err(Error::UnprocessableEntity)?;
 
     // TODO: retry on db collision
-    let file_id = NanoId::new(6);
+    let file_id = FileId::generate(6);
     let ext = std::path::Path::new(name.as_str())
         .extension()
         .and_then(OsStr::to_str)
@@ -214,7 +216,7 @@ pub struct RenameFilePayload {
 async fn rename(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<NanoId>,
+    id: PathParam<FileId>,
     body: JsonBody<RenameFilePayload>,
 ) -> Result<Json<FileResponse>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
@@ -241,7 +243,7 @@ async fn rename(
 async fn delete(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<NanoId>,
+    id: PathParam<FileId>,
 ) -> Result<NoContent, Error> {
     let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
 
@@ -288,7 +290,7 @@ async fn download(
     res: &mut Response,
     depot: &mut Depot,
     session: Session,
-    id: PathParam<NanoId>,
+    id: PathParam<FileId>,
 ) -> Result<(), Error> {
     let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
 
@@ -316,7 +318,7 @@ async fn download(
 async fn regenerate_thumbnail(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<NanoId>,
+    id: PathParam<FileId>,
 ) -> Result<Json<FileResponse>, Error> {
     let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
 

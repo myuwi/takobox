@@ -2,8 +2,8 @@ use salvo::{oapi::extract::PathParam, prelude::*};
 
 use crate::{
     db::{self, sessions::Session},
+    domain::{collection::CollectionId, file::FileId},
     http::{error::Error, response::FileResponse, state::AppState, status::NoContent},
-    types::NanoId,
 };
 
 /// Get files
@@ -13,7 +13,7 @@ use crate::{
 async fn index(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<NanoId>,
+    id: PathParam<CollectionId>,
 ) -> Result<Json<Vec<FileResponse>>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
     if !db::collections::exists(pool, session.user_id, &id).await? {
@@ -34,8 +34,8 @@ async fn index(
 async fn add(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<NanoId>,
-    file_id: PathParam<NanoId>,
+    id: PathParam<CollectionId>,
+    file_id: PathParam<FileId>,
 ) -> Result<NoContent, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
@@ -59,8 +59,8 @@ async fn add(
 async fn remove(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<NanoId>,
-    file_id: PathParam<NanoId>,
+    id: PathParam<CollectionId>,
+    file_id: PathParam<FileId>,
 ) -> Result<NoContent, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 

@@ -1,13 +1,16 @@
 use salvo::oapi::ToSchema;
 use serde::Serialize;
 
-use crate::{db::collections::Collection, http::serialize::serialize_timestamp, types::NanoId};
+use crate::{
+    db::collections::Collection, domain::collection::CollectionId,
+    http::serialize::serialize_timestamp,
+};
 
 #[derive(Clone, Debug, Serialize, ToSchema)]
 #[salvo(schema(name = Collection))]
 #[serde(rename_all = "camelCase")]
 pub struct CollectionResponse {
-    pub id: NanoId,
+    pub id: CollectionId,
     pub name: String,
     #[salvo(schema(value_type = String))]
     #[serde(serialize_with = "serialize_timestamp")]

@@ -1,13 +1,13 @@
 use salvo::oapi::ToSchema;
 use serde::Serialize;
 
-use crate::{db::users::User, http::serialize::serialize_timestamp, types::NanoId};
+use crate::{db::users::User, domain::user::UserId, http::serialize::serialize_timestamp};
 
 #[derive(Clone, Debug, Serialize, ToSchema)]
 #[salvo(schema(name = User))]
 #[serde(rename_all = "camelCase")]
 pub struct UserResponse {
-    pub id: NanoId,
+    pub id: UserId,
     pub username: String,
     #[salvo(schema(value_type = String))]
     #[serde(serialize_with = "serialize_timestamp")]

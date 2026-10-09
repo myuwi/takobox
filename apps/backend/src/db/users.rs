@@ -1,27 +1,30 @@
 use sqlx::{FromRow, SqliteExecutor};
 
-use crate::{domain::user::Username, types::NanoId};
+use crate::{
+    auth::password::PasswordHash,
+    domain::user::{UserId, Username},
+};
 
 #[derive(Clone, Debug, FromRow)]
 pub struct User {
     pub id: i64,
-    pub public_id: NanoId,
+    pub public_id: UserId,
     pub username: String,
-    pub password: String,
+    pub password: PasswordHash,
     pub created_at: i64,
 }
 
 pub async fn create(
     conn: impl SqliteExecutor<'_>,
     username: &Username,
-    password_hash: &str,
+    password_hash: &PasswordHash,
 ) -> Result<User, sqlx::Error> {
-    let id = NanoId::new(6);
+    let public_id = UserId::generate(6);
 
     sqlx::query_as(
         "insert into users (public_id, username, password) values ($1, $2, $3) returning *",
     )
-    .bind(id)
+    .bind(public_id)
     .bind(username.as_str())
     .bind(password_hash)
     .fetch_one(conn)

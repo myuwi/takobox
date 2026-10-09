@@ -1,12 +1,15 @@
+use std::fmt;
+
 use argon2::{
-    Argon2, PasswordHash, PasswordHasher, PasswordVerifier,
+    Argon2, PasswordHasher, PasswordVerifier,
     password_hash::{SaltString, rand_core::OsRng},
 };
+use sqlx::Type;
 
 pub struct Password(String);
 
-impl std::fmt::Debug for Password {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl fmt::Debug for Password {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str("Password(****)")
     }
 }
@@ -29,17 +32,27 @@ impl TryFrom<String> for Password {
     }
 }
 
-pub fn hash_password(password: &Password) -> Result<String, argon2::password_hash::Error> {
+#[derive(Clone, Type)]
+#[sqlx(transparent)]
+pub struct PasswordHash(String);
+
+impl fmt::Debug for PasswordHash {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str("PasswordHash(****)")
+    }
+}
+
+pub fn hash_password(password: &Password) -> Result<PasswordHash, argon2::password_hash::Error> {
     let salt = SaltString::generate(&mut OsRng);
     Argon2::default()
         .hash_password(password.as_str().as_bytes(), &salt)
-        .map(|v| v.to_string())
+        .map(|hash| PasswordHash(hash.to_string()))
 }
 
 pub fn verify_password(
     password: &str,
-    password_hash: &str,
+    password_hash: &PasswordHash,
 ) -> Result<(), argon2::password_hash::Error> {
-    let parsed_hash = PasswordHash::new(password_hash)?;
+    let parsed_hash = argon2::PasswordHash::new(&password_hash.0)?;
     Argon2::default().verify_password(password.as_bytes(), &parsed_hash)
 }

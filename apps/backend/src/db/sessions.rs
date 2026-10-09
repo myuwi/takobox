@@ -1,7 +1,7 @@
 use sqlx::{FromRow, SqliteExecutor};
 use time::{Duration, UtcDateTime};
 
-use crate::types::NanoId;
+use crate::auth::session_token::SessionToken;
 
 // TODO: Clear expired sessions?
 
@@ -10,14 +10,14 @@ const EXPIRATION: Duration = Duration::days(30);
 #[derive(Clone, Debug, FromRow)]
 pub struct Session {
     pub id: i64,
-    pub public_id: NanoId,
+    pub public_id: SessionToken,
     pub user_id: i64,
     pub created_at: i64,
     pub expires_at: i64,
 }
 
 pub async fn create(conn: impl SqliteExecutor<'_>, user_id: i64) -> Result<Session, sqlx::Error> {
-    let id = NanoId::new(32);
+    let token = SessionToken::generate();
     let expires_at = (UtcDateTime::now() + EXPIRATION).unix_timestamp();
 
     sqlx::query_as(
@@ -25,7 +25,7 @@ pub async fn create(conn: impl SqliteExecutor<'_>, user_id: i64) -> Result<Sessi
         values ($1, $2, $3)
         returning *",
     )
-    .bind(id)
+    .bind(token)
     .bind(user_id)
     .bind(expires_at)
     .fetch_one(conn)
@@ -34,10 +34,10 @@ pub async fn create(conn: impl SqliteExecutor<'_>, user_id: i64) -> Result<Sessi
 
 pub async fn get_by_public_id(
     conn: impl SqliteExecutor<'_>,
-    session_id: &NanoId,
+    token: &SessionToken,
 ) -> Result<Option<Session>, sqlx::Error> {
     sqlx::query_as("select * from sessions where public_id = $1 and expires_at > unixepoch()")
-        .bind(session_id)
+        .bind(token)
         .fetch_optional(conn)
         .await
 }

@@ -5,7 +5,6 @@ mod domain;
 mod http;
 mod services;
 mod settings;
-mod types;
 
 pub use directories::Directories;
 pub use http::{

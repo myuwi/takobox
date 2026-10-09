@@ -1,12 +1,12 @@
 use sqlx::{FromRow, SqliteExecutor};
 
-use crate::{domain::collection::CollectionName, types::NanoId};
+use crate::domain::collection::{CollectionId, CollectionName};
 
 #[derive(Clone, Debug, FromRow)]
 pub struct Collection {
     #[expect(dead_code)]
     pub id: i64,
-    pub public_id: NanoId,
+    pub public_id: CollectionId,
     #[expect(dead_code)]
     pub user_id: i64,
     pub name: String,
@@ -30,7 +30,7 @@ pub async fn get_all_for_user(
 pub async fn get_by_public_id(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    id: &NanoId,
+    id: &CollectionId,
 ) -> Result<Option<Collection>, sqlx::Error> {
     sqlx::query_as(
         "select * from collections
@@ -45,7 +45,7 @@ pub async fn get_by_public_id(
 pub async fn exists(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    id: &NanoId,
+    id: &CollectionId,
 ) -> Result<bool, sqlx::Error> {
     sqlx::query_scalar(
         "select count(*) > 0 from collections
@@ -62,14 +62,14 @@ pub async fn create(
     user_id: i64,
     name: &CollectionName,
 ) -> Result<Collection, sqlx::Error> {
-    let id = NanoId::new(6);
+    let public_id = CollectionId::generate(6);
 
     sqlx::query_as(
         "insert into collections (public_id, user_id, name)
         values ($1, $2, $3)
         returning *",
     )
-    .bind(id)
+    .bind(public_id)
     .bind(user_id)
     .bind(name.as_str())
     .fetch_one(conn)
@@ -79,7 +79,7 @@ pub async fn create(
 pub async fn rename(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    id: &NanoId,
+    id: &CollectionId,
     name: &CollectionName,
 ) -> Result<Option<Collection>, sqlx::Error> {
     sqlx::query_as(
@@ -98,7 +98,7 @@ pub async fn rename(
 pub async fn delete(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    id: &NanoId,
+    id: &CollectionId,
 ) -> Result<Option<Collection>, sqlx::Error> {
     sqlx::query_as(
         "delete from collections

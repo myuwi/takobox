@@ -11,9 +11,14 @@ export type AuthCredentials = {
 
 export type Collection = {
     createdAt: string;
-    id: NanoId;
+    id: CollectionId;
     name: string;
 };
+
+/**
+ * The public id of a collection.
+ */
+export type CollectionId = string;
 
 export type CreateCollectionPayload = {
     name: string;
@@ -26,13 +31,16 @@ export type ErrorResponse = {
 export type File = {
     createdAt: string;
     filename: string;
-    id: NanoId;
+    id: FileId;
     name: string;
     size: number;
     thumbnailUrl: string | null;
 };
 
-export type NanoId = string;
+/**
+ * The public id of a file.
+ */
+export type FileId = string;
 
 export type RenameCollectionPayload = {
     name: string;
@@ -53,9 +61,14 @@ export type UploadFilePayload = {
 
 export type User = {
     createdAt: string;
-    id: NanoId;
+    id: UserId;
     username: string;
 };
+
+/**
+ * The public id of a user.
+ */
+export type UserId = string;
 
 export type AuthLoginData = {
     /**
@@ -217,7 +230,7 @@ export type CollectionsDeleteData = {
         /**
          * Get parameter `id` from request url path.
          */
-        id: NanoId;
+        id: CollectionId;
     };
     query?: never;
     url: '/collections/{id}';
@@ -251,7 +264,7 @@ export type CollectionsGetData = {
         /**
          * Get parameter `id` from request url path.
          */
-        id: NanoId;
+        id: CollectionId;
     };
     query?: never;
     url: '/collections/{id}';
@@ -288,7 +301,7 @@ export type CollectionsRenameData = {
         /**
          * Get parameter `id` from request url path.
          */
-        id: NanoId;
+        id: CollectionId;
     };
     query?: never;
     url: '/collections/{id}';
@@ -322,7 +335,7 @@ export type CollectionsFilesListData = {
         /**
          * Get parameter `id` from request url path.
          */
-        id: NanoId;
+        id: CollectionId;
     };
     query?: never;
     url: '/collections/{id}/files';
@@ -356,11 +369,11 @@ export type CollectionsFilesRemoveData = {
         /**
          * Get parameter `id` from request url path.
          */
-        id: NanoId;
+        id: CollectionId;
         /**
          * Get parameter `file_id` from request url path.
          */
-        file_id: NanoId;
+        file_id: FileId;
     };
     query?: never;
     url: '/collections/{id}/files/{file_id}';
@@ -394,11 +407,11 @@ export type CollectionsFilesAddData = {
         /**
          * Get parameter `id` from request url path.
          */
-        id: NanoId;
+        id: CollectionId;
         /**
          * Get parameter `file_id` from request url path.
          */
-        file_id: NanoId;
+        file_id: FileId;
     };
     query?: never;
     url: '/collections/{id}/files/{file_id}';
@@ -462,7 +475,7 @@ export type FilesUploadData = {
     body: UploadFilePayload;
     path?: never;
     query?: {
-        collectionId?: NanoId;
+        collectionId?: CollectionId;
     };
     url: '/files';
 };
@@ -495,7 +508,7 @@ export type FilesDeleteData = {
         /**
          * Get parameter `id` from request url path.
          */
-        id: NanoId;
+        id: FileId;
     };
     query?: never;
     url: '/files/{id}';
@@ -529,7 +542,7 @@ export type FilesGetData = {
         /**
          * Get parameter `id` from request url path.
          */
-        id: NanoId;
+        id: FileId;
     };
     query?: never;
     url: '/files/{id}';
@@ -566,7 +579,7 @@ export type FilesRenameData = {
         /**
          * Get parameter `id` from request url path.
          */
-        id: NanoId;
+        id: FileId;
     };
     query?: never;
     url: '/files/{id}';
@@ -600,7 +613,7 @@ export type FilesCollectionsListData = {
         /**
          * Get parameter `id` from request url path.
          */
-        id: NanoId;
+        id: FileId;
     };
     query?: never;
     url: '/files/{id}/collections';
@@ -634,7 +647,7 @@ export type FilesDownloadData = {
         /**
          * Get parameter `id` from request url path.
          */
-        id: NanoId;
+        id: FileId;
     };
     query?: never;
     url: '/files/{id}/download';
@@ -666,7 +679,7 @@ export type FilesRegenerateThumbnailData = {
         /**
          * Get parameter `id` from request url path.
          */
-        id: NanoId;
+        id: FileId;
     };
     query?: never;
     url: '/files/{id}/regenerate-thumbnail';

@@ -279,7 +279,7 @@
             "description": "Get parameter `id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/CollectionId"
             }
           }
         ],
@@ -330,7 +330,7 @@
             "description": "Get parameter `id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/CollectionId"
             }
           }
         ],
@@ -374,7 +374,7 @@
             "description": "Get parameter `id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/CollectionId"
             }
           }
         ],
@@ -438,7 +438,7 @@
             "description": "Get parameter `id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/CollectionId"
             }
           }
         ],
@@ -494,7 +494,7 @@
             "description": "Get parameter `id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/CollectionId"
             }
           },
           {
@@ -503,7 +503,7 @@
             "description": "Get parameter `file_id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/FileId"
             }
           }
         ],
@@ -547,7 +547,7 @@
             "description": "Get parameter `id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/CollectionId"
             }
           },
           {
@@ -556,7 +556,7 @@
             "description": "Get parameter `file_id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/FileId"
             }
           }
         ],
@@ -644,7 +644,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/CollectionId"
             }
           }
         ],
@@ -716,7 +716,7 @@
             "description": "Get parameter `id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/FileId"
             }
           }
         ],
@@ -767,7 +767,7 @@
             "description": "Get parameter `id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/FileId"
             }
           }
         ],
@@ -811,7 +811,7 @@
             "description": "Get parameter `id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/FileId"
             }
           }
         ],
@@ -875,7 +875,7 @@
             "description": "Get parameter `id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/FileId"
             }
           }
         ],
@@ -931,7 +931,7 @@
             "description": "Get parameter `id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/FileId"
             }
           }
         ],
@@ -977,7 +977,7 @@
             "description": "Get parameter `id` from request url path.",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/NanoId"
+              "$ref": "#/components/schemas/FileId"
             }
           }
         ],
@@ -1129,12 +1129,16 @@
             "type": "string"
           },
           "id": {
-            "$ref": "#/components/schemas/NanoId"
+            "$ref": "#/components/schemas/CollectionId"
           },
           "name": {
             "type": "string"
           }
         }
+      },
+      "CollectionId": {
+        "type": "string",
+        "description": "The public id of a collection."
       },
       "CreateCollectionPayload": {
         "type": "object",
@@ -1176,7 +1180,7 @@
             "type": "string"
           },
           "id": {
-            "$ref": "#/components/schemas/NanoId"
+            "$ref": "#/components/schemas/FileId"
           },
           "name": {
             "type": "string"
@@ -1193,8 +1197,9 @@
           }
         }
       },
-      "NanoId": {
-        "type": "string"
+      "FileId": {
+        "type": "string",
+        "description": "The public id of a file."
       },
       "RenameCollectionPayload": {
         "type": "object",
@@ -1258,12 +1263,16 @@
             "type": "string"
           },
           "id": {
-            "$ref": "#/components/schemas/NanoId"
+            "$ref": "#/components/schemas/UserId"
           },
           "username": {
             "type": "string"
           }
         }
+      },
+      "UserId": {
+        "type": "string",
+        "description": "The public id of a user."
       }
     }
   }

@@ -2,13 +2,13 @@ use sqlx::SqliteExecutor;
 
 use crate::{
     db::{collections::Collection, files::File},
-    types::NanoId,
+    domain::{collection::CollectionId, file::FileId},
 };
 
 pub async fn get_files(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    collection_id: &NanoId,
+    collection_id: &CollectionId,
 ) -> Result<Vec<File>, sqlx::Error> {
     sqlx::query_as(
         "select f.* from collection_files cf
@@ -43,8 +43,8 @@ pub async fn get_collections(
 pub async fn add(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    collection_id: &NanoId,
-    file_id: &NanoId,
+    collection_id: &CollectionId,
+    file_id: &FileId,
 ) -> Result<Option<()>, sqlx::Error> {
     sqlx::query(
         "insert into collection_files (collection_id, file_id)
@@ -69,8 +69,8 @@ pub async fn add(
 pub async fn remove(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    collection_id: &NanoId,
-    file_id: &NanoId,
+    collection_id: &CollectionId,
+    file_id: &FileId,
 ) -> Result<Option<()>, sqlx::Error> {
     sqlx::query(
         "delete from collection_files

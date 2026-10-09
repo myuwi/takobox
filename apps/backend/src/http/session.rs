@@ -10,9 +10,9 @@ use sqlx::SqlitePool;
 use time::OffsetDateTime;
 
 use crate::{
+    auth::session_token::SessionToken,
     db::{self, sessions::Session},
     http::error::Error,
-    types::NanoId,
 };
 
 const COOKIE_NAME: &str = "session";
@@ -21,14 +21,14 @@ pub async fn resolve_session(
     pool: &SqlitePool,
     jar: &PrivateJar<&CookieJar>,
 ) -> Result<Option<Session>, Error> {
-    let Some(session_id) = jar
+    let Some(token) = jar
         .get(COOKIE_NAME)
-        .and_then(|c| NanoId::try_from(c.value().to_string()).ok())
+        .map(|c| SessionToken::from(c.value().to_owned()))
     else {
         return Ok(None);
     };
 
-    Ok(db::sessions::get_by_public_id(pool, &session_id).await?)
+    Ok(db::sessions::get_by_public_id(pool, &token).await?)
 }
 
 fn build_cookie(value: String, expires: OffsetDateTime) -> Cookie<'static> {
@@ -45,7 +45,7 @@ impl From<Session> for Cookie<'_> {
     fn from(session: Session) -> Self {
         let expires = OffsetDateTime::from_unix_timestamp(session.expires_at).unwrap();
 
-        build_cookie(session.public_id.to_string(), expires)
+        build_cookie(session.public_id.as_str().to_owned(), expires)
     }
 }
 

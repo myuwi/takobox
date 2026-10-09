@@ -1,6 +1,30 @@
-use std::sync::LazyLock;
+use std::{fmt, sync::LazyLock};
 
 use regex::Regex;
+use salvo::oapi::ToSchema;
+use serde::{Deserialize, Serialize};
+use sqlx::Type;
+
+use super::id;
+
+/// The public id of a user.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Type, ToSchema)]
+#[salvo(schema(name = UserId))]
+#[serde(transparent)]
+#[sqlx(transparent)]
+pub struct UserId(String);
+
+impl UserId {
+    pub fn generate(length: usize) -> Self {
+        Self(id::generate(length))
+    }
+}
+
+impl fmt::Display for UserId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(&self.0)
+    }
+}
 
 static VALID_USERNAME_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[a-z0-9_-]+$").unwrap());

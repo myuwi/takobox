@@ -1,14 +1,11 @@
 use sqlx::{FromRow, SqliteExecutor};
 
-use crate::{
-    domain::file::{FileName, FileRename},
-    types::NanoId,
-};
+use crate::domain::file::{FileId, FileName, FileRename};
 
 #[derive(Clone, Debug, FromRow)]
 pub struct File {
     pub id: i64,
-    pub public_id: NanoId,
+    pub public_id: FileId,
     #[expect(dead_code)]
     pub user_id: i64,
     pub name: String,
@@ -34,7 +31,7 @@ pub async fn get_all_for_user(
 pub async fn get_by_public_id(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    id: &NanoId,
+    id: &FileId,
 ) -> Result<Option<File>, sqlx::Error> {
     sqlx::query_as(
         "select * from files
@@ -49,7 +46,7 @@ pub async fn get_by_public_id(
 pub async fn create(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    id: &NanoId,
+    id: &FileId,
     filename: &str,
     name: &FileName,
     size: i64,
@@ -71,7 +68,7 @@ pub async fn create(
 pub async fn rename(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    id: &NanoId,
+    id: &FileId,
     rename: FileRename,
 ) -> Result<Option<File>, sqlx::Error> {
     sqlx::query_as(
@@ -90,7 +87,7 @@ pub async fn rename(
 pub async fn delete(
     conn: impl SqliteExecutor<'_>,
     user_id: i64,
-    id: &NanoId,
+    id: &FileId,
 ) -> Result<Option<File>, sqlx::Error> {
     sqlx::query_as(
         "delete from files

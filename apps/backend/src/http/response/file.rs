@@ -2,15 +2,15 @@ use salvo::oapi::ToSchema;
 use serde::Serialize;
 
 use crate::{
-    db::files::File, http::serialize::serialize_timestamp,
-    services::thumbnails::thumbnail_file_name, types::NanoId,
+    db::files::File, domain::file::FileId, http::serialize::serialize_timestamp,
+    services::thumbnails::thumbnail_file_name,
 };
 
 #[derive(Clone, Debug, Serialize, ToSchema)]
 #[salvo(schema(name = File))]
 #[serde(rename_all = "camelCase")]
 pub struct FileResponse {
-    pub id: NanoId,
+    pub id: FileId,
     pub name: String,
     pub filename: String,
     pub size: i64,

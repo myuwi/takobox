@@ -7,14 +7,13 @@ use serde::Deserialize;
 use super::collection_files;
 use crate::{
     db::{self, sessions::Session},
-    domain::collection::CollectionName,
+    domain::collection::{CollectionId, CollectionName},
     http::{
         error::{Error, ResultExt},
         response::CollectionResponse,
         state::AppState,
         status::{Created, NoContent},
     },
-    types::NanoId,
 };
 
 /// Get collections
@@ -38,7 +37,7 @@ async fn index(
 async fn show(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<NanoId>,
+    id: PathParam<CollectionId>,
 ) -> Result<Json<CollectionResponse>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
     let collection = db::collections::get_by_public_id(pool, session.user_id, &id)
@@ -100,7 +99,7 @@ pub struct RenameCollectionPayload {
 async fn rename(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<NanoId>,
+    id: PathParam<CollectionId>,
     body: JsonBody<RenameCollectionPayload>,
 ) -> Result<Json<CollectionResponse>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
@@ -124,7 +123,7 @@ async fn rename(
 async fn delete(
     depot: &mut Depot,
     session: Session,
-    id: PathParam<NanoId>,
+    id: PathParam<CollectionId>,
 ) -> Result<NoContent, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
