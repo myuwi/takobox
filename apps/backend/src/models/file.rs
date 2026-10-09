@@ -1,9 +1,8 @@
 use std::{ffi::OsStr, path::Path};
 
 use sanitize_filename::is_sanitized;
-use sqlx::{FromRow, SqliteExecutor};
 
-use crate::types::NanoId;
+use crate::db::files::File;
 
 #[derive(Debug)]
 pub struct FileName(String);
@@ -32,18 +31,6 @@ impl TryFrom<String> for FileName {
     }
 }
 
-#[allow(dead_code)]
-#[derive(Clone, Debug, FromRow)]
-pub struct File {
-    pub id: i64,
-    pub public_id: NanoId,
-    pub user_id: i64,
-    pub name: String,
-    pub filename: String,
-    pub size: i64,
-    pub created_at: i64,
-}
-
 impl File {
     pub fn parse_rename(&self, new: FileName) -> Result<RenameTo, &'static str> {
         fn extension(name: &str) -> Option<&str> {
@@ -63,113 +50,5 @@ pub struct RenameTo(FileName);
 impl RenameTo {
     pub fn as_str(&self) -> &str {
         self.0.as_str()
-    }
-}
-
-impl File {
-    pub async fn get_all_for_user(
-        conn: impl SqliteExecutor<'_>,
-        user_id: i64,
-    ) -> Result<Vec<File>, sqlx::Error> {
-        sqlx::query_as(
-            "select * from files
-            where user_id = $1
-            order by id desc",
-        )
-        .bind(user_id)
-        .fetch_all(conn)
-        .await
-    }
-
-    pub async fn get_all_for_collection(
-        conn: impl SqliteExecutor<'_>,
-        user_id: i64,
-        collection_id: &NanoId,
-    ) -> Result<Vec<File>, sqlx::Error> {
-        sqlx::query_as(
-            "select f.* from collection_files cf
-            join files f on cf.file_id = f.id
-            join collections c on cf.collection_id = c.id
-            where c.public_id = $1 and c.user_id = $2
-            order by id desc",
-        )
-        .bind(collection_id)
-        .bind(user_id)
-        .fetch_all(conn)
-        .await
-    }
-
-    pub async fn get_by_public_id(
-        conn: impl SqliteExecutor<'_>,
-        user_id: i64,
-        id: &NanoId,
-    ) -> Result<Option<File>, sqlx::Error> {
-        sqlx::query_as(
-            "select * from files
-            where public_id = $1 and user_id = $2",
-        )
-        .bind(id)
-        .bind(user_id)
-        .fetch_optional(conn)
-        .await
-    }
-
-    pub async fn create(
-        conn: impl SqliteExecutor<'_>,
-        user_id: i64,
-        id: &NanoId,
-        file_name: &str,
-        name: &FileName,
-        size: &usize,
-    ) -> Result<File, sqlx::Error> {
-        let file_size = *size as i64;
-
-        sqlx::query_as(
-            "insert into files (public_id, user_id, filename, name, size)
-            values ($1, $2, $3, $4, $5)
-            returning *",
-        )
-        .bind(id)
-        .bind(user_id)
-        .bind(file_name)
-        .bind(name.as_str())
-        .bind(file_size)
-        .fetch_one(conn)
-        .await
-    }
-
-    pub async fn rename(
-        conn: impl SqliteExecutor<'_>,
-        user_id: i64,
-        id: &NanoId,
-        name: RenameTo,
-    ) -> Result<Option<File>, sqlx::Error> {
-        sqlx::query_as(
-            "update files
-            set name = $1
-            where public_id = $2 and user_id = $3
-            returning *",
-        )
-        .bind(name.as_str())
-        .bind(id)
-        .bind(user_id)
-        .fetch_optional(conn)
-        .await
-    }
-
-    pub async fn delete(
-        conn: impl SqliteExecutor<'_>,
-        user_id: i64,
-        id: &NanoId,
-    ) -> Result<Option<File>, sqlx::Error> {
-        sqlx::query_as(
-            "delete from files 
-            where public_id = $1 and user_id = $2
-            returning *",
-        )
-        .bind(id)
-        .bind(user_id)
-        .fetch_optional(conn)
-        .await
     }
 }

@@ -13,6 +13,7 @@ use tempfile::NamedTempFile;
 use tracing::{error, warn};
 
 use crate::{
+    db::{self, sessions::Session},
     http::{
         error::Error,
         middleware::size_limit::limit_upload_size,
@@ -20,11 +21,7 @@ use crate::{
         state::AppState,
         status::{Created, NoContent},
     },
-    models::{
-        collection::Collection,
-        file::{File, FileName},
-        session::Session,
-    },
+    models::file::FileName,
     services::thumbnails::{ThumbnailError, generate_thumbnail},
     types::NanoId,
 };
@@ -35,7 +32,7 @@ use crate::{
 #[endpoint(operation_id = "files.list", tags("Files"))]
 async fn index(depot: &mut Depot, session: Session) -> Result<Json<Vec<FileResponse>>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
-    let files = File::get_all_for_user(pool, session.user_id).await?;
+    let files = db::files::get_all_for_user(pool, session.user_id).await?;
 
     Ok(Json(files.into_iter().map(Into::into).collect()))
 }
@@ -50,7 +47,7 @@ async fn show(
     id: PathParam<NanoId>,
 ) -> Result<Json<FileResponse>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
-    let file = File::get_by_public_id(pool, session.user_id, &id)
+    let file = db::files::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -68,11 +65,12 @@ async fn collections(
 ) -> Result<Json<Vec<CollectionResponse>>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
-    let file = File::get_by_public_id(pool, session.user_id, &id)
+    let file = db::files::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
-    let file_collections = Collection::get_all_for_file(pool, session.user_id, file.id).await?;
+    let file_collections =
+        db::collection_files::get_collections(pool, session.user_id, file.id).await?;
 
     Ok(Json(file_collections.into_iter().map(Into::into).collect()))
 }
@@ -126,7 +124,7 @@ async fn upload(
         .unwrap_or("".to_string());
 
     let file_name = file_id.to_string() + &ext;
-    let file_size = file.size() as usize;
+    let file_size = file.size() as i64;
     let temp_path = file.path();
 
     let file_path = dirs.uploads_dir().join(&file_name);
@@ -142,18 +140,18 @@ async fn upload(
 
     let mut transaction = pool.begin().await?;
 
-    let file = File::create(
+    let file = db::files::create(
         &mut *transaction,
         session.user_id,
         &file_id,
         &file_name,
         &name,
-        &file_size,
+        file_size,
     )
     .await?;
 
     if let Some(collection_id) = collection_id {
-        Collection::add_file(
+        db::collection_files::add(
             &mut *transaction,
             session.user_id,
             collection_id,
@@ -223,7 +221,7 @@ async fn rename(
 
     let name = FileName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
 
-    let file = File::get_by_public_id(pool, session.user_id, &id)
+    let file = db::files::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -231,7 +229,7 @@ async fn rename(
         .parse_rename(name)
         .map_err(Error::UnprocessableEntity)?;
 
-    let file = File::rename(pool, session.user_id, &id, new_name)
+    let file = db::files::rename(pool, session.user_id, &id, new_name)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -251,7 +249,7 @@ async fn delete(
 
     let mut transaction = pool.begin().await?;
 
-    let file = File::delete(&mut *transaction, session.user_id, &id)
+    let file = db::files::delete(&mut *transaction, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -296,7 +294,7 @@ async fn download(
 ) -> Result<(), Error> {
     let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
 
-    let file = File::get_by_public_id(pool, session.user_id, &id)
+    let file = db::files::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 
@@ -324,7 +322,7 @@ async fn regenerate_thumbnail(
 ) -> Result<Json<FileResponse>, Error> {
     let AppState { pool, dirs, .. } = depot.get_typed::<AppState>().unwrap();
 
-    let file = File::get_by_public_id(pool, session.user_id, &id)
+    let file = db::files::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("File not found or not owned by user."))?;
 

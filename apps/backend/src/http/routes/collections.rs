@@ -6,16 +6,14 @@ use serde::Deserialize;
 
 use super::collection_files;
 use crate::{
+    db::{self, sessions::Session},
     http::{
         error::{Error, ResultExt},
         response::CollectionResponse,
         state::AppState,
         status::{Created, NoContent},
     },
-    models::{
-        collection::{Collection, CollectionName},
-        session::Session,
-    },
+    models::collection::CollectionName,
     types::NanoId,
 };
 
@@ -28,7 +26,7 @@ async fn index(
     session: Session,
 ) -> Result<Json<Vec<CollectionResponse>>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
-    let collections = Collection::get_all_for_user(pool, session.user_id).await?;
+    let collections = db::collections::get_all_for_user(pool, session.user_id).await?;
 
     Ok(Json(collections.into_iter().map(Into::into).collect()))
 }
@@ -43,7 +41,7 @@ async fn show(
     id: PathParam<NanoId>,
 ) -> Result<Json<CollectionResponse>, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
-    let collection = Collection::get_by_public_id(pool, session.user_id, &id)
+    let collection = db::collections::get_by_public_id(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
 
@@ -73,7 +71,7 @@ async fn create(
 
     let name = CollectionName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
 
-    let collection = Collection::create(pool, session.user_id, &name)
+    let collection = db::collections::create(pool, session.user_id, &name)
         .await
         .map_constraint_err("collections.user_id, collections.name", |_| {
             Error::Conflict("A collection with this name already exists. Please try another name.")
@@ -109,7 +107,7 @@ async fn rename(
 
     let name = CollectionName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
 
-    let collection = Collection::rename(pool, session.user_id, &id, &name)
+    let collection = db::collections::rename(pool, session.user_id, &id, &name)
         .await
         .map_constraint_err("collections.user_id, collections.name", |_| {
             Error::Conflict("A collection with this name already exists. Please try another name.")
@@ -130,7 +128,7 @@ async fn delete(
 ) -> Result<NoContent, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
-    Collection::delete(pool, session.user_id, &id)
+    db::collections::delete(pool, session.user_id, &id)
         .await?
         .ok_or_else(|| Error::NotFound("Collection not found or not owned by user."))?;
 

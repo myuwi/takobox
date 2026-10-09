@@ -2,7 +2,7 @@ use salvo::oapi::ToSchema;
 use serde::Serialize;
 
 use crate::{
-    http::serialize::serialize_timestamp, models::file::File,
+    db::files::File, http::serialize::serialize_timestamp,
     services::thumbnails::thumbnail_file_name, types::NanoId,
 };
 

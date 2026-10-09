@@ -1,3 +1,9 @@
+pub(crate) mod collection_files;
+pub(crate) mod collections;
+pub(crate) mod files;
+pub(crate) mod sessions;
+pub(crate) mod users;
+
 use sqlx::{
     Sqlite, SqlitePool,
     migrate::{MigrateDatabase, MigrateError},

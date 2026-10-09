@@ -4,6 +4,7 @@ use tracing::info;
 
 use crate::{
     auth::password::{Password, hash_password, verify_password},
+    db::{self, sessions::Session},
     http::{
         error::{Error, ResultExt},
         middleware::rate_limit::rate_limit,
@@ -12,10 +13,7 @@ use crate::{
         state::AppState,
         status::{Created, NoContent},
     },
-    models::{
-        session::Session,
-        user::{User, Username},
-    },
+    models::user::Username,
 };
 
 #[derive(Clone, Debug, Deserialize, ToSchema)]
@@ -44,7 +42,7 @@ async fn login(
         ..
     } = depot.get_typed::<AppState>().unwrap();
 
-    let user = User::get_by_username(pool, &body.username)
+    let user = db::users::get_by_username(pool, &body.username)
         .await?
         .ok_or_else(|| Error::Unauthorized("Invalid username or password"))?;
 
@@ -55,7 +53,7 @@ async fn login(
         e => Error::internal("failed to verify password", e),
     })?;
 
-    let session = Session::create(pool, user.id).await?;
+    let session = db::sessions::create(pool, user.id).await?;
 
     res.cookies_mut().private_mut(session_secret).add(session);
 
@@ -94,14 +92,14 @@ async fn register(
     let password_hash =
         hash_password(&password).map_err(|e| Error::internal("failed to hash password", e))?;
 
-    let user = User::create(pool, &username, &password_hash)
+    let user = db::users::create(pool, &username, &password_hash)
         .await
         .map_constraint_err("users.username", |_| {
             Error::Conflict("Username is already taken.")
         })?;
     info!(user_id = user.id, "account created");
 
-    let session = Session::create(pool, user.id).await?;
+    let session = db::sessions::create(pool, user.id).await?;
 
     res.cookies_mut().private_mut(session_secret).add(session);
 
@@ -119,7 +117,7 @@ async fn logout(
 ) -> Result<NoContent, Error> {
     let AppState { pool, .. } = depot.get_typed::<AppState>().unwrap();
 
-    Session::delete(pool, session.id).await?;
+    db::sessions::delete(pool, session.id).await?;
 
     res.cookies_mut().add(clear_session_cookie());
 

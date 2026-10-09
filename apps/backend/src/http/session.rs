@@ -9,7 +9,11 @@ use salvo::{
 use sqlx::SqlitePool;
 use time::OffsetDateTime;
 
-use crate::{http::error::Error, models::session::Session, types::NanoId};
+use crate::{
+    db::{self, sessions::Session},
+    http::error::Error,
+    types::NanoId,
+};
 
 const COOKIE_NAME: &str = "session";
 
@@ -24,7 +28,7 @@ pub async fn resolve_session(
         return Ok(None);
     };
 
-    Ok(Session::get_by_public_id(pool, &session_id).await?)
+    Ok(db::sessions::get_by_public_id(pool, &session_id).await?)
 }
 
 fn build_cookie(value: String, expires: OffsetDateTime) -> Cookie<'static> {

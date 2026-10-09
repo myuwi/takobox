@@ -1,8 +1,8 @@
 use salvo::{Depot, Request, Writer, handler};
 
 use crate::{
+    db::sessions::Session,
     http::{error::Error, session::resolve_session, state::AppState},
-    models::session::Session,
 };
 
 #[handler]
