@@ -26,7 +26,7 @@ export function Content({
       <Backdrop forceRender />
       <DialogPrimitive.Popup
         className={cn(
-          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-[-50%] gap-4 rounded-lg border border-border bg-background p-6 shadow-lg sm:max-w-lg",
+          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-[-50%] gap-4 rounded-lg border border-border bg-background p-4 shadow-lg sm:max-w-md",
           "duration-200 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
           className,
         )}
@@ -40,10 +40,10 @@ export function Content({
   );
 }
 
-export const Header = tw.div`flex flex-col gap-4 text-center sm:text-left`;
+export const Header = tw.div`flex flex-col gap-2 text-center sm:text-left`;
 
 export const Footer = tw.div`flex flex-col-reverse gap-2 sm:flex-row sm:justify-end`;
 
-export const Title = tw(DialogPrimitive.Title)`text-lg leading-none font-semibold`;
+export const Title = tw(DialogPrimitive.Title)`text-lg font-medium`;
 
 export const Description = tw(DialogPrimitive.Description)`text-sm text-muted-foreground`;
