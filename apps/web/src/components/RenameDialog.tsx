@@ -4,11 +4,10 @@ import { useAtom } from "jotai";
 import { useForm } from "react-hook-form";
 import { renameDialogAtom } from "@/atoms/dialogs";
 import { formatError } from "@/utils/error";
-import { Alert } from "./primitives/Alert";
 import { Button } from "./primitives/Button";
 import * as Dialog from "./primitives/Dialog";
+import * as Field from "./primitives/Field";
 import { Input } from "./primitives/Input";
-import { Label } from "./primitives/Label";
 
 export const RenameDialog = () => {
   const [renameDialog, setRenameDialog] = useAtom(renameDialogAtom);
@@ -67,19 +66,18 @@ export const RenameDialog = () => {
             <Dialog.Title>{renameDialog?.title}</Dialog.Title>
           </Dialog.Header>
 
-          <div>
-            <Label className="flex flex-col gap-2">
-              Name
+          <Field.Group>
+            <Field.Root invalid={isError}>
+              <Field.Label>Name</Field.Label>
               <Input
                 {...register("name", { required: true })}
                 type="text"
                 placeholder={renameDialog?.placeholder ?? "Name"}
                 autoComplete="off"
-                aria-invalid={isError}
               />
-              {isError && <Alert>{formatError(error)}</Alert>}
-            </Label>
-          </div>
+              {isError && <Field.Error match>{formatError(error)}</Field.Error>}
+            </Field.Root>
+          </Field.Group>
 
           <Dialog.Footer>
             <Dialog.Close render={<Button variant="outline" />}>Cancel</Dialog.Close>

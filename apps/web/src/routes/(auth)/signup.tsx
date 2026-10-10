@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import type { AuthCredentials } from "@takobox/sdk";
 import { Alert } from "@/components/primitives/Alert";
 import { Button } from "@/components/primitives/Button";
+import * as Field from "@/components/primitives/Field";
 import { Input } from "@/components/primitives/Input";
-import { Label } from "@/components/primitives/Label";
 import { registerOptions } from "@/queries/register";
 import { settingsOptions } from "@/queries/settings";
 import { formatError } from "@/utils/error";
@@ -30,30 +30,30 @@ function SignUp() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex w-full max-w-xs flex-col gap-6">
       <h1 className="text-2xl">Create account</h1>
-      <div className="flex flex-col gap-4">
+      <Field.Group>
         {accountCreationDisabled && (
           <Alert variant="info">Account creation is currently disabled for this instance.</Alert>
         )}
         {error && <Alert>{formatError(error)}</Alert>}
-        <Label className="flex flex-col gap-2">
-          Username
+        <Field.Root>
+          <Field.Label>Username</Field.Label>
           <Input
             {...register("username", { required: true })}
             type="text"
             placeholder="Username"
             disabled={accountCreationDisabled}
           />
-        </Label>
-        <Label className="flex flex-col gap-2">
-          Password
+        </Field.Root>
+        <Field.Root>
+          <Field.Label>Password</Field.Label>
           <Input
             {...register("password", { required: true })}
             type="password"
             placeholder="Password"
             disabled={accountCreationDisabled}
           />
-        </Label>
-      </div>
+        </Field.Root>
+      </Field.Group>
       <Button type="submit" disabled={accountCreationDisabled}>
         Create account
       </Button>

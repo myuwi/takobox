@@ -5,11 +5,10 @@ import { Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { createCollectionOptions } from "@/queries/collections";
 import { formatError } from "@/utils/error";
-import { Alert } from "./primitives/Alert";
 import { Button } from "./primitives/Button";
 import * as Dialog from "./primitives/Dialog";
+import * as Field from "./primitives/Field";
 import { Input } from "./primitives/Input";
-import { Label } from "./primitives/Label";
 
 export const CreateCollectionDialog = () => {
   const [open, setOpen] = useState(false);
@@ -65,19 +64,18 @@ export const CreateCollectionDialog = () => {
             <Dialog.Title>Create new collection</Dialog.Title>
           </Dialog.Header>
 
-          <div>
-            <Label className="flex flex-col gap-2">
-              Name
+          <Field.Group>
+            <Field.Root invalid={isError}>
+              <Field.Label>Name</Field.Label>
               <Input
                 {...register("name", { required: true })}
                 type="text"
                 placeholder="Collection name"
                 autoComplete="off"
-                aria-invalid={isError}
               />
-              {isError && <Alert>{formatError(error)}</Alert>}
-            </Label>
-          </div>
+              {isError && <Field.Error match>{formatError(error)}</Field.Error>}
+            </Field.Root>
+          </Field.Group>
 
           <Dialog.Footer>
             <Dialog.Close render={<Button variant="outline" />}>Cancel</Dialog.Close>
