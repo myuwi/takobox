@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/utils/cn";
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md text-sm transition-colors duration-200 ease-in-out disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none",
+  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md text-sm transition-colors duration-200 ease-in-out disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:opacity-50 data-pending:cursor-progress [&_svg]:pointer-events-none",
   {
     variants: {
       variant: {
@@ -33,9 +33,18 @@ export interface ButtonProps
   extends
     React.ComponentProps<"button">,
     VariantProps<typeof buttonVariants>,
-    useRender.ComponentProps<"button"> {}
+    useRender.ComponentProps<"button"> {
+  pending?: boolean;
+}
 
-export const Button = ({ className, variant, size, render, ...props }: ButtonProps) => {
+export const Button = ({
+  className,
+  variant,
+  size,
+  pending = false,
+  render,
+  ...props
+}: ButtonProps) => {
   const defaultProps = {
     className: cn(buttonVariants({ variant, size, className })),
   } as const;
@@ -43,7 +52,20 @@ export const Button = ({ className, variant, size, render, ...props }: ButtonPro
   const element = useRender({
     defaultTagName: "button",
     render,
-    props: mergeProps<"button">(defaultProps, props),
+    state: { pending },
+    props: mergeProps<"button">(
+      defaultProps,
+      props,
+      pending
+        ? {
+            "aria-disabled": true,
+            onClick: (event) => {
+              event.preventDefault();
+              event.preventBaseUIHandler();
+            },
+          }
+        : undefined,
+    ),
   });
 
   return element;
