@@ -6,9 +6,9 @@ import { client } from "@/api/client";
 import { collectionsOptions } from "@/queries/collections";
 import { createTestQueryClient, renderWithProviders } from "@/test/render";
 import { ResizeObserverMock } from "@/test/ResizeObserverMock";
-import { ConfirmationDialog } from "./ConfirmationDialog";
+import { DeleteFileDialog } from "./DeleteFileDialog";
 import { FileGrid } from "./FileGrid";
-import { RenameDialog } from "./RenameDialog";
+import { RenameFileDialog } from "./RenameFileDialog";
 
 const createFile = (index: number): File => ({
   id: `file-${index}`,
@@ -29,8 +29,8 @@ const renderGrid = (gridFiles = files) => {
   return renderWithProviders(
     <>
       <FileGrid files={gridFiles} />
-      <ConfirmationDialog />
-      <RenameDialog />
+      <DeleteFileDialog />
+      <RenameFileDialog />
       <button>Outside the grid</button>
     </>,
     { queryClient },

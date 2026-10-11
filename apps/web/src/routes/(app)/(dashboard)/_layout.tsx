@@ -6,6 +6,7 @@ import { Menu, Search, X } from "lucide-react";
 import * as z from "zod";
 import { sidebarOpenMobileAtom } from "@/atoms/sidebar";
 import { AccountMenu } from "@/components/AccountMenu";
+import { Dialogs } from "@/components/Dialogs";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/primitives/Button";
 import { Input } from "@/components/primitives/Input";
@@ -105,6 +106,7 @@ function RouteComponent() {
           <Outlet />
         </div>
       </div>
+      <Dialogs />
     </UploadsProvider>
   );
 }

@@ -1,6 +1,5 @@
 import { useRef, type RefObject } from "react";
 import { useMutation, useMutationState, useQuery } from "@tanstack/react-query";
-import { useSetAtom } from "jotai";
 import {
   Download,
   EllipsisVertical,
@@ -12,18 +11,19 @@ import {
 } from "lucide-react";
 import type { File } from "@takobox/sdk";
 import { client } from "@/api/client";
-import { openConfirmationDialogAtom, openRenameDialogAtom } from "@/atoms/dialogs";
 import {
   addFileToCollectionOptions,
   collectionsOptions,
   removeFileFromCollectionOptions,
 } from "@/queries/collections";
-import { deleteFileOptions, fileCollectionsOptions, renameFileOptions } from "@/queries/files";
+import { fileCollectionsOptions } from "@/queries/files";
 import { copyToClipboard } from "@/utils/clipboard";
 import { stopPropagation } from "@/utils/event";
+import { deleteFileDialog } from "./DeleteFileDialog";
 import { Button } from "./primitives/Button";
 import * as Menu from "./primitives/Menu";
 import { toastError } from "./primitives/Toast";
+import { renameFileDialog } from "./RenameFileDialog";
 
 interface FileContextMenuProps {
   file: File;
@@ -43,17 +43,11 @@ export const FileContextMenu = ({
   onDeleted,
 }: FileContextMenuProps) => {
   const { data: collections } = useQuery(collectionsOptions);
-  const { mutateAsync: deleteFile } = useMutation(deleteFileOptions);
-
-  const openConfirmDialog = useSetAtom(openConfirmationDialogAtom);
-  const openRenameDialog = useSetAtom(openRenameDialogAtom);
 
   const { data: fileCollections = [] } = useQuery({
     ...fileCollectionsOptions(file.id),
     enabled: open,
   });
-
-  const { mutateAsync: renameFile } = useMutation(renameFileOptions);
 
   const { mutateAsync: addToCollection } = useMutation(addFileToCollectionOptions);
   const { mutateAsync: removeFromCollection } = useMutation(removeFileFromCollectionOptions);
@@ -103,19 +97,6 @@ export const FileContextMenu = ({
         });
     } catch (err) {
       toastError("Couldn't regenerate thumbnail", err);
-    }
-  };
-
-  const handleRename = async (name: string) => {
-    await renameFile({ id: file.id, name });
-  };
-
-  const handleDelete = async () => {
-    try {
-      await deleteFile(file.id);
-      onDeleted(file.id);
-    } catch (err) {
-      toastError(`Couldn't delete "${file.name}"`, err);
     }
   };
 
@@ -218,13 +199,7 @@ export const FileContextMenu = ({
           <Menu.Item
             onClick={() => {
               openingDialogRef.current = true;
-              openRenameDialog({
-                title: "Rename file",
-                placeholder: "File name",
-                initialValue: file.name,
-                callback: handleRename,
-                focusRef: returnFocusRef,
-              });
+              renameFileDialog.openWithPayload({ file, returnFocus: returnFocusRef });
             }}
           >
             <PencilLine />
@@ -238,13 +213,7 @@ export const FileContextMenu = ({
             variant="destructive"
             onClick={() => {
               openingDialogRef.current = true;
-              openConfirmDialog({
-                title: "Delete file?",
-                description: `Are you sure you want to delete the file "${file.name}"? This cannot be undone.`,
-                confirmText: "Delete File",
-                callback: handleDelete,
-                focusRef: returnFocusRef,
-              });
+              deleteFileDialog.openWithPayload({ file, returnFocus: returnFocusRef, onDeleted });
             }}
           >
             <Trash />

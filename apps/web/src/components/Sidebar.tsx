@@ -5,13 +5,14 @@ import { Files, Folder, Plus } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { sidebarOpenMobileAtom } from "@/atoms/sidebar";
 import { Button, type ButtonProps } from "@/components/primitives/Button";
+import * as Dialog from "@/components/primitives/Dialog";
 import * as Sheet from "@/components/primitives/Sheet";
 import { useUploadDropzone } from "@/hooks/useUploadDropzone";
 import { useUploads } from "@/hooks/useUploads";
 import { collectionsOptions } from "@/queries/collections";
 import { tw } from "@/utils/tw";
 import { CollectionMenu } from "./CollectionMenu";
-import { CreateCollectionDialog } from "./CreateCollectionDialog";
+import { createCollectionDialog } from "./CreateCollectionDialog";
 import { Logo } from "./Logo";
 
 const SidebarContent = tw.div`flex flex-col gap-4`;
@@ -70,7 +71,15 @@ export const Sidebar = () => {
         <SidebarGroup>
           <SidebarGroupLabel>
             <span>Collections</span>
-            <CreateCollectionDialog />
+            <Dialog.Trigger
+              handle={createCollectionDialog}
+              render={
+                <Button variant="ghost" size="icon-sm" className="mr-1">
+                  <Plus className="glyph-sm" />
+                  <span className="sr-only">Create collection</span>
+                </Button>
+              }
+            />
           </SidebarGroupLabel>
 
           <SidebarGroupContent>

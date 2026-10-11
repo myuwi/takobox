@@ -1,49 +1,16 @@
 import { useRef } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useSetAtom } from "jotai";
 import { MoreHorizontal, PencilLine, Trash } from "lucide-react";
 import type { Collection } from "@takobox/sdk";
-import { openConfirmationDialogAtom, openRenameDialogAtom } from "@/atoms/dialogs";
-import { deleteCollectionOptions, renameCollectionOptions } from "@/queries/collections";
+import { deleteCollectionDialog } from "./DeleteCollectionDialog";
 import { Button } from "./primitives/Button";
 import * as Menu from "./primitives/Menu";
-import { toastError } from "./primitives/Toast";
+import { renameCollectionDialog } from "./RenameCollectionDialog";
 
 interface CollectionMenuProps {
   collection: Collection;
 }
 
 export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
-  const openConfirmDialog = useSetAtom(openConfirmationDialogAtom);
-  const openRenameDialog = useSetAtom(openRenameDialogAtom);
-
-  const search = useSearch({ strict: false });
-  const navigate = useNavigate();
-
-  const { mutateAsync: renameCollection } = useMutation(renameCollectionOptions);
-
-  const { mutateAsync: deleteCollection } = useMutation(deleteCollectionOptions);
-
-  const handleRename = async (name: string) => {
-    await renameCollection({ id: collection.id, name });
-  };
-
-  const handleDelete = async () => {
-    try {
-      await deleteCollection(collection.id);
-
-      if (search.collection === collection.id) {
-        await navigate({
-          to: ".",
-          search: (prev) => ({ ...prev, collection: undefined }),
-        });
-      }
-    } catch (err) {
-      toastError(`Couldn't delete "${collection.name}"`, err);
-    }
-  };
-
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
@@ -65,16 +32,8 @@ export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
       {/* FIXME: Even with finalFocus set to false, the Menu.Popup element is focused on close for some reason */}
       <Menu.Content className="w-48" align="start" finalFocus={false}>
         <Menu.Item
-          // Use a timeout to get around focus fuckery
           onClick={() =>
-            setTimeout(() => {
-              openRenameDialog({
-                title: "Rename collection",
-                placeholder: "Collection name",
-                initialValue: collection.name,
-                callback: handleRename,
-              });
-            }, 0)
+            renameCollectionDialog.openWithPayload({ collection, returnFocus: menuTriggerRef })
           }
         >
           <PencilLine />
@@ -83,15 +42,7 @@ export const CollectionMenu = ({ collection }: CollectionMenuProps) => {
         <Menu.Item
           variant="destructive"
           onClick={() =>
-            setTimeout(() => {
-              openConfirmDialog({
-                title: "Delete collection?",
-                description: `Are you sure you want to delete the collection "${collection.name}"? Files inside the collection will remain unaffected. This cannot be undone.`,
-                confirmText: "Delete Collection",
-                callback: handleDelete,
-                focusRef: menuTriggerRef,
-              });
-            }, 0)
+            deleteCollectionDialog.openWithPayload({ collection, returnFocus: menuTriggerRef })
           }
         >
           <Trash />

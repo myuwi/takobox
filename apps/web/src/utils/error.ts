@@ -1,9 +1,11 @@
-import type { AxiosError } from "axios";
+import { isAxiosError } from "axios";
 
-export const formatError = (error: AxiosError) => {
-  const data = error.response?.data;
+export const formatError = (error: unknown) => {
+  const data = isAxiosError(error) ? error.response?.data : undefined;
 
-  return data && typeof data === "object" && "message" in data && typeof data.message === "string"
-    ? data.message
-    : error.message;
+  if (data && typeof data === "object" && "message" in data && typeof data.message === "string") {
+    return data.message;
+  }
+
+  return error instanceof Error ? error.message : String(error);
 };

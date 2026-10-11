@@ -5,7 +5,6 @@ import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { ConnectionBanner } from "@/components/ConnectionBanner";
-import { Dialogs } from "@/components/Dialogs";
 import { Toaster } from "@/components/primitives/Toast";
 import { meOptions } from "@/queries/me";
 import { settingsOptions } from "@/queries/settings";
@@ -48,7 +47,6 @@ function Root() {
         <StrictMode>
           <Outlet />
           <ConnectionBanner />
-          <Dialogs />
           <Toaster />
           <Scripts />
           <TanStackDevtools
