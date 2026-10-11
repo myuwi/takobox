@@ -14,13 +14,18 @@ export const Route = createFileRoute("/(auth)/login")({
 });
 
 function Login() {
-  const { register, handleSubmit } = useForm<AuthCredentials>();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<AuthCredentials>();
   const navigate = useNavigate();
   const { sessionExpired } = useLocation().state;
-  const { mutateAsync: loginMutation, error } = useMutation(loginOptions);
+  const { mutateAsync: login } = useMutation(loginOptions);
 
   const getAlert = () => {
-    if (error) return formatError(error);
+    if (errors.root) return errors.root.message;
 
     if (sessionExpired) return "Your session has expired. Please log in again.";
 
@@ -30,7 +35,12 @@ function Login() {
   const alertMessage = getAlert();
 
   const onSubmit = async (values: AuthCredentials) => {
-    await loginMutation(values);
+    try {
+      await login(values);
+    } catch (error) {
+      setError("root", { message: formatError(error) });
+      return;
+    }
     await navigate({ to: "/" });
   };
 
@@ -41,18 +51,16 @@ function Login() {
         {alertMessage && <Alert>{alertMessage}</Alert>}
         <Field.Root>
           <Field.Label>Username</Field.Label>
-          <Input {...register("username", { required: true })} type="text" placeholder="Username" />
+          <Input {...register("username")} required type="text" placeholder="Username" />
         </Field.Root>
         <Field.Root>
           <Field.Label>Password</Field.Label>
-          <Input
-            {...register("password", { required: true })}
-            type="password"
-            placeholder="Password"
-          />
+          <Input {...register("password")} required type="password" placeholder="Password" />
         </Field.Root>
       </Field.Group>
-      <Button type="submit">Log in</Button>
+      <Button type="submit" pending={isSubmitting}>
+        Log in
+      </Button>
       <span className="text-center text-muted-foreground">
         Don't have an account yet?{" "}
         <Link className="text-foreground hover:underline" to="/signup">

@@ -16,14 +16,24 @@ export const Route = createFileRoute("/(auth)/signup")({
 
 function SignUp() {
   const { data: settings } = useQuery(settingsOptions);
-  const { register, handleSubmit } = useForm<AuthCredentials>();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<AuthCredentials>();
   const navigate = useNavigate();
-  const { mutateAsync: registerMutation, error } = useMutation(registerOptions);
+  const { mutateAsync: registerUser } = useMutation(registerOptions);
 
   const accountCreationDisabled = !!settings && !settings.enableAccountCreation;
 
   const onSubmit = async (values: AuthCredentials) => {
-    await registerMutation(values);
+    try {
+      await registerUser(values);
+    } catch (error) {
+      setError("root", { message: formatError(error) });
+      return;
+    }
     await navigate({ to: "/" });
   };
 
@@ -34,11 +44,12 @@ function SignUp() {
         {accountCreationDisabled && (
           <Alert variant="info">Account creation is currently disabled for this instance.</Alert>
         )}
-        {error && <Alert>{formatError(error)}</Alert>}
+        {errors.root && <Alert>{errors.root.message}</Alert>}
         <Field.Root>
           <Field.Label>Username</Field.Label>
           <Input
-            {...register("username", { required: true })}
+            {...register("username")}
+            required
             type="text"
             placeholder="Username"
             disabled={accountCreationDisabled}
@@ -47,14 +58,15 @@ function SignUp() {
         <Field.Root>
           <Field.Label>Password</Field.Label>
           <Input
-            {...register("password", { required: true })}
+            {...register("password")}
+            required
             type="password"
             placeholder="Password"
             disabled={accountCreationDisabled}
           />
         </Field.Root>
       </Field.Group>
-      <Button type="submit" disabled={accountCreationDisabled}>
+      <Button type="submit" disabled={accountCreationDisabled} pending={isSubmitting}>
         Create account
       </Button>
       <span className="text-center text-muted-foreground">
