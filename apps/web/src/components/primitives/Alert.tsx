@@ -25,7 +25,10 @@ export const Alert = ({ className, variant, children, onDismiss }: AlertProps) =
   const Icon = variant === "info" ? Info : CircleAlert;
 
   return (
-    <div className={cn(alertVariants({ variant, className }))}>
+    <div
+      role={variant === "info" ? "status" : "alert"}
+      className={cn(alertVariants({ variant, className }))}
+    >
       <Icon />
       {children}
       {onDismiss && (
