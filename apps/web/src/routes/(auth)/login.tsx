@@ -51,11 +51,23 @@ function Login() {
         {alertMessage && <Alert>{alertMessage}</Alert>}
         <Field.Root>
           <Field.Label>Username</Field.Label>
-          <Input {...register("username")} required type="text" placeholder="Username" />
+          <Input
+            {...register("username")}
+            required
+            type="text"
+            autoComplete="username"
+            placeholder="Username"
+          />
         </Field.Root>
         <Field.Root>
           <Field.Label>Password</Field.Label>
-          <Input {...register("password")} required type="password" placeholder="Password" />
+          <Input
+            {...register("password")}
+            required
+            type="password"
+            autoComplete="current-password"
+            placeholder="Password"
+          />
         </Field.Root>
       </Field.Group>
       <Button type="submit" pending={isSubmitting}>

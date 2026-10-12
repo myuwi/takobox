@@ -51,6 +51,7 @@ function SignUp() {
             {...register("username")}
             required
             type="text"
+            autoComplete="username"
             placeholder="Username"
             disabled={accountCreationDisabled}
           />
@@ -61,6 +62,7 @@ function SignUp() {
             {...register("password")}
             required
             type="password"
+            autoComplete="new-password"
             placeholder="Password"
             disabled={accountCreationDisabled}
           />
