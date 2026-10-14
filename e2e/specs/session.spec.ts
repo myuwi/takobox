@@ -33,18 +33,15 @@ test("logs out when the session is no longer accepted", async ({ page, request }
   const credentials = createCredentials(testInfo);
   await registerUser(request, credentials);
 
-  const fileRequestCount = await stubFileRequests(page, 401);
-
   await logIn(page, credentials);
+  const createCollection = page.getByRole("button", { name: "Create collection" });
+  await expect(createCollection).toBeVisible();
 
-  await expect(page.getByText("Your session has expired")).toBeVisible();
-  await expect(page).toHaveURL("/login");
-  expect(fileRequestCount()).toBeGreaterThan(0);
-});
-
-test("does not claim the session expired on a plain visit to the login page", async ({ page }) => {
-  await page.goto("/login");
+  await page.context().clearCookies();
+  await createCollection.click();
+  const dialog = page.getByRole("dialog", { name: "Create new collection" });
+  await dialog.getByRole("textbox", { name: "Name" }).fill("Photos");
+  await dialog.getByRole("button", { name: "Create", exact: true }).click();
 
   await expect(page.getByRole("heading", { name: "Log in" })).toBeVisible();
-  await expect(page.getByText("Your session has expired")).toBeHidden();
 });

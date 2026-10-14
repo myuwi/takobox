@@ -7,12 +7,6 @@ import { setUnauthorizedHandler } from "@/api/client";
 import { meOptions } from "@/queries/me";
 import { routeTree } from "./routeTree.gen";
 
-declare module "@tanstack/react-router" {
-  interface HistoryState {
-    sessionExpired?: boolean;
-  }
-}
-
 export function getRouter() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -53,9 +47,7 @@ export function getRouter() {
     if (!hadSession) {
       return;
     }
-
-    queryClient.setQueryData(meOptions.queryKey, null);
-    void router.navigate({ to: "/login", state: { sessionExpired: true } });
+    void router.navigate({ to: "/login", reloadDocument: true });
   });
 
   return router;

@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { createFileRoute, Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import type { AuthCredentials } from "@takobox/sdk";
 import { Alert } from "@/components/primitives/Alert";
@@ -21,18 +21,7 @@ function Login() {
     formState: { errors, isSubmitting },
   } = useForm<AuthCredentials>();
   const navigate = useNavigate();
-  const { sessionExpired } = useLocation().state;
   const { mutateAsync: login } = useMutation(loginOptions);
-
-  const getAlert = () => {
-    if (errors.root) return errors.root.message;
-
-    if (sessionExpired) return "Your session has expired. Please log in again.";
-
-    return undefined;
-  };
-
-  const alertMessage = getAlert();
 
   const onSubmit = async (values: AuthCredentials) => {
     try {
@@ -48,7 +37,7 @@ function Login() {
     <form onSubmit={handleSubmit(onSubmit)} className="flex w-full max-w-xs flex-col gap-6">
       <h1 className="text-2xl">Log in</h1>
       <Field.Group>
-        {alertMessage && <Alert>{alertMessage}</Alert>}
+        {errors.root && <Alert>{errors.root.message}</Alert>}
         <Field.Root>
           <Field.Label>Username</Field.Label>
           <Input
