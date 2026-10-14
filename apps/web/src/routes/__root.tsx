@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import type { QueryClient } from "@tanstack/react-query";
+import { noop, type QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
@@ -15,8 +15,8 @@ export const Route = createRootRouteWithContext<{
 }>()({
   beforeLoad: async ({ context }) => {
     await Promise.all([
-      context.queryClient.prefetchQuery(meOptions),
-      context.queryClient.prefetchQuery(settingsOptions),
+      context.queryClient.query(meOptions).catch(noop),
+      context.queryClient.query(settingsOptions).catch(noop),
     ]);
   },
   head: () => ({

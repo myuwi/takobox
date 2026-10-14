@@ -15,7 +15,9 @@ const getRuntimeSettings = createServerFn({ method: "GET" }).handler(() => {
 
 export const Route = createFileRoute("/")({
   beforeLoad: async ({ context }) => {
-    const user = await context.queryClient.ensureQueryData(meOptions).catch(() => null);
+    const user = await context.queryClient
+      .query({ ...meOptions, staleTime: "static" })
+      .catch(() => null);
     if (user) {
       throw redirect({ to: "/files" });
     }

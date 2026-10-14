@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { noop, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useSetAtom } from "jotai";
 import { Menu, Search, X } from "lucide-react";
@@ -40,7 +40,7 @@ const onUploadRejected = ({ files, maxFileSize }: UploadRejection) => {
 export const Route = createFileRoute("/(app)/(dashboard)")({
   validateSearch: appSearchSchema,
   beforeLoad: async ({ context }) => {
-    await context.queryClient.prefetchQuery(collectionsOptions);
+    await context.queryClient.query(collectionsOptions).catch(noop);
   },
   component: RouteComponent,
 });
