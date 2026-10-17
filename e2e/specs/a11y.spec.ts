@@ -18,7 +18,8 @@ test("has no automatically detectable accessibility violations on the populated 
   const generalResults = await new AxeBuilder({ page }).disableRules(["color-contrast"]).analyze();
   const contrastResults = await new AxeBuilder({ page })
     .withRules(["color-contrast"])
-    .exclude("[data-a11y-contrast-exempt]")
+    // Logotypes are exempt from contrast requirements (WCAG 1.4.3).
+    .exclude("[data-logo]")
     .analyze();
 
   expect([...generalResults.violations, ...contrastResults.violations]).toEqual([]);

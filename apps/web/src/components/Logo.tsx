@@ -1,10 +1,8 @@
 export const Logo = () => {
   return (
-    <div className="text-xl">
+    <div className="text-xl" data-logo>
       Tako
-      <span className="text-primary" data-a11y-contrast-exempt>
-        box
-      </span>
+      <span className="text-primary">box</span>
     </div>
   );
 };
