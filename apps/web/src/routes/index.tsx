@@ -1,58 +1,12 @@
-import { createServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { Nav } from "@/components/Nav";
-import { Button } from "@/components/primitives/Button";
-import { env } from "@/env.server";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { meOptions } from "@/queries/me";
-import { settingsOptions } from "@/queries/settings";
-
-const getRuntimeSettings = createServerFn({ method: "GET" }).handler(() => {
-  return {
-    disableLandingPage: env.TAKOBOX_DISABLE_LANDING_PAGE,
-  };
-});
 
 export const Route = createFileRoute("/")({
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient
       .query({ ...meOptions, staleTime: "static" })
       .catch(() => null);
-    if (user) {
-      throw redirect({ to: "/files" });
-    }
 
-    const { disableLandingPage } = await getRuntimeSettings();
-    if (disableLandingPage) {
-      throw redirect({ to: "/login" });
-    }
+    throw redirect({ to: user ? "/files" : "/login" });
   },
-  component: App,
 });
-
-function App() {
-  const { data: settings } = useQuery(settingsOptions);
-
-  return (
-    <>
-      <Nav />
-      <main className="mx-auto flex max-w-5xl flex-col items-center gap-6 px-4 py-48">
-        <h1 className="text-center text-4xl">
-          A{" "}
-          <span className="text-primary" data-a11y-contrast-exempt>
-            simpler
-          </span>{" "}
-          file upload service
-        </h1>
-        <h2 className="text-base text-subtle-foreground">
-          Lightweight, self-hostable and blazingly fast.
-        </h2>
-        <div className="flex flex-row gap-4">
-          <Button render={<Link to={settings?.enableAccountCreation ? "/signup" : "/login"} />}>
-            Get started
-          </Button>
-        </div>
-      </main>
-    </>
-  );
-}

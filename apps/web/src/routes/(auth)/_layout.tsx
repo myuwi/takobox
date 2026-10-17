@@ -1,6 +1,4 @@
-import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/primitives/Button";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { meOptions } from "@/queries/me";
 
 export const Route = createFileRoute("/(auth)")({
@@ -17,12 +15,7 @@ export const Route = createFileRoute("/(auth)")({
 
 function Layout() {
   return (
-    <main className="relative mx-auto flex max-w-7xl items-center justify-center px-6 py-48">
-      <nav className="absolute top-8 left-8">
-        <Button variant="ghost" size="icon" render={<Link to="/" />}>
-          <ArrowLeft />
-        </Button>
-      </nav>
+    <main className="mx-auto flex max-w-7xl items-center justify-center px-6 py-48">
       <Outlet />
     </main>
   );

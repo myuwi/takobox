@@ -6,7 +6,6 @@ services:
     environment:
       TAKOBOX_ENABLE_ACCOUNT_CREATION: "true"
       TAKOBOX_ENABLE_RATE_LIMIT: "false"
-      TAKOBOX_DISABLE_LANDING_PAGE: "true"
     volumes:
       - e2e-data:/takobox_data
     ports:

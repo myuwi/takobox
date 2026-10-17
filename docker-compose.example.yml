@@ -4,7 +4,6 @@ services:
     image: ghcr.io/myuwi/takobox:main
     environment:
       - TAKOBOX_ENABLE_ACCOUNT_CREATION=false
-      - TAKOBOX_DISABLE_LANDING_PAGE=true
     volumes:
       - ./takobox_data:/takobox_data
     ports:

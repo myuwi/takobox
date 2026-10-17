@@ -2,7 +2,6 @@ import * as z from "zod";
 
 const schema = z.object({
   TAKOBOX_INTERNAL_API_URL: z.url().default("http://127.0.0.1:8000/api"),
-  TAKOBOX_DISABLE_LANDING_PAGE: z.stringbool().default(false),
 });
 
 const result = schema.safeParse(process.env);

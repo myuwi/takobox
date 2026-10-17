@@ -37,10 +37,9 @@ For debugging, set `RUST_LOG=info,takobox=debug` to enable debug logs for Takobo
 
 ### Web
 
-| Variable                       | Description                                            | Default                     |
-| ------------------------------ | ------------------------------------------------------ | --------------------------- |
-| `TAKOBOX_INTERNAL_API_URL`     | The internal URL of the backend service. Used for SSR. | `http://127.0.0.1:8000/api` |
-| `TAKOBOX_DISABLE_LANDING_PAGE` | Can be used to disable the landing page.               | `false`                     |
+| Variable                   | Description                                            | Default                     |
+| -------------------------- | ------------------------------------------------------ | --------------------------- |
+| `TAKOBOX_INTERNAL_API_URL` | The internal URL of the backend service. Used for SSR. | `http://127.0.0.1:8000/api` |
 
 ## Development
 
