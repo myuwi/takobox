@@ -5,6 +5,7 @@ use tokio::signal::{
     self,
     unix::{SignalKind, signal},
 };
+use tokio_util::sync::CancellationToken;
 use tracing::{error, info};
 use tracing_subscriber::{EnvFilter, filter::LevelFilter};
 
@@ -13,7 +14,7 @@ mod session_secret;
 
 use anyhow::Context;
 use env::Env;
-use takobox::{AppState, Directories, SessionSecret, Settings, db, router};
+use takobox::{AppState, Directories, SessionSecret, Settings, db, jobs, router};
 
 fn init_tracing() {
     let filter = EnvFilter::builder()
@@ -96,7 +97,7 @@ async fn run() -> anyhow::Result<()> {
         None => session_secret::load_or_create(&data_dir).await?,
     };
 
-    let app_state = AppState::new(session_secret, pool, dirs, settings);
+    let app_state = AppState::new(session_secret, pool.clone(), dirs, settings);
     let app = router(app_state);
 
     let acceptor = TcpListener::new("0.0.0.0:8000")
@@ -108,7 +109,13 @@ async fn run() -> anyhow::Result<()> {
 
     tokio::spawn(shutdown_signal(handle));
 
+    let shutdown = CancellationToken::new();
+    let session_cleanup = tokio::spawn(jobs::delete_expired_sessions(pool, shutdown.clone()));
+
     server.serve(app).await;
+
+    shutdown.cancel();
+    let _ = session_cleanup.await;
 
     Ok(())
 }

@@ -3,8 +3,6 @@ use time::UtcDateTime;
 
 use crate::domain::session::SessionToken;
 
-// TODO: Clear expired sessions?
-
 #[derive(Clone, Debug, FromRow)]
 pub struct Session {
     pub id: i64,
@@ -48,4 +46,11 @@ pub async fn delete(conn: impl SqliteExecutor<'_>, session_id: i64) -> Result<()
         .execute(conn)
         .await
         .map(|_| ())
+}
+
+pub async fn delete_expired(conn: impl SqliteExecutor<'_>) -> Result<u64, sqlx::Error> {
+    sqlx::query("delete from sessions where expires_at <= unixepoch()")
+        .execute(conn)
+        .await
+        .map(|result| result.rows_affected())
 }

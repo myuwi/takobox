@@ -2,6 +2,7 @@ pub mod db;
 mod directories;
 mod domain;
 mod http;
+pub mod jobs;
 mod services;
 mod settings;
 
