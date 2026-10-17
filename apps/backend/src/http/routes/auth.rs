@@ -91,11 +91,21 @@ async fn register(
     let password_hash =
         hash_password(&password).map_err(|e| Error::internal("failed to hash password", e))?;
 
-    let user = db::users::create(pool, &UserId::generate(6), &username, &password_hash)
-        .await
-        .map_constraint_err("users.username", |_| {
-            Error::Conflict("Username is already taken.")
-        })?;
+    let mut attempt = 1;
+    let user = loop {
+        match db::users::create(pool, &UserId::generate(6), &username, &password_hash).await {
+            Err(err)
+                if attempt < db::MAX_ID_ATTEMPTS
+                    && db::is_unique_violation(&err, &["users.public_id"]) =>
+            {
+                attempt += 1;
+            }
+            result => break result,
+        }
+    }
+    .map_constraint_err("users.username", |_| {
+        Error::Conflict("Username is already taken.")
+    })?;
     info!(user_id = user.id, "account created");
 
     let session = create_session(pool, user.id).await?;

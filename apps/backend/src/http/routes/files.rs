@@ -117,19 +117,14 @@ async fn upload(
 
     let name = FileName::try_from(original_name.to_owned()).map_err(Error::UnprocessableEntity)?;
 
-    // TODO: retry on db collision
-    let file_id = FileId::generate(6);
     let ext = std::path::Path::new(name.as_str())
         .extension()
         .and_then(OsStr::to_str)
         .map(|p| ".".to_string() + p)
         .unwrap_or("".to_string());
 
-    let file_name = file_id.to_string() + &ext;
     let file_size = file.size() as i64;
     let temp_path = file.path();
-
-    let file_path = dirs.uploads_dir().join(&file_name);
 
     // salvo's temp file may be on another filesystem, so copy it here to move it in atomically.
     // Note: tempfile's calls are blocking.
@@ -142,15 +137,32 @@ async fn upload(
 
     let mut transaction = pool.begin().await?;
 
-    let file = db::files::create(
-        &mut *transaction,
-        session.user_id,
-        &file_id,
-        &file_name,
-        &name,
-        file_size,
-    )
-    .await?;
+    let mut attempt = 1;
+    let file = loop {
+        let file_id = FileId::generate(6);
+        let file_name = file_id.to_string() + &ext;
+
+        match db::files::create(
+            &mut *transaction,
+            session.user_id,
+            &file_id,
+            &file_name,
+            &name,
+            file_size,
+        )
+        .await
+        {
+            Err(err)
+                if attempt < db::MAX_ID_ATTEMPTS
+                    && db::is_unique_violation(&err, &["files.public_id", "files.filename"]) =>
+            {
+                attempt += 1;
+            }
+            result => break result?,
+        }
+    };
+
+    let file_path = dirs.uploads_dir().join(&file.filename);
 
     if let Some(collection_id) = collection_id {
         db::collection_files::add(
@@ -186,7 +198,7 @@ async fn upload(
     }
 
     Ok(Created::new(
-        format!("/api/files/{file_id}"),
+        format!("/api/files/{}", file.public_id),
         Json(file.into()),
     ))
 }

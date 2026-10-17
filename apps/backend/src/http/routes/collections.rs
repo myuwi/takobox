@@ -70,14 +70,23 @@ async fn create(
 
     let name = CollectionName::try_from(body.name.clone()).map_err(Error::UnprocessableEntity)?;
 
-    let collection =
-        db::collections::create(pool, session.user_id, &CollectionId::generate(6), &name)
+    let mut attempt = 1;
+    let collection = loop {
+        match db::collections::create(pool, session.user_id, &CollectionId::generate(6), &name)
             .await
-            .map_constraint_err("collections.user_id, collections.name", |_| {
-                Error::Conflict(
-                    "A collection with this name already exists. Please try another name.",
-                )
-            })?;
+        {
+            Err(err)
+                if attempt < db::MAX_ID_ATTEMPTS
+                    && db::is_unique_violation(&err, &["collections.public_id"]) =>
+            {
+                attempt += 1;
+            }
+            result => break result,
+        }
+    }
+    .map_constraint_err("collections.user_id, collections.name", |_| {
+        Error::Conflict("A collection with this name already exists. Please try another name.")
+    })?;
 
     Ok(Created::new(
         format!("/api/collections/{}", collection.public_id),

@@ -2,6 +2,8 @@ use salvo::{oapi, prelude::*};
 use serde::Serialize;
 use tracing::error;
 
+use crate::db;
+
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("{0}")]
@@ -134,10 +136,7 @@ where
         F: FnOnce(Box<dyn sqlx::error::DatabaseError>) -> Error,
     {
         self.map_err(|e| match e.into() {
-            Error::Sqlx(sqlx::Error::Database(e))
-                if e.message()
-                    .ends_with(&format!(" constraint failed: {name}")) =>
-            {
+            Error::Sqlx(sqlx::Error::Database(e)) if db::violates_constraint(&*e, name) => {
                 map_err(e)
             }
             e => e,
