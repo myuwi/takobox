@@ -40,7 +40,7 @@ export const Sidebar = () => {
   });
 
   const sidebar = (
-    <aside className="flex w-62 shrink-0 flex-col gap-4 p-4">
+    <nav aria-label="Main" className="flex w-62 shrink-0 flex-col gap-4 p-4">
       <Link to="/" className="flex h-9 items-center self-start">
         <Logo />
       </Link>
@@ -108,7 +108,7 @@ export const Sidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-    </aside>
+    </nav>
   );
 
   return (
