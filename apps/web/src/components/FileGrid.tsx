@@ -293,7 +293,7 @@ export const FileGrid = ({ files }: FileGridProps) => {
         tabIndex={-1}
         aria-multiselectable
         aria-label="Files"
-        className="group/grid absolute inset-0 grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] content-start justify-around gap-2 overflow-auto p-2"
+        className="group/grid absolute inset-0 grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] content-start justify-around gap-2 overflow-auto p-2 outline-0"
         data-selecting={selectedFiles.length > 0}
         onKeyDownCapture={handleKeyDownCapture}
         onBlurCapture={(e) => {
