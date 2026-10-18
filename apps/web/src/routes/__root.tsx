@@ -50,6 +50,7 @@ function Root() {
           <Toaster />
           <Scripts />
           <TanStackDevtools
+            config={{ triggerMode: "fixed" }}
             plugins={[
               {
                 name: "TanStack Query",
