@@ -1,6 +1,6 @@
 use sqlx::{FromRow, SqliteExecutor};
 
-use crate::domain::user::{PasswordHash, UserId, Username};
+use crate::domain::user::{PasswordHash, Role, UserId, Username};
 
 #[derive(Clone, Debug, FromRow)]
 pub struct User {
@@ -8,6 +8,7 @@ pub struct User {
     pub public_id: UserId,
     pub username: String,
     pub password: PasswordHash,
+    pub role: Role,
     pub created_at: i64,
 }
 

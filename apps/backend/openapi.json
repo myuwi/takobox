@@ -1223,6 +1223,13 @@
           }
         }
       },
+      "Role": {
+        "type": "string",
+        "enum": [
+          "user",
+          "admin"
+        ]
+      },
       "Settings": {
         "type": "object",
         "required": [
@@ -1256,6 +1263,7 @@
         "required": [
           "id",
           "username",
+          "role",
           "createdAt"
         ],
         "properties": {
@@ -1264,6 +1272,9 @@
           },
           "id": {
             "$ref": "#/components/schemas/UserId"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
           },
           "username": {
             "type": "string"

@@ -50,6 +50,10 @@ export type RenameFilePayload = {
     name: string;
 };
 
+export const Role = { USER: 'user', ADMIN: 'admin' } as const;
+
+export type Role = typeof Role[keyof typeof Role];
+
 export type Settings = {
     enableAccountCreation: boolean;
     maxFileSize: number;
@@ -62,6 +66,7 @@ export type UploadFilePayload = {
 export type User = {
     createdAt: string;
     id: UserId;
+    role: Role;
     username: string;
 };
 

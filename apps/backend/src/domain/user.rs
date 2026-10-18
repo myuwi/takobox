@@ -30,6 +30,15 @@ impl fmt::Display for UserId {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Type, ToSchema)]
+#[salvo(schema(name = Role))]
+#[serde(rename_all = "lowercase")]
+#[sqlx(rename_all = "lowercase")]
+pub enum Role {
+    User,
+    Admin,
+}
+
 static VALID_USERNAME_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[a-z0-9_-]+$").unwrap());
 
