@@ -7,12 +7,12 @@
     "stack": "bash stack.sh",
     "test": "bun run typecheck && playwright test",
     "test:ui": "bun run typecheck && playwright test --ui",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsrs --noEmit"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "1.63.0",
     "@types/node": "26.2.0",
-    "typescript": "7.0.2"
+    "tsrs": "0.18.0-ts7.1.0-dev.20260929"
   }
 }

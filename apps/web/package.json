@@ -51,7 +51,7 @@
     "@vitejs/plugin-react": "^6.1.0",
     "eslint-plugin-better-tailwindcss": "^4.7.0",
     "jsdom": "^30.0.1",
-    "typescript": "^7.0.2",
+    "tsrs": "0.18.0-ts7.1.0-dev.20260929",
     "vitest": "^4.1.11"
   }
 }
