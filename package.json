@@ -19,13 +19,13 @@
     "test:e2e:install": "bun install --cwd e2e --frozen-lockfile",
     "generate": "cargo run --manifest-path apps/backend/Cargo.toml --bin openapi > apps/backend/openapi.json && bun run --cwd packages/sdk generate",
     "fmt": "oxfmt . --check",
-    "lint": "oxlint --type-aware --type-check --deny-warnings --report-unused-disable-directives"
+    "lint": "OXLINT_TSGOLINT_PATH=node_modules/.bin/tsrslint oxlint --type-aware --type-check --deny-warnings --report-unused-disable-directives"
   },
   "devDependencies": {
+    "@maschwenk/tsrslint": "0.1.5",
     "concurrently": "^10.0.5",
     "lefthook": "^2.1.10",
     "oxfmt": "^0.64.0",
-    "oxlint": "^1.79.0",
-    "oxlint-tsgolint": "^7.0.2001"
+    "oxlint": "^1.79.0"
   }
 }
